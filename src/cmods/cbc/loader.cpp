@@ -7,7 +7,7 @@ using namespace std;
 
 static void shutdowncbc();
 
-extern "C" int luaopen_std_cbc(lua_State *L) {
+extern "C" int luaopen_raw_cbc(lua_State *L) {
 	lua_newtable(L);
 	luaL_register(L, NULL, luafuncs);
 	

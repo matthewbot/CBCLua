@@ -1,6 +1,5 @@
 module("main")
 
-local cbc = require("std.cbc")
 local task = require("std.task")
 
 function taskfunc()

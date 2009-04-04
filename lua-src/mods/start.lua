@@ -16,6 +16,7 @@ function module(name, ...)
 	mod._M  = mod
 	mod._PACKAGE = name:gsub("[^.]*$", "")
 	mod._G = _G -- _G can be used to make true global variables if so desired
+	mod._IMPORTS = { }
 	package.loaded[name] = mod
 
 	setfenv(2, mod)
@@ -25,19 +26,34 @@ function module(name, ...)
 	end
 end
 
+-- This function loads a module, then makes it visible in the current module
+
+function import(name)
+	local newmod = require(name)
+	local outermod = getfenv(2)
+	
+	outermod._IMPORTS:insert(newmod)
+end
+
 -- This function is a metatable function that allows modules to view global functions defined by lua
 
-function mod_mt.__index(module, key)
-	local globalval = _G[key]
-	if type(globalval) == "function" then
-		module[key] = globalval -- assign the function into the module for a faster lookup next time
-		return globalval
+function mod_mt.__index(mod, key)
+	for _,importmod in ipairs(mod) do
+		local val = importmod[key]
+		if val then
+			return val
+		end
+	end
+	
+	local val = _G[key]
+	if type(val) == "function" then
+		return val
 	end
 end
 
 -- Now we begin the actual startup code
 
-print "CBCLua v0.1 starting"
+print "CBCLua v0.1 loading"
 
 -- This creates the main task and begins running it
 
@@ -47,6 +63,8 @@ local mainmod = require("main")
 if mainmod == nil then
 	error("Main module is missing the main function!")
 end
+
+print "Program start"
 
 task.new(mainmod.main)
 task.run()

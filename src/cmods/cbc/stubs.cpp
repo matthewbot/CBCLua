@@ -2,7 +2,7 @@
 
 #include "usercode.hpp"
 
-// TODO - Pull this out 
+// TODO - Pull this out so it can be developed into a simulator
 
 extern "C" {
 	void tone(int frequency, int duration) { }

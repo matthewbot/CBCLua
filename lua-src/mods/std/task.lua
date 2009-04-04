@@ -33,12 +33,12 @@ end
 yield = co.yield
 
 -- Returns the task number of the current task
-function getCurrent()
+function get_current()
 	return tasklist_current
 end
 
 -- Returns the number of tasks currently running
-function getRunCount()
+function get_run_count()
 	return tasklist_count
 end
 
@@ -72,15 +72,19 @@ function run()
 			local task = tasklist[curtask]
 			
 			if task then
-				local running, msg, arg = co.resume(task, arg)	
-			
-				if not(running) then
+				local noerr, msg, arg = co.resume(task, arg)					
+				if noerr == false then
+					print("task: error in task " .. curtask)
+					print(msg)
+					return false
+				elseif co.status(task) == "dead" then
 					endtask(curtask)
 				elseif msg == "terminate" then
 					if arg ~= nil then
-						print("Program terminated: " .. arg)
+						print("task: program terminated by task " .. curtask .. ":")
+						print(arg)
 					else
-						print("Program terminated")
+						print("task: program terminated by task " .. curtask)
 					end
 					
 					return false

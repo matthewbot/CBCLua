@@ -11,7 +11,7 @@ $(modules):
 
 .PHONY: clean	
 clean:
-	rm -rf build
+	rm -rf build usbdrive/cbclua
 	
 .PHONY: image
 image:

@@ -69,18 +69,21 @@ local status, errmsg = pcall(function()
 
 	print "cbclua: main task starting"
 
-	task.new(mainmod.main)
-	if task.run() == false then
+	task.start(mainmod.main)
+	if task.run() == false then -- task.run signals an error by returning false
 		goterror = true
 	end
 end)
 
+-- The task scheduler catches errors inside tasks
+-- If an error still gets through to the outer pcall() then we need to still give a stack trace
 if status == false then
 	print("--------")
 	print(debug.traceback("error at top level: " .. errmsg, 1))
 	goterror = true
 end
 
+-- Print a final status message
 if not(goterror) then
 	print("cbclua: finished")
 else

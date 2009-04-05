@@ -15,7 +15,7 @@ local tasklist_count = 0
 local tasklist_current
 
  -- Creates a new task and returns a task number
-function new(func) 
+function start(func) 
 	if type(func) ~= "function" then
 		error("bad argument #1 to 'task.new' (Lua function expected)");
 	end
@@ -39,13 +39,14 @@ function get_current()
 end
 
 -- Returns the number of tasks currently running
-function get_run_count()
+function get_running_count()
 	return tasklist_count
 end
 
 -- Ends the current task
 function exit()
-	endtask(tasklist_current)
+	stop(tasklist_current)
+	yield()
 end
 
 -- Ends the entire program, printing the message
@@ -60,7 +61,7 @@ function sleep(secs)
 end
 
 -- Ends the specified task
-function endtask(tasknum)
+function stop(tasknum)
 	tasklist[tasknum] = nil
 	tasklist_count = tasklist_count - 1
 end
@@ -69,20 +70,19 @@ end
 function run()
 	while tasklist_count >= 1 do 
 		for curtask = 1,tasklist_nextid do
-			timer.watchdog() -- the timer module will print a message if this doesn't get called often enough warning of a program stall
-		
 			tasklist_current = curtask	
 			local task = tasklist[curtask]
 			
 			if task then
-				local noerr, msg, arg = co.resume(task, arg)					
-				if noerr == false then
+				local status, msg, arg = co.resume(task, arg)	
+								
+				if status == false then -- if the coroutine raised an error
 					print("--------")
-					print(debug.traceback(task, "error in task " .. curtask .. ": " .. msg, 1))
+					print(debug.traceback(task, "error in task " .. curtask .. ": " .. msg, 1)) -- stack trace
 					return false
-				elseif co.status(task) == "dead" then
-					endtask(curtask)
-				elseif msg == "terminate" then
+				elseif co.status(task) == "dead" then -- if the coroutine ended
+					stop(curtask) -- take it off the list
+				elseif msg == "terminate" then -- if the coroutine yielded a terminate command
 					if arg ~= nil then
 						print("task: program terminated by task " .. curtask .. ":")
 						print(arg)
@@ -90,8 +90,10 @@ function run()
 						print("task: program terminated by task " .. curtask)
 					end
 					
-					return false
+					return true -- perform the termination
 				end
+				
+				timer.watchdog() -- if this doesn't get called enough the timer module produces a stall warning
 			end
 		end
 	end

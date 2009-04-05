@@ -17,10 +17,16 @@ static int lua_reset(lua_State *L) {
 	return 0;
 }
 
+static int lua_watchdog(lua_State *L) {
+	watchdog();
+	return 0;
+}
+
 const luaL_Reg luafuncs[] = {
 	{"mseconds", lua_mseconds},
 	{"seconds", lua_seconds},
 	{"reset", lua_reset},
+	{"watchdog", lua_watchdog},
 	
 	{NULL, NULL}
 };

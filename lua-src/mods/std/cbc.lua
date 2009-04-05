@@ -50,11 +50,15 @@ function Motor:construct(num)
 	self.num = num
 end
 
-local function make_motor_wrapper(funcname)
-	local func = raw[funcname]
+local function make_motor_wrapper(rawfuncname, realfuncname)
+	if realfuncname == nil then
+		realfuncname = rawfuncname
+	end
+	
+	local func = raw[rawfuncname]
 
 	return function(self, ...)
-		return func(self.num, ...)
+		return raw.__errwrap(2, realfuncname, func, self.num, ...) -- errwrap makes error messages come out correctly since some functions are renamed
 	end
 end
 
@@ -63,10 +67,10 @@ for _,funcname in ipairs(motorfuncnames) do
 	Motor[funcname] = make_motor_wrapper(funcname)
 end
 
-Motor.wait = make_motor_wrapper("bmd")
-Motor.getpos = make_motor_wrapper("get_motor_position_counter")
-Motor.clearpos = make_motor_wrapper("clear_motor_position_counter")
-Motor.getdone = make_motor_wrapper("get_motor_done")
+Motor.wait = make_motor_wrapper("bmd", "wait")
+Motor.getpos = make_motor_wrapper("get_motor_position_counter", "getpos")
+Motor.clearpos = make_motor_wrapper("clear_motor_position_counter", "clearpos")
+Motor.getdone = make_motor_wrapper("get_motor_done", "getdone")
 
 motors = { }
 for i=0,3 do

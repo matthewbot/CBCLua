@@ -8,5 +8,8 @@ modpath:=std
 # modname is the name of the module. All module names must be unique.
 modname:=timer
 
+# This line isn't needed for most modules. This module needs it to use the linux threading library, pthread
+ldflags += -lpthread
+
 include ../../../shared.mk
 

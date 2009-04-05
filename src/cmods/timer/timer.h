@@ -6,4 +6,6 @@ double seconds(); // returns time in seconds to highest precision
 	
 void reset(); // resets the timer
 
+void watchdog(); // sets the watchdog timer
+
 #endif

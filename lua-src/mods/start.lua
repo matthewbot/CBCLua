@@ -13,10 +13,10 @@ function module(name, ...)
 	local mod = { }
 	setmetatable(mod, mod_mt)
 	mod._NAME = name
-	mod._M  = mod
+	mod._M  = mod -- _M can be used in meta programming to create module level variables
 	mod._PACKAGE = name:gsub("[^.]*$", "")
 	mod._G = _G -- _G can be used to make true global variables if so desired
-	mod._IMPORTS = { }
+	mod._IMPORTS = { } -- used by __index
 	package.loaded[name] = mod
 
 	setfenv(2, mod)
@@ -53,18 +53,34 @@ end
 
 -- Now we begin the actual startup code
 
-print "CBCLua v0.1 loading"
+local goterror = false
 
--- This creates the main task and begins running it
+local status, errmsg = pcall(function() 
+	print "cbclua: v0.1 loading"
 
-local task = require("std.task")
-local mainmod = require("main")
+	-- This creates the main task and begins running it
 
-if mainmod == nil then
-	error("Main module is missing the main function!")
+	local task = require("std.task")
+	local mainmod = require("main")
+
+	if mainmod == nil then
+		error("Main module is missing the main function!")
+	end
+
+	print "cbclua: main task starting"
+
+	task.new(mainmod.main)
+	goterror = task.run()
+end)
+
+if status == false then
+	print("--------")
+	print(debug.traceback("error at top level: " .. errmsg, 1))
+	goterror = true
 end
 
-print "Program start"
-
-task.new(mainmod.main)
-task.run()
+if not(goterror) then
+	print("cbclua: finished")
+else
+	print("cbclua: terminated due to errors")
+end

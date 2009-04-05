@@ -6,6 +6,7 @@ module("std.task")
 
 local timer = require "std.timer"
 local co = require "coroutine"
+local debug = require "debug"
 
  -- This is the list of couroutines that are currently running
 local tasklist = { }
@@ -68,14 +69,16 @@ end
 function run()
 	while tasklist_count >= 1 do 
 		for curtask = 1,tasklist_nextid do
+			timer.watchdog() -- the timer module will print a message if this doesn't get called often enough warning of a program stall
+		
 			tasklist_current = curtask	
 			local task = tasklist[curtask]
 			
 			if task then
 				local noerr, msg, arg = co.resume(task, arg)					
 				if noerr == false then
-					print("task: error in task " .. curtask)
-					print(msg)
+					print("--------")
+					print(debug.traceback(task, "error in task " .. curtask .. ": " .. msg, 1))
 					return false
 				elseif co.status(task) == "dead" then
 					endtask(curtask)

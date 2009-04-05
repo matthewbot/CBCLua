@@ -70,7 +70,9 @@ local status, errmsg = pcall(function()
 	print "cbclua: main task starting"
 
 	task.new(mainmod.main)
-	goterror = task.run()
+	if task.run() == false then
+		goterror = true
+	end
 end)
 
 if status == false then

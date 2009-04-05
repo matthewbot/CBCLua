@@ -1,0 +1,49 @@
+#!/bin/bash
+
+if [ "$1" == "--type" ]; then
+  echo Upgrade
+  exit 0
+fi
+
+set -x
+
+CBCDRIVE=$2
+PRINT='/psp/rfs1/fb_print'
+
+BOOT=/mnt/kiss-usb
+KISS=/mnt/kiss
+USB=/mnt/usb
+
+BOOT_DEV=/dev/${CBCDRIVE}1
+KISS_DEV=/dev/${CBCDRIVE}2
+
+echo "CBCLua Installer v0.1" | $PRINT
+echo "By Matthew Thompson" | $PRINT
+echo "Installing in 5 seconds.." | $PRINT
+
+sleep 5
+
+echo "Mounting boot partition read-only" | $PRINT
+mount $BOOT_DEV $BOOT -t vfat -v 2>&1 -o rw | $PRINT
+
+echo "Loading ext2.ko" | $PRINT
+insmod $BOOT/ext2.ko -v 2>&1 | $PRINT
+
+echo "Mounting kiss parition read-write" | $PRINT
+mount $KISS_DEV $KISS -t vfat -v 2>&1 | $PRINT
+
+echo "Installing files to kiss partition" | $PRINT
+cp -r $USB/cbclua/* /mnt/kiss -v 2>&1 | $PRINT
+
+echo "Unmounting partitions" | $PRINT
+umount $KISS -v 2>&1 | $PRINT
+umount $BOOT -v 2>&1 | $PRINT
+
+echo "Remounting usb drive read-only" | $PRINT
+mount -r -o remount $USB -v 2>&1 | $PRINT
+
+echo "" | $PRINT
+
+echo "Finished! If there are no error messages above, reboot and enjoy." | $PRINT
+echo "If your CBC does not reboot, the boot partition should still be intact." | $PRINT
+echo "Simply perform a normal firmware update and it should be good as new." | $PRINT

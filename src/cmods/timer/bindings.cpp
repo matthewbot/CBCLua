@@ -1,6 +1,7 @@
 #include "bindings.h"
 #include "timer.h"
 #include "watchdog.h"
+#include <sched.h>
 #include <lua.hpp>
 
 static int lua_mseconds(lua_State *L) {
@@ -38,6 +39,11 @@ static int lua_watchdog(lua_State *L) {
 	return 0;
 }
 
+static int lua_yield(lua_State *L) {
+	sched_yield();
+	return 0;
+}
+
 const luaL_Reg luafuncs[] = {
 	{"raw_seconds", lua_raw_seconds},
 	{"raw_mseconds", lua_raw_mseconds},
@@ -46,6 +52,7 @@ const luaL_Reg luafuncs[] = {
 	{"reset", lua_reset},
 	{"rawsleep", lua_rawsleep},
 	{"watchdog", lua_watchdog},
+	{"yield", lua_yield},
 	
 	{NULL, NULL}
 };

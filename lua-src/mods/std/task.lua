@@ -8,6 +8,7 @@ local timer = require "std.timer"
 local co = require "coroutine"
 local debug = require "debug"
 local os = require "os"
+local math = require "math"
 
  -- This is the list of couroutines that are currently running
 local tasklist = { }
@@ -25,7 +26,7 @@ function start(func, name)
 	tasklist_nextid = tasklist_nextid + 1
 	tasklist_count = tasklist_count + 1
 	
-	tasklist[id] = { co = co.create(func), sleepamt = 0, name = name or "#" .. id }
+	tasklist[id] = { co = co.create(func), sleeptill = 0, name = name or "#" .. id }
 	
 	return id
 end
@@ -53,7 +54,7 @@ end
 -- Ends the entire program, printing the message
 function terminate(msg, code)
 	if msg ~= nil then
-		print("task: program terminated by task " .. curtask.name .. ":")
+		print("task: program terminated by task " .. curtask.name .. " :")
 		print(msg)
 	else
 		print("task: program terminated by task " .. curtask.name)
@@ -64,23 +65,8 @@ end
 
 -- Pause current task for a minimum of secs seconds
 function sleep(secs)
-	local selftask = tasklist[tasklist_current]
-	local start = timer.seconds() -- remember starting time
-	
-	selftask.sleepamt = secs -- set processes sleep amount to the requested amount
-	
-	while true do 
-		local newtime = yield()
-		
-		local newamt = start + secs - newtime -- recalculate time left to sleep
-		if newamt > 0 then -- if there is still some left
-			selftask.sleepamt = newamt -- update it, hit the yield again
-		else -- times up!
-			break -- end the yield loop
-		end
-	end
-	
-	selftask.sleepamt = 0
+	tasklist[tasklist_current].sleeptill = timer.seconds() + secs -- set processes sleep amount to the requested amount
+	yield()
 end
 
 -- Ends the specified task
@@ -95,25 +81,25 @@ local run_sleep -- predeclare function
 function run()
 	while tasklist_count >= 1 do 
 		run_sleep() -- sleeps until the nearest task wants to wake up
-	
-		local time = timer.seconds()
-	
+		local curtime = timer.seconds()
+		
 		for curtask = 1,tasklist_nextid do
 			tasklist_current = curtask	
 			local task = tasklist[curtask]
 			
-			if task then
-				local status = co.resume(task.co, time)	
-								
-				if status == false then -- if the coroutine raised an error
+			if task and task.sleeptill <= curtime then -- if the task is valid and not currently sleeping
+				local goodresume = co.resume(task.co)	
+							
+				if not(goodresume) then -- if the coroutine raised an error
 					print("--------")
 					print(debug.traceback(task, "error in task " .. curtask .. ": " .. msg, 1)) -- stack trace
 					return false
 				elseif co.status(task.co) == "dead" then -- if the coroutine ended
 					stop(curtask) -- take it off the list
 				end
-				
+			
 				timer.watchdog() -- if this doesn't get called enough the timer module produces a stall warning
+				curtime = timer.seconds()
 			end
 		end
 	end
@@ -122,20 +108,30 @@ function run()
 end
 
 function run_sleep() 
-	local minsleep = 999999
+	local minsleeptill = math.huge
 	
-	for checktask = 1,tasklist_nextid do
+	for checktask = 1,tasklist_nextid do -- go through each process
 		local task = tasklist[checktask]
 		if task then
-			local sleepamt = task.sleepamt
-			if sleepamt < minsleep then
-				minsleep = sleepamt
+			local sleeptill = task.sleeptill
+			if sleeptill == 0 then -- if its not sleeping
+				minsleeptill = -1 -- set a flag & exit the loop
+				break
+			elseif sleeptill < minsleeptill then -- if it sleeping but needs to be woken up sooner than our current soonest
+				minsleeptill = sleeptill -- then it is now the current soonest
 			end
 		end
 	end
 	
-	if minsleep > 0 then
-		timer.rawsleep(minsleep)
-	end 
+	assert(minsleeptill ~= math.huge)
+	
+	if minsleeptill == -1 then -- if at least one process isn't sleeping
+		timer.yield() -- we only yield
+	else
+		local sleeptime = minsleeptill - timer.seconds() -- if they're all sleeping
+		if sleeptime > 0 then
+			timer.rawsleep(sleeptime) -- then give the entire process naptime
+		end
+	end
 end
 

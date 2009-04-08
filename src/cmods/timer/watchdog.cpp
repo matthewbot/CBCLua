@@ -40,3 +40,6 @@ void watchdog() {
 	watchdog_enabled = true;
 }
 
+void watchdog_disable() {
+    watchdog_enabled = false;
+}

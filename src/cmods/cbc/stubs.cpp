@@ -46,6 +46,7 @@ extern "C" {
 	int track_is_new_data_available() { return 0; }
 	void track_update() { }
 	int track_get_frame() { return 0; }
+	int track_count(int ch) { return 0; }
 	int track_size(int ch, int i) { return 0; }
 	int track_x(int ch, int i) { return 0; }
 	int track_y(int ch, int i) { return 0; }

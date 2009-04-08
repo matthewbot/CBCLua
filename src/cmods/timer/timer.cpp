@@ -1,6 +1,8 @@
 #include "timer.h"
+#include "watchdog.h"
 
 #include <sys/time.h>
+#include <unistd.h>
 #include <cstdlib>
 
 using namespace std;
@@ -31,5 +33,11 @@ double seconds() { return raw_seconds() - seconds_start; }
 void reset() {
 	mseconds_start = raw_mseconds();
 	seconds_start = raw_seconds();
+}
+
+void rawsleep(double secs) {
+    watchdog_disable();
+    usleep((unsigned long)(secs * 1000000));
+    watchdog();
 }
 

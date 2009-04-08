@@ -12,7 +12,9 @@ template <void (* func)(int)>          static int lbind(lua_State *L);
 template <int (* func)(int)>           static int lbind(lua_State *L);
 template <void (* func)(int, int)>     static int lbind(lua_State *L);
 template <int (* func)(int, int)>      static int lbind(lua_State *L);
+template <float (* func)(int, int)>    static int lbind(lua_State *L);
 template <int (* func)(int, int, int)> static int lbind(lua_State *L);
+
 
 // function table
 
@@ -43,6 +45,26 @@ const luaL_Reg luafuncs[] = {
 	
 	{"analog10", lbind<analog10>},
 	{"digital", lbind<digital>},
+	
+	{"track_is_new_data_available", lbind<track_is_new_data_available>},
+	{"track_update", lbind<track_update>},
+	{"track_get_frame", lbind<track_get_frame>},
+	{"track_count", lbind<track_count>},
+	{"track_size", lbind<track_size>},
+	{"track_x", lbind<track_x>},
+	{"track_y", lbind<track_y>},
+	{"track_confidence", lbind<track_confidence>},
+	{"track_bbox_left", lbind<track_bbox_left>},
+	{"track_bbox_right", lbind<track_bbox_right>},
+	{"track_bbox_top", lbind<track_bbox_top>},
+	{"track_bbox_bottom", lbind<track_bbox_bottom>},
+	{"track_bbox_width", lbind<track_bbox_width>},
+	{"track_bbox_height", lbind<track_bbox_height>},
+	{"track_angle", lbind<track_angle>},
+	{"track_major_axis", lbind<track_major_axis>},
+	{"track_minor_axis", lbind<track_minor_axis>},
+	{"track_capture_time", lbind<track_capture_time>},
+	{"track_previous_capture_time", lbind<track_previous_capture_time>},
 	
 	{"__errwrap", errwrap},
 	
@@ -119,6 +141,13 @@ template <void (* func)(int, int)> static int lbind(lua_State *L) {
 template <int (* func)(int, int)> static int lbind(lua_State *L) {
 	int ret = func(checkint(L, 1), checkint(L, 2));
 	lua_pushinteger(L, ret);
+	return 1;
+}
+
+
+template <float (* func)(int, int)> static int lbind(lua_State *L) {
+	float ret = func(checkint(L, 1), checkint(L, 2));
+	lua_pushnumber(L, ret);
 	return 1;
 }
 

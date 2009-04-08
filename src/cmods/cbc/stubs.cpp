@@ -1,4 +1,4 @@
-#ifndef CBCLUA_ARM
+#ifndef CBCLUA_CBC
 
 #include "usercode.hpp"
 

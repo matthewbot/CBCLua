@@ -5,7 +5,6 @@ import Control.Monad
 import System.Process
 import System.IO
 import System.IO.Error
-import Data.IORef
 import Data.Maybe
 	
 data Lua = Lua { inputh :: Handle, outputh :: Handle, process :: ProcessHandle, outputthread :: ThreadId }

@@ -13,8 +13,7 @@ $(modules):
 clean:
 	rm -rf build usbdrive/cbclua
 	
-.PHONY: image
-image:
-	rm -rf usbdrive/cbclua
-	cp -rL cbc usbdrive
-	mv usbdrive/cbc usbdrive/cbclua
+.PHONY: usbinstall
+usbinstall:
+	rm -rf usbinstall/cbclua
+	cp -rL cbc usbinstall/cbclua

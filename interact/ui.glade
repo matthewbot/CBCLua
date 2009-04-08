@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.5 on Tue Apr  7 10:00:46 2009 -->
+<!--Generated with glade3 3.4.5 on Wed Apr  8 09:40:50 2009 -->
 <glade-interface>
   <widget class="GtkWindow" id="mainwindow">
     <property name="title" translatable="yes">CBCLua Downloader</property>
@@ -100,6 +100,7 @@
               <widget class="GtkTextView" id="output">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="editable">False</property>
                 <property name="wrap_mode">GTK_WRAP_CHAR</property>
                 <property name="cursor_visible">False</property>
                 <property name="accepts_tab">False</property>

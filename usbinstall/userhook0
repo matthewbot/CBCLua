@@ -33,7 +33,8 @@ echo "Mounting kiss parition read-write" | $PRINT
 mount $KISS_DEV $KISS -t vfat -v 2>&1 | $PRINT
 
 echo "Installing files to kiss partition" | $PRINT
-cp -r $USB/cbclua/* /mnt/kiss -v 2>&1 | $PRINT
+rm -rf /mnt/kiss/cbclua | $PRINT
+cp -r $USB/cbclua /mnt/kiss/cbclua -v 2>&1 | $PRINT
 
 echo "Unmounting partitions" | $PRINT
 umount $KISS -v 2>&1 | $PRINT

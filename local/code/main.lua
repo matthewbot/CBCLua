@@ -1,24 +1,14 @@
 module("main")
 
-local cbc = require "std.cbc"
-local task = require "std.task"
+kissc_compat()
 
-function blah()
-	while true do
-	    task.sleep(.5)
-	    print("foo?")
-	    task.sleep(1.2)
-	    print("bar!")
-	end
+function main()
+	fd(0)
+	enable_servos()
+	
+	set_servo_position(0, 2)
+	
+	sleep(2)
 end
-
-function main() 
-    task.start(blah)
-    while true do
-        task.sleep(1)
-        print("hi")
-    end
-end
-
 
 

@@ -79,6 +79,9 @@ local run_sleep -- predeclare function
 		
 -- This function runs the tasks in order. It is called from start.lua, and shouldn't be used outside of there
 function run()
+	collectgarbage("stop") -- stop GC
+	collectgarbage("collect") -- do a full collection to clean up any left overs from loading the program
+	
 	while tasklist_count >= 1 do 
 		run_sleep() -- sleeps until the nearest task wants to wake up
 		local curtime = timer.seconds()
@@ -88,11 +91,11 @@ function run()
 			local task = tasklist[curtask]
 			
 			if task and task.sleeptill <= curtime then -- if the task is valid and not currently sleeping
-				local goodresume = co.resume(task.co)	
+				local goodresume,msg = co.resume(task.co)	
 							
 				if not(goodresume) then -- if the coroutine raised an error
 					print("--------")
-					print(debug.traceback(task, "error in task " .. curtask .. ": " .. msg, 1)) -- stack trace
+					print(debug.traceback(task.co, "error in task " .. task.name .. ": " .. msg, 1)) -- stack trace
 					return false
 				elseif co.status(task.co) == "dead" then -- if the coroutine ended
 					stop(curtask) -- take it off the list
@@ -126,9 +129,15 @@ function run_sleep()
 	assert(minsleeptill ~= math.huge)
 	
 	if minsleeptill == -1 then -- if at least one process isn't sleeping
-		timer.yield() -- we only yield
+		collectgarbage("step", 1) -- run a GC step
+		timer.yield() -- then yield so other processes (cbcui) can run
 	else
 		local sleeptime = minsleeptill - timer.seconds() -- if they're all sleeping
+		if sleeptime > 0.1 then -- if we're sleeping for more than a tenth of a second
+			collectgarbage("collect") -- run a full GC cycle
+			sleeptime = minsleeptill - timer.seconds() -- recalculate the time
+		end
+		
 		if sleeptime > 0 then
 			timer.rawsleep(sleeptime) -- then give the entire process naptime
 		end

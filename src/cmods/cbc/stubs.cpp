@@ -62,6 +62,14 @@ extern "C" {
 	int track_minor_axis(int ch, int i) { return 0; }
 	int track_capture_time() { return 0; }
 	int track_previous_capture_time() { return 0; }
+	
+	int up_button() { return 0; }
+	int down_button() { return 0; }
+	int left_button() { return 0; }
+	int right_button() { return 0; }
+	int a_button() { return 0; }
+	int b_button() { return 0; }
+	int black_button() { return 0; }
 }
 
 #endif

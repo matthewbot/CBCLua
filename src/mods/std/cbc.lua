@@ -1,7 +1,11 @@
 module("std.cbc")
 
+--[[ Requires and globals ]]--
+
 local class = require "std.class"
 local raw = require "raw.cbc"
+
+global{"sensors", "motors", "servos"}
 
 --[[ Sensors ]]--
 

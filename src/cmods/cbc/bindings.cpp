@@ -66,6 +66,14 @@ const luaL_Reg luafuncs[] = {
 	{"track_capture_time", lbind<track_capture_time>},
 	{"track_previous_capture_time", lbind<track_previous_capture_time>},
 	
+	{"black_button", lbind<black_button>},
+	{"up_button", lbind<up_button>},
+	{"down_button", lbind<down_button>},
+	{"left_button", lbind<left_button>},
+	{"right_button", lbind<right_button>},
+	{"a_button", lbind<a_button>},
+	{"b_button", lbind<b_button>},
+	
 	{"__errwrap", errwrap},
 	
 	{NULL, NULL}

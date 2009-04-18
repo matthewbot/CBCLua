@@ -18,7 +18,8 @@ BOOT_DEV=/dev/${CBCDRIVE}1
 KISS_DEV=/dev/${CBCDRIVE}2
 USER_DEV=/dev/${CBCDRIVE}3
 
-CBCLUA_TGZ = $USB/cbclua.tgz
+CBCLUA_TGZ=$USB/cbclua.tgz
+CBCLUA_DIR=$USER/code/cbclua
 
 echo "CBCLua Installer v0.1" | $PRINT
 echo "By Matthew Thompson" | $PRINT
@@ -29,7 +30,8 @@ mount -r -o remount $USB -v 2>&1 | $PRINT
 
 if [ ! -f $CBCLUA_TGZ ]; then
 	echo "Error: This thumbdrive does not contain cbclua.tgz." | $PRINT
-	echo "Please copy the file on and try again." | $PRINT
+	echo "Please place this file on the thumbdrive" | $PRINT
+	echo "and try again." | $PRINT
 	exit 1
 fi
 
@@ -49,8 +51,9 @@ mkdir $USER 2>&1 | $PRINT
 mount $USER_DEV $USER -t ext2 -v -o rw 2>&1 | $PRINT
 
 echo "Extracting files to user partition" | $PRINT
-rm -rf $USER/cbclua $USER/code/cbclua 2>&1 | $PRINT # $USER/cbclua will clean up older versions
-tar -xf $USB/userhook0_data.tgz -C $USER/code
+rm -rf $USER/code/cbclua 2>&1 | $PRINT
+tar -xzf $CBCLUA_TGZ -C $USER/code 2>&1 | $PRINT
+chmod +x $CBCLUA_DIR/run.sh $CBCLUA_DIR/lua 2>&1 | $PRINT
 
 echo "Unmounting partitions" | $PRINT
 umount $BOOT -v 2>&1 | $PRINT

@@ -3,13 +3,13 @@
 
 const char *errmsg = "\
 Unable to launch lua, error %d.\n\
-You probably need to reinstall\
+You probably need to reinstall\n\
 CBCLua through its userhook0\
 ";
 
 int main(int argc, char **argv) {
 	printf("cbclua: v0.1 loading\n");
-	int status = system("/mnt/user/code/cbclua/run.sh");
+	int status = system("/mnt/user/code/cbclua/run.sh -u");
 
 	if (status != 0) {
 		fprintf(stderr, errmsg, status);

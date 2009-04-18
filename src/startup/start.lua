@@ -2,7 +2,7 @@
 
 -- load the other startup files
 
-local startupdir = arg[0]:match("(.*)\/")
+startupdir = arg[0]:match("(.*)\/")
 dofile(startupdir .. "/module.lua")
 dofile(startupdir .. "/util.lua")
 
@@ -14,12 +14,6 @@ if table.findvalue(arg, "-i") ~= nil then
 	package.preload['std.task'] = function () error("module std.task not supported in interact mode") end
 	
 	return
-end
-
--- Scan the argument list to see if we're supposed to look for a usb drive
-
-if table.findvalue(arg, "-u") ~= nil then
-	dofile(startupdir .. "/usbload.lua")
 end
 
 -- Load the main module

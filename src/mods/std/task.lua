@@ -60,7 +60,7 @@ function terminate(msg, code)
 		print("task: program terminated by task " .. curtask.name)
 	end
 	
-	os.exit(code or 1)
+	os.exit(code or 0)
 end
 
 -- Pause current task for a minimum of secs seconds

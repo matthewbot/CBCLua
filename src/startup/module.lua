@@ -1,5 +1,3 @@
--- This file is the lua program run by the run script
-
 -- Some expansions on the module system
 
 local mod_mt = { }
@@ -15,8 +13,14 @@ end
 -- Module modifier that automatically declares globals on assignment
 
 function autoglobals(mod)
-	cbcluamodule(mod)
 	mod._AUTOGLOBALS = true
+end
+
+-- Module modifier that puts the module in KISS-C compat mode
+
+function kissc_compat(mod) 
+	table.insert(mod._IMPORTS, require("raw.cbc"))
+	table.insert(mod._IMPORTS, require("std.kissc"))
 end
 
 -- This function loads a module, then makes it visible in the current module
@@ -90,69 +94,4 @@ function mod_mt.__newindex(mod, key, value)
 	end
 	
 	error("Assignment to undefined global variable '" .. key .. "'", 2)
-end
-	
-function kissc_compat() 
-	local kissc = require "std.kissc"
-	kissc.compat(2)
-end
-
--- Scan the argument list to see if lua was launched in interactive mode
-
-local interact = false
-
-for _,v in pairs(arg) do
-	if v == "-i" then
-		interact = true
-		break
-	end
-end
-
-if interact then
-	print "cbclua: v0.1 interact"
-	
-	package.preload['std.task'] = function () error("module std.task not supported in interact mode") end
-	
-	return
-end
-
--- Now we begin the actual startup code
-
-local goterror = false
-
-local status, trace = xpcall(function() 
-	print "cbclua: v0.1 loading"
-
-	-- This creates the main task and begins running it
-
-	local mainmod = require("main")
-
-	if mainmod == nil then
-		error("Main module is missing the main function!")
-	end
-	
-	print "cbclua: main task starting"
-	local task = require("std.task")
-	task.start(mainmod.main)
-	if task.run() == false then -- task.run signals an error by returning false
-		goterror = true
-	end
-end, function (errmsg)
-	-- error handler
-	return debug.traceback("error at top level: " .. errmsg, 2)
-end)
-
--- The task scheduler catches errors inside tasks
--- If an error still gets through to the outer xpcall() then we need to still give a stack trace
-if status == false then
-	print("--------")
-	print(trace)
-	goterror = true
-end
-
--- Print a final status message
-if not(goterror) then
-	print("cbclua: finished")
-else
-	print("cbclua: terminated due to errors")
 end

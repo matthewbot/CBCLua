@@ -1,22 +1,16 @@
-#include <unistd.h>
-
-const char *cbclua_run_path = "/mnt/user/cbclua/run.sh";
-const char *cbclua_run_args[] = { cbclua_run_path, NULL };
-
-int main(int argc, char **argv) {
-	execv(cbclua_run_path, cbclua_run_args);
-	
-	fprintf(stderr, "Failed to start cbclua!\nYou will probably need to re-install.");
-	return 1;
-}
-#include <unistd.h>
-
-const char *cbclua_run_path = "/mnt/user/cbclua/run.sh";
-const char *cbclua_run_args[] = { cbclua_run_path, NULL };
+const char *errmsg = "\
+Unable to launch cbclua, error %d.\n\
+You should probably do a full\n\
+firmware reinstall.\
+";
 
 int main(int argc, char **argv) {
-	execv(cbclua_run_path, cbclua_run_args);
-	
-	fprintf(stderr, "Failed to start cbclua!\nYou will probably need to re-install.");
-	return 1;
+	int status = system("/mnt/user/cbclua/run.sh");
+
+	if (status != 0) {
+		fprintf(stderr, errmsg, status);
+		return 1;
+	}
+
+	return 0;
 }

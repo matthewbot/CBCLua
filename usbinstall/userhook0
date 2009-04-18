@@ -41,15 +41,8 @@ mount $USER_DEV $USER -t ext2 -v -o rw 2>&1 | $PRINT
 
 echo "Installing files to user partition" | $PRINT
 rm -rf $USER/cbclua $USER/code/cbclua 2>&1 | $PRINT
-cp -r $USB/cbclua $USER/cbclua -v 2>&1 | $PRINT
+cp -r $USB/cbclua $USER/cbclua 2>&1 | $PRINT
 cp -r $USB/cbclua-code $USER/code/cbclua 2>&1 | $PRINT
-
-sleep 4
-
-echo "Running find" | $PRINT
-find $USER | $PRINT
-
-sleep 4
 
 echo "Unmounting partitions" | $PRINT
 umount $BOOT -v 2>&1 | $PRINT

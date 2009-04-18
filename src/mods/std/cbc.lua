@@ -1,5 +1,7 @@
 module("std.cbc")
 
+-- /proc/sys/sense1/brightness
+
 --[[ Requires and globals ]]--
 
 local class = require "std.class"

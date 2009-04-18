@@ -16,6 +16,12 @@ if table.findvalue(arg, "-i") ~= nil then
 	return
 end
 
+-- Scan the argument list to see if we're supposed to look for a usb drive
+
+if table.findvalue(arg, "-u") ~= nil then
+	dofile(startupdir .. "/usbload.lua")
+end
+
 -- Load the main module
 
 local status, result = xpcall(function() 

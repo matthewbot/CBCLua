@@ -11,12 +11,12 @@ $(modules):
 
 .PHONY: clean	
 clean:
-	rm -rf build usbdrive/cbclua
+	rm -rf build usbdrive/userhook0_data.tgz
 	
 .PHONY: usbinstall
 usbinstall:
-	rm -rf usbinstall/cbclua
-	cp -rL cbc usbinstall/cbclua
+	rm -rf usbinstall/cbclua.tgz
+	tar -czf usbinstall/cbclua.tgz cbclua --exclude=".*" --exclude="*~" -h
 
 .PHONY: interact
 interact:

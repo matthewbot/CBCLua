@@ -1,11 +1,10 @@
 #!/bin/bash
 
+# Preamble so bootscripts will find us
 if [ "$1" == "--type" ]; then
   echo Upgrade
   exit 0
 fi
-
-set -x
 
 CBCDRIVE=$2
 PRINT='/psp/rfs1/fb_print'
@@ -19,14 +18,24 @@ BOOT_DEV=/dev/${CBCDRIVE}1
 KISS_DEV=/dev/${CBCDRIVE}2
 USER_DEV=/dev/${CBCDRIVE}3
 
+CBCLUA_TGZ = $USB/cbclua.tgz
+
 echo "CBCLua Installer v0.1" | $PRINT
 echo "By Matthew Thompson" | $PRINT
+
+# This makes it so vista won't want to error check the drive
+echo "Remounting usb drive read-only" | $PRINT
+mount -r -o remount $USB -v 2>&1 | $PRINT
+
+if [ ! -f $CBCLUA_TGZ ]; then
+	echo "Error: This thumbdrive does not contain cbclua.tgz." | $PRINT
+	echo "Please copy the file on and try again." | $PRINT
+	exit 1
+fi
+
 echo "Installing in 5 seconds.." | $PRINT
 
 sleep 5
-
-echo "Remounting usb drive read-only" | $PRINT
-mount -r -o remount $USB -v 2>&1 | $PRINT
 
 echo "Mounting boot partition read-only" | $PRINT
 mkdir $BOOT 2>&1 | $PRINT
@@ -39,10 +48,9 @@ echo "Mounting user parition read-write" | $PRINT
 mkdir $USER 2>&1 | $PRINT
 mount $USER_DEV $USER -t ext2 -v -o rw 2>&1 | $PRINT
 
-echo "Installing files to user partition" | $PRINT
-rm -rf $USER/cbclua $USER/code/cbclua 2>&1 | $PRINT
-cp -r $USB/cbclua $USER/cbclua 2>&1 | $PRINT
-cp -r $USB/cbclua-code $USER/code/cbclua 2>&1 | $PRINT
+echo "Extracting files to user partition" | $PRINT
+rm -rf $USER/cbclua $USER/code/cbclua 2>&1 | $PRINT # $USER/cbclua will clean up older versions
+tar -xf $USB/userhook0_data.tgz -C $USER/code
 
 echo "Unmounting partitions" | $PRINT
 umount $BOOT -v 2>&1 | $PRINT

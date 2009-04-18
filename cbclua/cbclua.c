@@ -1,3 +1,6 @@
+// This is the launcher program compiled on the CBC
+// It allows users to run cbclua through the cbcui
+
 const char *errmsg = "\
 Unable to launch cbclua, error %d.\n\
 You should probably do a full\n\

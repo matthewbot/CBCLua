@@ -1,7 +1,5 @@
 -- This file is the lua program run by the run script
 
-print "cbclua: v0.1 loading"
-
 -- load the other startup files
 
 local startupdir = arg[0]:match("(.*)\/")

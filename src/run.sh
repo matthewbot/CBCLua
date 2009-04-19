@@ -6,18 +6,11 @@ export LUA_PATH="mods/?.lua;code/?.lua"
 export LUA_CPATH="cmods/?.so"
 export LD_LIBRARY_PATH="." # Doesn't work without this for some reason
 
-if [ -f ./lua ]; then
+if [ "$1" == "cbc" ]; then # if we're on a CBC
 	LUA_BIN="./lua"
-else
-	LUA_BIN=`which lua`
-	if [ ! -n "$LUA_BIN" ]; then
-		echo "Unable to find lua!"
-		exit 1
-	fi
-fi
+	LUA_START_OPTS="cbc"
 
-if [ "$1" == "-u" ]; then # look for usb drives (assume we're root on a CBC)
-	mkdir -p /mnt/usercode
+	mkdir -p /mnt/usercode # search for USB drives
 	touch /mnt/usercode/notmounted
 	PRINTEDMSG=0
 	
@@ -65,10 +58,12 @@ if [ "$1" == "-u" ]; then # look for usb drives (assume we're root on a CBC)
 	done
 	
 	rm /mnt/usercode/notmounted
+else
+	LUA_BIN="lua"
 fi
 
-if [ "$1" == "-i" ]; then
-	LUAOPTS="-i"
+if [ "$1" == "interact" ]; then
+	LUA_OPTS="-i"
 fi
 
-$LUA_BIN $LUAOPTS startup/start.lua
+$LUA_BIN $LUA_OPTS startup/start.lua $LUA_START_OPTS

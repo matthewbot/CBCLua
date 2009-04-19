@@ -18,6 +18,12 @@ if table.findvalue(arg, "-i") ~= nil then
 	return
 end
 
+-- Scan to see if we were launched in cbc mode
+
+if table.findvalue(arg, "cbc") ~= nil then
+	debug.traceback = cbctraceback -- patch debug.traceback to not use tabs so they're readable on CBC display
+end
+
 -- Load the main module
 
 local status, result = xpcall(function() 

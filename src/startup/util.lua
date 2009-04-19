@@ -7,3 +7,10 @@ function table.findvalue(table, val)
 		end
 	end
 end
+
+local traceback = debug.traceback
+function cbctraceback(...)
+	local out = traceback(...)
+	return (out:gsub("\t", "  "))
+end
+	

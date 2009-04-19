@@ -1,8 +1,14 @@
 # All paths in this file must be relative to src/cmods/somemodule!
 
+ifeq '$(arch)' 'cbc'
+archdir := cbclua
+else
+archdir := local
+endif
+
 rootdir := ../../..
 modbuilddir := $(rootdir)/build/$(arch)/$(modname)
-moddir := $(rootdir)/$(arch)/cmods/$(modpath)
+moddir := $(rootdir)/$(archdir)/cmods/$(modpath)
 modbin := $(moddir)/$(modname).so
 includedir := $(rootdir)/src/include
 objects := $(patsubst %.cpp,%.o,$(addprefix $(modbuilddir)/,$(wildcard *.cpp)))

@@ -1,5 +1,7 @@
 -- This file is the lua program run by the run script
 
+io.stdout:setvbuf("no") -- turn off standard output buffering
+
 -- load the other startup files
 
 startupdir = arg[0]:match("(.*)\/")

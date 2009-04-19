@@ -41,13 +41,22 @@ if [ "$1" == "-u" ]; then # look for usb drives (assume we're root on a CBC)
 			break
 		fi
 		
+		echo "cbclua: usb mounted"
+		
 		if [ -e /mnt/usercode/cbclua.tgz ]; then
 			echo "cbclua: applying update"
+			rm -rf /mnt/user/code/cbclua
 			tar -xzf /mnt/usercode/cbclua.tgz -C /mnt/user/code
 			umount /mnt/usercode
 			echo "cbclua: done. Please recompile cbclua.c"
-			echo "cbclua: (remove cbclua.tgz from drive to stop updating)"
+			echo "cbclua: (remove cbclua.tgz to stop updating)"
 			exit 0
+		fi
+		
+		if [ -d /mnt/usercode/lua ]; then
+			echo "cbclua: loading new code"
+			rm -rf /mnt/user/code/cbclua/code
+			cp -r /mnt/usercode/lua /mnt/user/code/cbclua/code
 		fi
 		
 		umount /mnt/usercode

@@ -57,6 +57,7 @@ task.start(mainfunc)
 
 -- Print a final status message
 print("cbclua: starting main task")
+dostartup() -- if the program has a startup function run it
 if task.run() then
 	print("cbclua: program finished")
 else

@@ -13,4 +13,14 @@ function cbctraceback(...)
 	local out = traceback(...)
 	return (out:gsub("\t", "  "))
 end
+
+local startup
+function registerstartup(func)
+	if startup then error("Cannot register two startup functions!") end
+	startup = func
+end
+
+function dostartup()
+	if startup then startup() end
+end
 	

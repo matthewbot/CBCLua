@@ -8,6 +8,19 @@ function table.findvalue(table, val)
 	end
 end
 
+function table.deepclone(table)
+	local newtable = { }
+	for k,v in pairs(table) do
+		if type(v) == "table" then
+			newtable[k] = table.deepclone(v)
+		else
+			newtable[k] = v
+		end
+	end
+	
+	return newtable
+end
+
 local traceback = debug.traceback
 function cbctraceback(...)
 	local out = traceback(...)

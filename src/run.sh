@@ -41,6 +41,7 @@ if [ "$1" == "cbc" ]; then # if we're on a CBC
 			rm -rf /mnt/user/code/cbclua
 			tar -xzf /mnt/usercode/cbclua.tgz -C /mnt/user/code
 			umount /mnt/usercode
+			sync
 			echo "cbclua: done. Please recompile cbclua.c"
 			echo "cbclua: (remove cbclua.tgz to stop updating)"
 			exit 0
@@ -50,6 +51,7 @@ if [ "$1" == "cbc" ]; then # if we're on a CBC
 			echo "cbclua: loading new code"
 			rm -rf /mnt/user/code/cbclua/code
 			cp -r /mnt/usercode/lua /mnt/user/code/cbclua/code
+			sync
 		fi
 		
 		umount /mnt/usercode

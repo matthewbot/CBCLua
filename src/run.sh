@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cd `dirname $0`
 
@@ -67,4 +67,8 @@ if [ "$1" == "-u" ]; then # look for usb drives (assume we're root on a CBC)
 	rm /mnt/usercode/notmounted
 fi
 
-$LUA_BIN startup/start.lua $*
+if [ "$1" == "-i" ]; then
+	LUAOPTS="-i"
+fi
+
+$LUA_BIN $LUAOPTS startup/start.lua

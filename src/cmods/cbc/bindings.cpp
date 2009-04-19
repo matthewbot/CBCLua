@@ -15,7 +15,8 @@ template <int (* func)(int, int)>      static int lbind(lua_State *L);
 template <float (* func)(int, int)>    static int lbind(lua_State *L);
 template <int (* func)(int, int, int)> static int lbind(lua_State *L);
 
-
+template <int (* func)()>              static int lbind_bool(lua_State *L);
+template <int (* func)(int)>           static int lbind_bool(lua_State *L);
 // function table
 
 static int errwrap(lua_State *L);
@@ -44,7 +45,7 @@ const luaL_Reg luafuncs[] = {
 	{"disable_servos", lbind<disable_servos>},
 	
 	{"analog10", lbind<analog10>},
-	{"digital", lbind<digital>},
+	{"digital", lbind_bool<digital>},
 	
 	{"track_is_new_data_available", lbind<track_is_new_data_available>},
 	{"track_update", lbind<track_update>},
@@ -66,13 +67,13 @@ const luaL_Reg luafuncs[] = {
 	{"track_capture_time", lbind<track_capture_time>},
 	{"track_previous_capture_time", lbind<track_previous_capture_time>},
 	
-	{"black_button", lbind<black_button>},
-	{"up_button", lbind<up_button>},
-	{"down_button", lbind<down_button>},
-	{"left_button", lbind<left_button>},
-	{"right_button", lbind<right_button>},
-	{"a_button", lbind<a_button>},
-	{"b_button", lbind<b_button>},
+	{"black_button", lbind_bool<black_button>},
+	{"up_button", lbind_bool<up_button>},
+	{"down_button", lbind_bool<down_button>},
+	{"left_button", lbind_bool<left_button>},
+	{"right_button", lbind_bool<right_button>},
+	{"a_button", lbind_bool<a_button>},
+	{"b_button", lbind_bool<b_button>},
 	
 	{"__errwrap", errwrap},
 	
@@ -152,7 +153,6 @@ template <int (* func)(int, int)> static int lbind(lua_State *L) {
 	return 1;
 }
 
-
 template <float (* func)(int, int)> static int lbind(lua_State *L) {
 	float ret = func(checkint(L, 1), checkint(L, 2));
 	lua_pushnumber(L, ret);
@@ -162,6 +162,17 @@ template <float (* func)(int, int)> static int lbind(lua_State *L) {
 template <int (* func)(int, int, int)> static int lbind(lua_State *L) {
 	int ret = func(checkint(L, 1), checkint(L, 2), checkint(L, 3));
 	lua_pushinteger(L, ret);
+	return 1;
+}
+
+template <int (* func)()> static int lbind_bool(lua_State *L) {
+	lua_pushboolean(L, func() != 0);
+	return 1;
+}
+
+template <int (* func)(int)> static int lbind_bool(lua_State *L) {
+	int ret = func(checkint(L, 1));
+	lua_pushboolean(L, ret != 0);
 	return 1;
 }
 

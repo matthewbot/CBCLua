@@ -9,7 +9,7 @@ CBCLua through its userhook0\
 
 int main(int argc, char **argv) {
 	printf("cbclua: v0.1 loading\n");
-	int status = system("/mnt/user/code/cbclua/run.sh -u");
+	int status = system("/mnt/user/code/cbclua/run.sh cbc");
 
 	if (status != 0) {
 		fprintf(stderr, errmsg, status);

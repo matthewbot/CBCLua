@@ -10,7 +10,7 @@ dofile(startupdir .. "/util.lua")
 
 -- Scan the argument list to see if lua was launched in interactive mode
 
-if table.findvalue(arg, "-i") ~= nil then
+if hasarg("-i") then
 	print "cbclua: beginning interaction"
 	
 	package.preload['std.task'] = function () error("module std.task not supported in interact mode") end
@@ -20,7 +20,7 @@ end
 
 -- Scan to see if we were launched in cbc mode
 
-if table.findvalue(arg, "cbc") ~= nil then
+if hasarg("cbc") then
 	debug.traceback = cbctraceback -- patch debug.traceback to not use tabs so they're readable on CBC display
 end
 

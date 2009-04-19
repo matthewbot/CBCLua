@@ -1,25 +1,4 @@
--- some handy global functions
-
-function table.findvalue(table, val)
-	for k,v in pairs(table) do
-		if v == val then
-			return k
-		end
-	end
-end
-
-function table.deepclone(table)
-	local newtable = { }
-	for k,v in pairs(table) do
-		if type(v) == "table" then
-			newtable[k] = table.deepclone(v)
-		else
-			newtable[k] = v
-		end
-	end
-	
-	return newtable
-end
+-- some misc utilities for starting up
 
 local traceback = debug.traceback
 function cbctraceback(...)
@@ -37,3 +16,12 @@ function dostartup()
 	if startup then startup() end
 end
 	
+function hasarg(val)
+	for _,v in pairs(arg) do
+		if v == val then
+			return true
+		end
+	end
+	
+	return false
+end

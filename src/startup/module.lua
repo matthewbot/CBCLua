@@ -85,14 +85,18 @@ end
 -- This function is a metatable function that allows modules to view global functions and imported modules
 
 function mod_mt.__index(mod, key)
-	for _,importmod in ipairs(mod._IMPORTS) do
+	if getfenv(2) ~= mod then -- if the environment of our caller isn't the module (IE, its not a function declared inside the module)
+		return nil -- no special lookup rules, quit now
+	end
+	
+	for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value
 		local val = importmod[key]
 		if val then
 			return val
 		end
 	end
 	
-	local val = _G[key]
+	local val = _G[key] -- otherwise, go through global functions
 	if type(val) == "function" then
 		return val
 	end

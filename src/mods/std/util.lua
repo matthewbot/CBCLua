@@ -56,7 +56,7 @@ function prettyprint(table, indent)
 			print(indent_str .. k .. ": ")
 			prettyprint(v, indent+1)
 		else
-			print(indent_str .. k .. ": " .. v)
+			print(indent_str .. k .. ": " .. tostring(v))
 		end
 	end
 end

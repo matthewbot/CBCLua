@@ -5,7 +5,7 @@ module("std.cbc")
 --[[ Requires and globals ]]--
 
 local class = require "std.class"
-local raw = require "raw.cbc"
+import "raw.cbc"
 
 global{"sensors", "motors", "servos"}
 
@@ -24,15 +24,15 @@ end
 
 function Sensor:read()
 	if self.type == "analog" then
-		return raw.analog10(self.num)
+		return analog10(self.num)
 	else
-		return raw.digital(self.num) == 1 -- convert to a bool
+		return digital(self.num) == 1 -- convert to a bool
 	end
 end
 
 function Sensor:read_float()
 	if self.type == "analog" then
-		return raw.analog10(self.num)/1024
+		return analog10(self.num)/1024
 	else
 		error("Attempting to read a digital sensor as a floating value", 2)
 	end
@@ -61,10 +61,10 @@ local function make_motor_wrapper(rawfuncname, realfuncname)
 		realfuncname = rawfuncname
 	end
 	
-	local func = raw[rawfuncname]
+	local func = _M[rawfuncname] -- this will still search our imports
 
 	return function(self, ...)
-		return raw.__errwrap(2, realfuncname, func, self.num, ...) -- errwrap makes error messages come out correctly since some functions are renamed
+		return __errwrap(2, realfuncname, func, self.num, ...) -- errwrap makes error messages come out correctly since some functions are renamed
 	end
 end
 
@@ -96,11 +96,11 @@ function Servo:setpos(pos)
 		error("Attempt to set servo position out of range (must be 0-2047)", 2)
 	end
 
-	raw.set_servo_position(self.num, pos)
+	set_servo_position(self.num, pos)
 end
 
 function Servo:getpos()
-	return raw.get_servo_position(self.num)
+	return get_servo_position(self.num)
 end
 
 servos = { }
@@ -108,8 +108,8 @@ for i=1,4 do
 	servos[i] = Servo(i)
 end
 
-enable_servos = raw.enable_servos
-disable_servos = raw.disable_servos
+enable_servos = enable_servos
+disable_servos = disable_servos
 
 --[[ Buttons ]]--
 
@@ -117,5 +117,5 @@ local buttons = { "black", "up", "down", "left", "right" }
 
 for _,button in ipairs(buttons) do
 	local btnfunc = button .. "_button" -- all button functions end in _button
-	_M[btnfunc] = raw[btnfunc]
+	_M[btnfunc] = _M[btnfunc] -- looks weird, but on the right we're going to find it in our import, and then on the left we're going to make it a module variable
 end

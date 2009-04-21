@@ -5,14 +5,18 @@ local mod_mt = { }
 -- Module modifier that allows import() to work and requires declaration of global variables through the global() function
 
 function cbcluamodule(mod)
+	if mod._CBCLUAMODULE then return end
+	
 	mod._IMPORTS = { }
 	mod._GLOBALS = { }
+	mod._CBCLUAMODULE = true
 	setmetatable(mod, mod_mt)
 end
 
 -- Module modifier that automatically declares globals on assignment
 
 function autoglobals(mod)
+	cbcluamodule(mod)
 	mod._AUTOGLOBALS = true
 end
 

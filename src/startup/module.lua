@@ -34,19 +34,32 @@ function import(name, depth)
 end
 
 -- This function declares a global
+---- Usage: global("ultimate_answer", 42)
+---- Or: global{ ultimate_answer = 42, ultimate_question = "Cannot be known in this universe" }
 
-function global(name, depth)
-	depth = depth or 2
-	local outermod = getfenv(depth)
+function global(name, val)
+	local outermod = getfenv(2)
 	assert(outermod._NAME, "global may only be called from within a module!")
 	
 	local tname = type(name)
 	
 	if tname == "string" then
 		outermod._GLOBALS[name] = true
+		if val ~= nil then
+			rawset(outermod, name, val)
+		end
 	elseif tname == "table" then
-		for _,v in pairs(name) do
-			outermod._GLOBALS[v] = true
+		for k,v in pairs(name) do
+			local t = type(k)
+			
+			if t == "number" then
+				outermod._GLOBALS[v] = true
+			elseif t == "string" then
+				outermod._GLOBALS[k] = true
+				rawset(outermod, k, v)
+			else
+				error("Bad key in global declaration table of type " .. t)
+			end
 		end
 	else
 		error("Expected string or table for argument #1 to global", 2)
@@ -85,10 +98,16 @@ function mod_mt.__index(mod, key)
 	end
 end
 
--- This function catches access to undefined globals
+-- This function catches assignment to undefined globals
+
+-- You don't need to declare
+---- Capitalized globals (should be class names, usually only assigned to once)
+---- Globals that will contain functions (again, usually only assinged once)
 
 function mod_mt.__newindex(mod, key, value)
-	if mod._AUTOGLOBALS or type(value) == "function" or mod._GLOBALS[key] then
+	local firstbyte = key:byte(1)
+
+	if (firstbyte >= 65 and firstbyte <= 90) or mod._AUTOGLOBALS or type(value) == "function" or mod._GLOBALS[key] then
 		rawset(mod, key, value)
 		return
 	end

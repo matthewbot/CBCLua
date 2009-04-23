@@ -18,7 +18,7 @@ end
 
 function autoglobals(mod)
 	cbcluamodule(mod)
-	mod._AUTOGLOBALS = true
+	rawset(mod, "_AUTOGLOBALS", true)
 end
 
 -- Module modifier that puts the module in KISS-C compat mode

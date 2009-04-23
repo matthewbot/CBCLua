@@ -1,6 +1,6 @@
 luadir := lua-5.1.4
 
-modules := $(wildcard src/cmods/*)
+modules := $(filter-out %shared, $(wildcard src/cmods/*))
 
 all: $(modules) interact
 

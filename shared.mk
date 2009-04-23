@@ -7,14 +7,20 @@ archdir := local
 endif
 
 rootdir := ../../..
+
+shareddir := $(rootdir)/src/cmods/shared
+sharedbuilddir := $(rootdir)/build/$(arch)/shared
+sharedobjs := $(patsubst %.cpp,%.o,$(addprefix $(sharedbuilddir)/,$(notdir $(wildcard $(shareddir)/*.cpp))))
+sharedheaders := $(wildcard $(shareddir)/*.h)
+
 modbuilddir := $(rootdir)/build/$(arch)/$(modname)
 moddir := $(rootdir)/$(archdir)/cmods/$(modpath)
 modbin := $(moddir)/$(modname).so
 includedir := $(rootdir)/src/include
-objects := $(patsubst %.cpp,%.o,$(addprefix $(modbuilddir)/,$(wildcard *.cpp)))
-headers := $(wildcard *.h) $(wildcard *.hpp) $(wildcard $(includedir)/*.h) $(wildcard $(includedir)/*.hpp)
+objects := $(patsubst %.cpp,%.o,$(addprefix $(modbuilddir)/,$(wildcard *.cpp))) $(sharedobjs)
+headers := $(wildcard *.h) $(wildcard *.hpp) $(wildcard $(includedir)/*.h) $(wildcard $(includedir)/*.hpp) $(sharedheaders)
 
-cflags += -Wall -pipe -fpic -I$(includedir)
+cflags += -Wall -pipe -fpic -I$(includedir) -I$(shareddir)
 ldflags += -shared -ldl
 
 ifeq '$(arch)' 'local'
@@ -36,6 +42,9 @@ $(modbin): $(objects) | $(moddir)
 	
 $(modbuilddir)/%.o: %.cpp $(headers) | $(modbuilddir)
 	$(CC) -c $< -o $@ $(cflags)
+	
+$(sharedbuilddir)/%.o: $(shareddir)/%.cpp $(sharedheaders) | $(sharedbuilddir)
+	$(CC) -c $< -o $@ $(cflags)
 		
-$(modbuilddir) $(moddir):
+$(modbuilddir) $(sharedbuilddir) $(moddir):
 	mkdir -p $@

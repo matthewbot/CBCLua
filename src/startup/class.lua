@@ -1,9 +1,7 @@
-module("std.class")
-
 local class_mt = { }
 local inst_mt = { }
 
-function create(name, ...)
+function create_class(name, ...)
 	local class = { }
 	class.name = name
 	class.mixins = {...}

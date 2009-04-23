@@ -4,14 +4,13 @@ module("std.cbc")
 
 --[[ Requires and globals ]]--
 
-local class = require "std.class"
 import "raw.cbc"
 
 global{"sensors", "motors", "servos"}
 
 --[[ Sensors ]]--
 
-local Sensor = class.create("Sensor")
+local Sensor = create_class("Sensor")
 
 function Sensor:construct(num, type)
 	self.num = num
@@ -50,7 +49,7 @@ end
 
 --[[ Motors ]]--
 
-local Motor = class.create("Motor")
+local Motor = create_class("Motor")
 
 function Motor:construct(num)
 	self.num = num
@@ -85,7 +84,7 @@ end
 
 --[[ Servos ]]--
 
-local Servo = class.create("Servo")
+local Servo = create_class("Servo")
 
 function Servo:construct(num)
 	self.num = num

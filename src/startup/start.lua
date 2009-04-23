@@ -5,6 +5,7 @@ io.stdout:setvbuf("no") -- turn off standard output buffering
 -- load the other startup files
 
 startupdir = arg[0]:match("(.*)\/")
+dofile(startupdir .. "/class.lua")
 dofile(startupdir .. "/module.lua")
 dofile(startupdir .. "/util.lua")
 

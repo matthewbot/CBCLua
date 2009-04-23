@@ -8,6 +8,7 @@ function cbcluamodule(mod)
 	if mod._CBCLUAMODULE then return end
 	
 	mod._IMPORTS = { }
+	mod._SUBMODS = { }
 	mod._GLOBALS = { }
 	mod._CBCLUAMODULE = true
 	setmetatable(mod, mod_mt)
@@ -29,12 +30,18 @@ end
 
 -- This function loads a module, then makes it visible in the current module
 
-function import(name, depth)
-	depth = depth or 1
-	local outermod = getfenv(depth+1)	
+function import(name)
+	local outermod = getfenv(2)	
 	assert(outermod._NAME, "import may only be called from within a module!")
 
 	table.insert(outermod._IMPORTS, require(name))
+end
+
+function submodule(name)
+	local outermod = getfnev(2)
+	assert(outermod._NAME, "submodule may only be called from within a module!")
+	
+	table.insert(outermod._SUBMODS, require(name))
 end
 
 -- This function declares a global
@@ -89,6 +96,13 @@ end
 -- This function is a metatable function that allows modules to view global functions and imported modules
 
 function mod_mt.__index(mod, key)
+	for _,submod in ipairs(mod._SUBMODS) do -- look in sub modules
+		local val = submod[key]
+		if val then
+			return val
+		end
+	end
+
 	if getfenv(2) ~= mod then -- if the environment of our caller isn't the module (IE, its not a function declared inside the module)
 		return nil -- no special lookup rules, quit now
 	end

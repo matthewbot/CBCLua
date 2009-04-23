@@ -95,7 +95,7 @@ function run()
 							
 				if not(goodresume) then -- if the coroutine raised an error
 					print("--------")
-					print(debug.traceback(task.co, "error in task " .. task.name .. ": " .. msg, 1)) -- stack trace
+					print(debug.traceback(task.co, "error in task " .. task.name .. ": " .. msg)) -- stack trace
 					return false
 				elseif co.status(task.co) == "dead" then -- if the coroutine ended
 					stop(curtask) -- take it off the list

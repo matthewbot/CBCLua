@@ -18,9 +18,9 @@ function class_mt.__call(class, ...)
 	inst.class = class
 	setmetatable(inst, inst_mt)
 	
-	local constr = inst.construct
-	if constr then
-		constr(inst, ...)
+	local construct = inst.construct
+	if construct then
+		construct(inst, ...)
 	end
 	
 	return inst

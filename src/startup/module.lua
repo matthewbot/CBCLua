@@ -107,6 +107,10 @@ function mod_mt.__index(mod, key)
 		return nil -- no special lookup rules, quit now
 	end
 	
+	if key == '_G' then
+		return _G
+	end
+	
 	for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value
 		local val = importmod[key]
 		if val then

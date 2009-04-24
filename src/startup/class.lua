@@ -1,3 +1,6 @@
+-- lua class system
+-- Allows instance metamethods to be overwritten
+
 local class_mt = { }
 local inst_mt = { }
 

@@ -69,13 +69,28 @@ function sleep(secs)
 	yield()
 end
 
+function wait_event(event)
+	tasklist[tasklist_current].sleepevent = event
+	yield()
+end
+
 -- Ends the specified task
 function stop(tasknum)
 	tasklist[tasknum] = nil
 	tasklist_count = tasklist_count - 1
 end
 
-local run_sleep -- predeclare function
+-- predeclare some functions
+local run_sleep
+local def_sleep_func
+
+-- the sleep function is responsible for sleeping up to the specified amount of time,
+-- and returning any "events" that have occured in the mean time
+local sleepfunc
+
+function set_sleep_func(newfunc)
+	sleepfunc = newfunc
+end
 		
 -- This function runs the tasks in order. It is called from start.lua, and shouldn't be used outside of there
 function run()
@@ -83,7 +98,7 @@ function run()
 	collectgarbage("collect") -- do a full collection to clean up any left overs from loading the program
 	
 	while tasklist_count >= 1 do 
-		run_sleep() -- sleeps until the nearest task wants to wake up
+		local events = run_sleep() -- sleeps until the nearest task wants to wake up
 		local curtime = timer.seconds()
 		
 		for curtask = 1,tasklist_nextid do
@@ -92,7 +107,7 @@ function run()
 			tasklist_current = curtask	
 			local task = tasklist[curtask]
 			
-			if task and task.sleeptill <= curtime then -- if the task is valid and not currently sleeping
+			if task and task.sleeptill <= curtime and (task.sleepevent == nil or events[task.sleepevent]) then -- if the task is valid and not currently sleeping or waiting for an event
 				local goodresume,msg = co.resume(task.co)	
 							
 				if not(goodresume) then -- if the coroutine raised an error
@@ -131,7 +146,7 @@ function run_sleep()
 	
 	if minsleeptill == -1 then -- if at least one process isn't sleeping
 		collectgarbage("step", 1) -- run a GC step
-		timer.yield() -- then yield so other processes (cbcui) can run
+		return sleepfunc(0)
 	else
 		local sleeptime = minsleeptill - timer.seconds() -- if they're all sleeping
 		if sleeptime > 0.1 then -- if we're sleeping for more than a tenth of a second
@@ -139,10 +154,27 @@ function run_sleep()
 			sleeptime = minsleeptill - timer.seconds() -- recalculate the time
 		end
 		
-		if sleeptime > 0 then
-			timer.watchdog_disable()
-			timer.rawsleep(sleeptime) -- then give the entire process naptime
+		if sleeptime < 0 then
+			sleeptime = 0
 		end
+		
+		return sleepfunc(sleeptime)
 	end
 end
 
+set_sleep_func(function (time) 
+	if time > 0 then
+		timer.watchdog_disable() -- disable watchdog
+		timer.rawsleep(time) -- then give the entire process naptime
+	else
+		timer.yield()
+	end
+	
+	return { }
+end)
+
+-- Export some super globals (visible everywhere)
+-- because std.task is loaded on startup, every other module can depend on these existing
+
+_G.sleep = sleep
+_G.yield = yield

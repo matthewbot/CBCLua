@@ -36,8 +36,6 @@ void reset() {
 }
 
 void rawsleep(double secs) {
-    watchdog_disable();
     usleep((unsigned long)(secs * 1000000));
-    watchdog();
 }
 

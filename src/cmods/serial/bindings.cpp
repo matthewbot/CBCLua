@@ -10,7 +10,7 @@ const luaL_Reg luafuncs[] = {
 	{"init", lbind<serial::init>},
 	{"quit", lbind<serial::quit>},
 	
-	{"poll", lbind_bool<serial::poll>},
+	{"poll", lbind<serial::poll>},
 	{"read", lread},
 	{"write", lwrite},
 	

@@ -87,6 +87,8 @@ function run()
 		local curtime = timer.seconds()
 		
 		for curtask = 1,tasklist_nextid do
+			timer.watchdog() -- if this doesn't get called enough the timer module produces a stall warning
+			
 			tasklist_current = curtask	
 			local task = tasklist[curtask]
 			
@@ -101,7 +103,6 @@ function run()
 					stop(curtask) -- take it off the list
 				end
 			
-				timer.watchdog() -- if this doesn't get called enough the timer module produces a stall warning
 				curtime = timer.seconds()
 			end
 		end
@@ -139,6 +140,7 @@ function run_sleep()
 		end
 		
 		if sleeptime > 0 then
+			timer.watchdog_disable()
 			timer.rawsleep(sleeptime) -- then give the entire process naptime
 		end
 	end

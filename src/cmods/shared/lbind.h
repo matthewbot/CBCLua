@@ -68,9 +68,24 @@ template <int (* func)(int)> static int lbind_bool(lua_State *L) {
 	return 1;
 }
 
-template <bool (* func)(double)> static int lbind_bool(lua_State *L) {
+template <bool (* func)(double)> static int lbind(lua_State *L) {
 	lua_pushboolean(L, checknumber(L, 1));
 	return 1;
+}
+
+template <double (* func)()> static int lbind(lua_State *L) {
+	lua_pushnumber(L, func());
+	return 1;
+}
+
+template <unsigned long (* func)()> static int lbind(lua_State *L) {
+	lua_pushinteger(L, func());
+	return 1;
+}
+
+template <void (* func)(double)> static int lbind(lua_State *L) {
+	func(checknumber(L, 1));
+	return 0;
 }
 
 #endif

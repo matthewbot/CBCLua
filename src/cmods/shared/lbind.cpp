@@ -40,3 +40,20 @@ int checkint(lua_State *L, int pos) {
 	}
 }
 
+double checknumber(lua_State *L, int pos) {
+	int type = lua_type(L, pos);
+	if (type == LUA_TNUMBER)
+		return lua_tonumber(L, pos);
+
+	const char *tname = lua_typename(L, type);
+
+	if (errwrapped) {
+		luaL_where(L, errlevel);
+		lua_pushfstring(L, "bad argument %d to '%s' (integer expected, got %s)", pos, errfuncname.c_str(), tname);
+		lua_concat(L, 2);
+		return lua_error(L);
+	} else {
+		return luaL_typerror(L, pos, tname);
+	}
+}
+

@@ -8,6 +8,8 @@
 
 int errwrap(lua_State *L); // calls a C function but can rewrite its error handling. Used in OO wrappers to make error messages nicer
 int checkint(lua_State *L, int pos); // called by templates. Uses error information from above
+double checknumber(lua_State *L, int pos);
+const char *checklstring(lua_State *L, int pos, size_t *len);
 
 // binder definitions
 
@@ -63,6 +65,11 @@ template <int (* func)()> static int lbind_bool(lua_State *L) {
 template <int (* func)(int)> static int lbind_bool(lua_State *L) {
 	int ret = func(checkint(L, 1));
 	lua_pushboolean(L, ret != 0);
+	return 1;
+}
+
+template <bool (* func)(double)> static int lbind_bool(lua_State *L) {
+	lua_pushboolean(L, checknumber(L, 1));
 	return 1;
 }
 

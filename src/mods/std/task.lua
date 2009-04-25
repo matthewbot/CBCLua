@@ -141,13 +141,20 @@ function run()
 	collectgarbage("stop") -- stop GC
 	collectgarbage("collect") -- do a full collection to clean up any leftovers from loading the program
 	
+	local result = true
+	
 	while tasklist_count >= 1 do -- while there are processes
 		local events = run_sleep() -- sleeps until the nearest task wants to wake up
 
-		if not(run_cycle(events)) then return false end
+		if not(run_cycle(events)) then
+			result = false
+			break
+		end
 	end
 	
-	return true
+	timer.watchdog_term() -- must be sure to term watchdog, it occasionally will segfault the process if the shared object is unloaded while the thread is still running
+	
+	return result
 end
 
 function run_cycle(events)

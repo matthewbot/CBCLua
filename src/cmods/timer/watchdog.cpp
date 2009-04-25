@@ -11,16 +11,17 @@ static pthread_t watchdogthread;
 static bool watchdog_enabled=false;
 static bool watchdog_started=false;
 
-static void *watchdog_func(void *unused) {
-	while (1) {
-		usleep(100 * 1000); // 100 msecs
+extern "C" void *watchdog_func(void *unused) {
+	while (watchdog_started) {
 		if (watchdog_enabled && raw_mseconds() - watchdog_lasttime > 500) {
 			printf("watchdog: timer passed. program is likely stalled.\n");
 			watchdog_enabled = false;
 		}	
+		
+		usleep(200 * 1000); // 200 msecs
 	}
 	
-	return NULL; // stupid GCC warning
+	return NULL;
 }
 
 static void watchdog_start() {
@@ -30,6 +31,11 @@ static void watchdog_start() {
 	}
 	
 	watchdog_started = true;
+}
+
+void watchdog_term() {
+	watchdog_started = false;
+	pthread_join(watchdogthread, NULL);
 }
 
 void watchdog() {

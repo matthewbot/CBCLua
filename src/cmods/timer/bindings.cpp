@@ -14,6 +14,7 @@ const luaL_Reg luafuncs[] = {
 	{"rawsleep", lbind<rawsleep>},
 	{"watchdog", lbind<watchdog>},
 	{"watchdog_disable", lbind<watchdog_disable>},
+	{"watchdog_term", lbind<watchdog_term>},
 	{"yield", lbind<sched_yield>},
 	
 	{NULL, NULL}

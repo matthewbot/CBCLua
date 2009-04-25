@@ -51,7 +51,7 @@ if [ "$1" == "cbc" ]; then # if we're on a CBC
 			echo "cbclua: loading new code"
 			rm -rf /mnt/user/code/cbclua/code
 			cp -r /mnt/usercode/lua /mnt/user/code/cbclua/code
-			sync
+			sync &
 		fi
 		
 		umount /mnt/usercode

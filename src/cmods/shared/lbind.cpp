@@ -36,7 +36,7 @@ int checkint(lua_State *L, int pos) {
 		lua_concat(L, 2);
 		return lua_error(L);
 	} else {
-		return luaL_typerror(L, pos, tname);
+		return luaL_typerror(L, pos, "int");
 	}
 }
 
@@ -49,11 +49,30 @@ double checknumber(lua_State *L, int pos) {
 
 	if (errwrapped) {
 		luaL_where(L, errlevel);
-		lua_pushfstring(L, "bad argument %d to '%s' (integer expected, got %s)", pos, errfuncname.c_str(), tname);
+		lua_pushfstring(L, "bad argument %d to '%s' (number expected, got %s)", pos, errfuncname.c_str(), tname);
 		lua_concat(L, 2);
 		return lua_error(L);
 	} else {
-		return luaL_typerror(L, pos, tname);
+		return luaL_typerror(L, pos, "number");
 	}
+}
+
+const char *checklstring(lua_State *L, int pos, size_t *len) {
+	int type = lua_type(L, pos);
+	if (type == LUA_TSTRING)
+		return lua_tolstring(L, pos, len);
+
+	const char *tname = lua_typename(L, type);
+
+	if (errwrapped) {
+		luaL_where(L, errlevel);
+		lua_pushfstring(L, "bad argument %d to '%s' (string expected, got %s)", pos, errfuncname.c_str(), tname);
+		lua_concat(L, 2);
+		lua_error(L);
+	} else {
+		luaL_typerror(L, pos, "string");
+	}
+	
+	return NULL; // shut compiler up, code never gets here
 }
 

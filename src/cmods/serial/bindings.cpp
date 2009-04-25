@@ -19,11 +19,8 @@ const luaL_Reg luafuncs[] = {
 
 static int lread(lua_State *L) {
 	static char buf[2048];
-	int amt = checkint(L, 1);
-	if (amt > sizeof(buf))
-		amt = sizeof(buf);
 	
-	int got = serial::read(buf, amt);
+	int got = serial::read(buf, sizeof(buf));
 	lua_pushlstring(L, buf, got);
 	
 	return 1;

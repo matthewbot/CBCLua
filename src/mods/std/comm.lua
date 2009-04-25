@@ -61,7 +61,7 @@ function SerialComm:fill_buf(timeout)
 		end
 	end
 	
-	self.readbuf = self.readbuf + serial.read()
+	self.readbuf = self.readbuf .. serial.read()
 end
 
 function SerialComm:get_avail()

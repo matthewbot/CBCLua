@@ -100,7 +100,7 @@ end
 -- Waits until the specified event is triggered, or timeout
 -- returns true if event was triggered
 function sleep_event(event, timeout)
-	local curtask = tasklist[task_current]
+	local curtask = tasklist[tasklist_current]
 	
 	if timeout then
 		curtask.sleeptill = timer.seconds() + timeout -- task system wakes tasks up if the sleeptill or sleepevent passes

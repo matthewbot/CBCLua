@@ -122,6 +122,8 @@ function mod_mt.__index(mod, key)
 	if type(val) == "function" then
 		return val
 	end
+	
+	error("Attempt to read undefined global " .. key, 2)
 end
 
 -- This function catches assignment to undefined globals

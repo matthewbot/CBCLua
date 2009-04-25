@@ -50,7 +50,7 @@ bool serial::poll(double timeout) {
 	if (rx) {
 		struct timeval timeblock;
 		timeblock.tv_sec = (long)timeout;
-		timeblock.tv_usec = (long)((timeout - timeblock.tv_sec) / 1000000);
+		timeblock.tv_usec = (long)((timeout - timeblock.tv_sec) * 1000000);
 	
 		fd_set fdset;
 		FD_ZERO(&fdset);

@@ -47,17 +47,23 @@ int serial::read(char *buf, int amt) {
 }
 
 bool serial::poll(double timeout) {
-	struct timeval timeblock;
-	timeblock.tv_sec = (long)timeout;
-	timeblock.tv_usec = (long)((timeout - timeblock.tv_sec) / 1000000);
+	if (rx) {
+		struct timeval timeblock;
+		timeblock.tv_sec = (long)timeout;
+		timeblock.tv_usec = (long)((timeout - timeblock.tv_sec) / 1000000);
 	
-	fd_set fdset;
-	FD_ZERO(&fdset);
-	FD_SET(rx, &fdset);
+		fd_set fdset;
+		FD_ZERO(&fdset);
+		FD_SET(rx, &fdset);
 	
-	select(rx+1, &fdset, NULL, NULL, &timeblock);
+		select(rx+1, &fdset, NULL, NULL, &timeblock);
 	
-	return FD_ISSET(rx, &fdset);
+		return FD_ISSET(rx, &fdset);
+	} else {
+		usleep((unsigned long)(timeout * 1000000));
+		
+		return false;
+	}
 }
 
 void serial::write(const char *buf, int amt) {

@@ -69,7 +69,7 @@ template <int (* func)(int)> static int lbind_bool(lua_State *L) {
 }
 
 template <bool (* func)(double)> static int lbind(lua_State *L) {
-	lua_pushboolean(L, checknumber(L, 1));
+	lua_pushboolean(L, func(checknumber(L, 1)));
 	return 1;
 }
 

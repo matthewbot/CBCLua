@@ -5,6 +5,7 @@ module("std.cbc")
 --[[ Requires and globals ]]--
 
 import "raw.cbc"
+local task = require "std.task"
 
 global{"sensors", "motors", "servos"}
 
@@ -25,7 +26,7 @@ function Sensor:read()
 	if self.type == "analog" then
 		return analog10(self.num)
 	else
-		return digital(self.num) == 1 -- convert to a bool
+		return digital(self.num)
 	end
 end
 
@@ -55,6 +56,12 @@ function Motor:construct(num)
 	self.num = num
 end
 
+function Motor:wait()
+	while not(get_motor_done(self.num)) do
+		task.sleep(0.020)
+	end
+end
+
 local function make_motor_wrapper(rawfuncname, realfuncname)
 	if realfuncname == nil then
 		realfuncname = rawfuncname
@@ -72,7 +79,6 @@ for _,funcname in ipairs(motorfuncnames) do
 	Motor[funcname] = make_motor_wrapper(funcname)
 end
 
-Motor.wait = make_motor_wrapper("bmd", "wait")
 Motor.getpos = make_motor_wrapper("get_motor_position_counter", "getpos")
 Motor.clearpos = make_motor_wrapper("clear_motor_position_counter", "clearpos")
 Motor.getdone = make_motor_wrapper("get_motor_done", "getdone")

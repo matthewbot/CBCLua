@@ -13,10 +13,12 @@ data UI = UI {
     connect :: MenuItem,
     disconnect :: MenuItem,
     openprgm :: MenuItem,
-    reloadprgm :: MenuItem,    
+    recompileprgm :: MenuItem,    
     about :: MenuItem,
     output :: TextView,
     outputscroll :: ScrolledWindow,
+    log :: TextView,
+    logscroll :: ScrolledWindow,
     stop :: Button,
     status :: Statusbar,
     
@@ -34,7 +36,7 @@ data UI = UI {
 data GUIAction = ConnectIPAction String | 
                  DisconnectAction | 
                  OpenProgramAction FilePath | 
-                 ReloadProgramAction | 
+                 RecompileProgramAction | 
                  InputAction String | 
                  StopAction | 
                  CloseAction
@@ -50,13 +52,15 @@ makeUI = do
     
     Just xml <- xmlNew "ui.glade"
     
-    [connect, disconnect, openprgm, reloadprgm, about] <-
+    [connect, disconnect, openprgm, recompileprgm, about] <-
         mapM (xmlGetWidget xml castToMenuItem)
-        ["connect", "disconnect", "openprgm", "reloadprgm", "about"]
+        ["connect", "disconnect", "openprgm", "recompileprgm", "about"]
         
     mainwindow <- xmlGetWidget xml castToWindow "mainwindow"
     output <- xmlGetWidget xml castToTextView "output"
     outputscroll <- xmlGetWidget xml castToScrolledWindow "outputscroll"
+    log <- xmlGetWidget xml castToTextView "log"
+    logscroll <- xmlGetWidget xml castToScrolledWindow "logscroll"
     stop <- xmlGetWidget xml castToButton "stop"
     status <- xmlGetWidget xml castToStatusbar "status"
     
@@ -69,16 +73,16 @@ makeUI = do
     
     keybuffer <- newIORef ""
     
-    let ui = UI mainwindow connect disconnect openprgm reloadprgm about output outputscroll stop status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
+    let ui = UI mainwindow connect disconnect openprgm recompileprgm about output outputscroll log logscroll stop status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
     
-    onDestroy mainwindow      $ putMVar lastaction CloseAction >> mainQuit
-    onClicked stop            $ tryPutMVar lastaction StopAction >> return ()
-    onActivateLeaf disconnect $ tryPutMVar lastaction DisconnectAction >> return ()
-    onActivateLeaf connect    $ entrySetText ipentry "" >> windowPresent ipdialog
-    onActivateLeaf openprgm   $ onOpenPrgm ui
-    onActivateLeaf reloadprgm $ tryPutMVar lastaction ReloadProgramAction >> return ()
-    onActivateLeaf about      $ dialogRun aboutdialog >> widgetHide aboutdialog >> return ()
-    onKeyPress output         $ onTypeOutput ui
+    onDestroy mainwindow         $ putMVar lastaction CloseAction >> mainQuit
+    onClicked stop               $ tryPutMVar lastaction StopAction >> return ()
+    onActivateLeaf disconnect    $ tryPutMVar lastaction DisconnectAction >> return ()
+    onActivateLeaf connect       $ entrySetText ipentry "" >> windowPresent ipdialog
+    onActivateLeaf openprgm      $ onOpenPrgm ui
+    onActivateLeaf recompileprgm $ tryPutMVar lastaction RecompileProgramAction >> return ()
+    onActivateLeaf about         $ dialogRun aboutdialog >> widgetHide aboutdialog >> return ()
+    onKeyPress output            $ onTypeOutput ui
     
     usertag <- makeTag "usertag" "blue"
     luatag <- makeTag "luatag" "black"

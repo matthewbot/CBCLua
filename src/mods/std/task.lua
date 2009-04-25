@@ -176,7 +176,7 @@ end
 function task_is_ready(task, curtime, events)
 	if task.sleeptill ~= -1 and task.sleeptill <= curtime then
 		return "sleeptill"
-	elseif task.sleepevent == nil or events[task.sleepevent] then
+	elseif task.sleepevent ~= nil and events[task.sleepevent] then
 		return "sleepevent"
 	else
 		return nil

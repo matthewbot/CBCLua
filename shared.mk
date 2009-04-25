@@ -20,8 +20,8 @@ includedir := $(rootdir)/src/include
 objects := $(patsubst %.cpp,%.o,$(addprefix $(modbuilddir)/,$(wildcard *.cpp))) $(sharedobjs)
 headers := $(wildcard *.h) $(wildcard *.hpp) $(wildcard $(includedir)/*.h) $(wildcard $(includedir)/*.hpp) $(sharedheaders)
 
-cflags += -Wall -pipe -fpic -I$(includedir) -I$(shareddir)
-ldflags += -shared -ldl
+cflags += -Wall -pipe -fpic -I$(includedir) -I$(shareddir) -ffast-math -Os
+ldflags += -shared -ldl -ffast-math -Os
 
 ifeq '$(arch)' 'local'
 CC := g++

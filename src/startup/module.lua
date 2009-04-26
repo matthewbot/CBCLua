@@ -39,7 +39,7 @@ function import(name)
 end
 
 function submodule(name)
-	local outermod = getfnev(2)
+	local outermod = getfenv(2)
 	assert(outermod._NAME, "submodule may only be called from within a module!")
 	
 	table.insert(outermod._SUBMODS, require(name))

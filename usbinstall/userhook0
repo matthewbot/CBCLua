@@ -52,8 +52,7 @@ mount $USER_DEV $USER -t ext2 -v -o rw 2>&1 | $PRINT
 
 echo "Extracting files to user partition" | $PRINT
 rm -rf $USER/code/cbclua 2>&1 | $PRINT
-tar -xzf $CBCLUA_TGZ -C $USER/code 2>&1 | $PRINT
-chmod +x $CBCLUA_DIR/run.sh $CBCLUA_DIR/lua 2>&1 | $PRINT
+tar -xzfp $CBCLUA_TGZ -C $USER/code 2>&1 | $PRINT
 
 echo "Unmounting partitions" | $PRINT
 umount $BOOT -v 2>&1 | $PRINT

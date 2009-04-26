@@ -39,7 +39,7 @@ if [ "$1" == "cbc" ]; then # if we're on a CBC
 		if [ -e /mnt/usercode/cbclua.tgz ]; then
 			echo "cbclua: applying update"
 			rm -rf /mnt/user/code/cbclua
-			tar -xzf /mnt/usercode/cbclua.tgz -C /mnt/user/code
+			tar -xzfp /mnt/usercode/cbclua.tgz -C /mnt/user/code
 			umount /mnt/usercode
 			sync
 			echo "cbclua: done. Please recompile cbclua.c"

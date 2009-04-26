@@ -56,7 +56,7 @@ function start(func, name)
 	tasklist_nextid = tasklist_nextid + 1
 	tasklist_count = tasklist_count + 1
 	
-	tasklist[id] = { co = co.create(func), id = id, name = name or "#" .. id }
+	tasklist[id] = { co = co.create(func), id = id, name = name or tostring(id) }
 	
 	return id
 end
@@ -248,7 +248,7 @@ function resume_task(task, reason)
 				
 	if not(goodresume) then -- if the coroutine raised an error
 		print("--------")
-		print(debug.traceback(tco, "error in task " .. task.name .. ": " .. msg)) -- stack trace
+		print(debug.traceback(tco, "error in task '" .. task.name .. "':\n" .. msg)) -- stack trace
 		return false
 	elseif co.status(tco) == "dead" then -- if the coroutine ended
 		stop(id) -- take it off the list

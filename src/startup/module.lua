@@ -70,7 +70,7 @@ function global(name, val)
 				outermod._GLOBALS[k] = true
 				rawset(outermod, k, v)
 			else
-				error("Bad key in global declaration table of type " .. t)
+				error("Bad key in global declaration table (type " .. t .. ")")
 			end
 		end
 	else
@@ -84,7 +84,6 @@ end
 
 local realmodule = module
 function module(name, ...)
-	local funcs
 	if select("#", ...) == 0 then 
 		realmodule(name, cbcluamodule)
 	else
@@ -124,7 +123,7 @@ function mod_mt.__index(mod, key)
 		return val
 	end
 	
-	error("Attempt to read undefined global " .. key, 2)
+	error("Undefined global '" .. key .. "'", 2)
 end
 
 -- This function catches assignment to undefined globals
@@ -146,5 +145,5 @@ function mod_mt.__newindex(mod, key, value)
 		return -- ignore it, lua's module system is creating globals inside our tables
 	end
 	
-	error("Assignment to undefined global variable '" .. key .. "'", 2)
+	error("Undefined global '" .. key .. "'", 2)
 end

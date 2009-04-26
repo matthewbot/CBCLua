@@ -54,7 +54,7 @@ if mainfunc == nil then
 end
 
 local task = require "std.task"
-task.start(mainfunc)
+task.start(mainfunc, "main")
 
 -- Print a final status message
 print("cbclua: starting main task")

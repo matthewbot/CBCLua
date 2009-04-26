@@ -141,5 +141,10 @@ function mod_mt.__newindex(mod, key, value)
 		return
 	end
 	
+	-- hackish thing below
+	if type(value) == "table" and getfenv(2) == _G then -- if its a table being assigned in, and the caller's environment is global
+		return -- ignore it, lua's module system is creating globals inside our tables
+	end
+	
 	error("Assignment to undefined global variable '" .. key .. "'", 2)
 end

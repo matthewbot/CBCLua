@@ -55,7 +55,7 @@ function SerialComm:fill_buf(timeout)
 	local canread = serial.poll(0) -- find if we can perform a nonblocking read right now
 	
 	if not(canread) then -- if we can't
-		if timeout == 0 then return end -- and non blocking, then terminate now
+		if timeout == nil then return end -- and non blocking, then terminate now
 	
 		if timeout > 0 then -- if we can timeout
 			local gotevent = task.sleep_event("serial", timeout) -- tell the task system to wait for the serial event or our timeout

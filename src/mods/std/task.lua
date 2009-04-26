@@ -220,13 +220,24 @@ function run_cycle(events)
 end
 
 function task_is_ready(task, curtime, events)
-	if task.sleeptill ~= nil then -- determine and form the correct ready check
-		if task.sleeptill <= curtime then return "sleeptill" end
-	elseif task.sleepevent ~= nil then
+	local hascheck = false
+	
+	if task.sleepevent ~= nil then -- determine and form the correct ready check
+		hascheck = true
 		if events[task.sleepevent] then return "sleepevent" end
-	elseif task.sleepsignal ~= nil then
+	end
+	
+	if task.sleepsignal ~= nil then
+		hascheck = true
 		if task.sleepsignal.ctr > task.signalctr then return "sleepsignal" end
-	else -- its not really sleeping
+	end
+	
+	if task.sleeptill ~= nil then 
+		hascheck = true
+		if task.sleeptill <= curtime then return "sleeptill" end
+	end
+	
+	if not(hascheck) then
 		return "yield" -- so its always ready
 	end
 	

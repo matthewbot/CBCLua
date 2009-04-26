@@ -2,8 +2,8 @@
 
 cd `dirname $0`
 
-export LUA_PATH="mods/?.lua;code/?.lua"
-export LUA_CPATH="cmods/?.so"
+export LUA_PATH="code/?.lua;code/?/main.lua;mods/?.lua;mods/?/main.lua"
+export LUA_CPATH="code/?.so;cmods/?.so"
 export LD_LIBRARY_PATH="." # Doesn't work without this for some reason
 
 if [ "$1" == "cbc" ]; then # if we're on a CBC

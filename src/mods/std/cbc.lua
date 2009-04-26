@@ -1,4 +1,4 @@
-module("std.cbc")
+module(...)
 
 -- /proc/sys/sense1/brightness
 
@@ -118,7 +118,7 @@ disable_servos = disable_servos
 
 --[[ Buttons ]]--
 
-local buttons = { "black", "up", "down", "left", "right" }
+local buttons = { "black", "up", "down", "left", "right", "a", "b" }
 
 for _,button in ipairs(buttons) do
 	local btnfunc = button .. "_button" -- all button functions end in _button

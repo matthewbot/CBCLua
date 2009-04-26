@@ -13,6 +13,11 @@ local math = require 'math'
 
 task.set_sleep_func(function (time)
 	timer.watchdog_disable()
+	
+	if time == math.huge then -- infinite sleep
+		time = -1 -- serial accepts -1 to mean "disable timeout"
+	end
+	
 	if serial.poll(time) then
 		return { serial = true }
 	else

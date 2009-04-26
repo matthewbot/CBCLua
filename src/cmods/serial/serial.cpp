@@ -48,15 +48,19 @@ int serial::read(char *buf, int amt) {
 
 bool serial::poll(double timeout) {
 	if (rx) {
-		struct timeval timeblock;
-		timeblock.tv_sec = (long)timeout;
-		timeblock.tv_usec = (long)((timeout - timeblock.tv_sec) * 1000000);
-	
 		fd_set fdset;
 		FD_ZERO(&fdset);
 		FD_SET(rx, &fdset);
 	
-		select(rx+1, &fdset, NULL, NULL, &timeblock);
+		if (timeout > 0) {
+			struct timeval timeblock;
+			timeblock.tv_sec = (long)timeout;
+			timeblock.tv_usec = (long)((timeout - timeblock.tv_sec) * 1000000);
+	
+			select(rx+1, &fdset, NULL, NULL, &timeblock);
+		} else {
+			select(rx+1, &fdset, NULL, NULL, NULL);
+		}
 	
 		return FD_ISSET(rx, &fdset);
 	} else {

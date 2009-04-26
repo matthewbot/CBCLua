@@ -18,12 +18,18 @@ programs to boil down to a select loop on the create's serial port
 and, perhaps one day, data from cbcui. This allows minimum CPU usage
 while still also giving the best possible response time.
 
-To determine which tasks to run, the schedular looks at two things,
-the tasks' sleeptill field (set by sleep), and sleepevent (set by sleep_event).
-If the sleeptill specifies a time in the past, but not -1, the task is 
-considered ready. A task with a sleepevent field holding a string event is
-automatically considered ready regardless of sleeptill if the sleep function
-signals the event.
+To determine which tasks to run, the schedular looks at three things,
+the tasks' sleeptill field (set by sleep), sleepevent (set by sleep_event),
+and sleepsignal (set by Signal:wait()).
+
+If the sleeptill specifies a time in the past, the task is 
+considered ready. 
+
+A task with a sleepevent field holding a string event is considered ready
+if the sleep function signals the event.
+
+A task with a sleepsignal is considered ready if the sleepsignals's ctr
+is higher than the task's signalctr
 
 ]]
 module("std.task")
@@ -50,7 +56,7 @@ function start(func, name)
 	tasklist_nextid = tasklist_nextid + 1
 	tasklist_count = tasklist_count + 1
 	
-	tasklist[id] = { co = co.create(func), id = id, sleeptill = 0, name = name or "#" .. id }
+	tasklist[id] = { co = co.create(func), id = id, name = name or "#" .. id }
 	
 	return id
 end
@@ -58,7 +64,10 @@ end
 -- Causes the current task to yield, giving other tasks a chance to run
 -- Not calling this will cause other tasks to stall, so be careful!
 function yield()
+	local task = tasklist[tasklist_current]
+	task.sleeptill = 0
 	co.yield()
+	task.sleeptill = nil
 end
 
 -- Returns the task number of the current task
@@ -74,7 +83,7 @@ end
 -- Ends the current task
 function exit()
 	stop(tasklist_current)
-	yield()
+	co.yield()
 end
 
 -- Ends the entire program, printing the message
@@ -93,8 +102,10 @@ end
 
 -- Pause current task for a minimum of secs seconds
 function sleep(secs)
-	tasklist[tasklist_current].sleeptill = timer.seconds() + secs -- set processes sleep amount to the requested amount
+	local task = tasklist[tasklist_current]
+	task.sleeptill = timer.seconds() + secs -- set processes sleep amount to the requested amount
 	co.yield()
+	task.sleeptill = nil
 end
 
 -- Waits until the specified event is triggered, or timeout
@@ -105,12 +116,16 @@ function sleep_event(event, timeout)
 	if timeout then
 		curtask.sleeptill = timer.seconds() + timeout -- task system wakes tasks up if the sleeptill or sleepevent passes
 	else
-		curtask.sleeptill = -1 -- -1 causes the task system to not wake us until the event
+		curtask.sleeptill = nil -- nil causes the task system to not wake us until the event
 	end
 	
 	curtask.sleepevent = event
 	
 	local reason = co.yield()
+	
+	curtask.sleeptill = nil
+	curtask.sleepevent = nil
+	
 	return reason == "sleepevent" -- return true if reason was the event, false if timeout
 end
 
@@ -120,11 +135,42 @@ function stop(tasknum)
 	tasklist_count = tasklist_count - 1
 end
 
+-- Signals
+
+Signal = create_class "std.task.Signal"
+
+function Signal:construct()
+	self.ctr = 0
+end
+
+function Signal:notify()
+	self.ctr = self.ctr + 1
+end
+
+function Signal:wait(timeout)
+	local task = tasklist[tasklist_current]
+	task.sleepsignal = self
+	task.signalctr = self.ctr
+	
+	if timeout then
+		task.sleeptill = timer.seconds() + timeout
+	end
+	
+	co.yield()
+	
+	task.sleepsignal = nil
+	task.signalctr = nil
+	task.sleeptill = nil
+end
+
+-- Schedular implementation stuff
+
 -- predeclare some functions
 local run_cycle
 local run_sleep
 local find_min_sleep
 local task_is_ready
+local task_get_sleep
 local resume_task
 local def_sleep_func
 
@@ -174,13 +220,19 @@ function run_cycle(events)
 end
 
 function task_is_ready(task, curtime, events)
-	if task.sleeptill ~= -1 and task.sleeptill <= curtime then
-		return "sleeptill"
-	elseif task.sleepevent ~= nil and events[task.sleepevent] then
-		return "sleepevent"
-	else
-		return nil
+	if task.sleeptill ~= nil then -- determine and form the correct ready check
+		if task.sleeptill <= curtime then return "sleeptill" end
+	elseif task.sleepevent ~= nil then
+		if events[task.sleepevent] then return "sleepevent" end
+	elseif task.sleepsignal ~= nil then
+		if task.sleepsignal.ctr > task.signalctr then return "sleepsignal" end
+	else -- its not really sleeping
+		return "yield" -- so its always ready
 	end
+	
+	-- if the ready check failed
+	
+	return nil
 end
 
 function resume_task(task, reason)
@@ -208,7 +260,7 @@ end
 function run_sleep() 
 	local minsleep = find_min_sleep() -- find the amount of time till the next task needs to wake up
 	
-	if minsleep == -1 then -- if at least one process isn't sleeping (and needs to be re-awaken ASAP)
+	if minsleep == nil then -- if at least one process isn't sleeping (and needs to be re-awaken ASAP)
 		collectgarbage("step", 1) -- run a GC step
 		return sleepfunc(0) -- call the sleep function to pick up on possible events
 	else -- if they're all sleeping
@@ -227,16 +279,16 @@ function run_sleep()
 end
 
 function find_min_sleep()
-	local minsleeptill = 9999
+	local minsleeptill = math.huge
 	
 	for checktask = 1,tasklist_nextid do -- go through each process
 		local task = tasklist[checktask]
 		if task then
-			local sleeptill = task.sleeptill
-			if sleeptill == 0 and task.sleepevent == nil then -- if its not sleeping
-				return -1 -- return sentinel
-			elseif sleeptill < minsleeptill then -- if it sleeping but needs to be woken up sooner than our current soonest
-				minsleeptill = sleeptill -- then it is now the current soonest
+			local sleepamt = task_get_sleep(task)
+			if sleepamt == nil then -- if its not sleeping
+				return nil -- return sentinel
+			elseif sleepamt < minsleeptill then -- if it sleeping but needs to be woken up sooner than our current soonest
+				minsleeptill = sleepamt -- then it is now the current soonest
 			end
 		end
 	end
@@ -244,13 +296,32 @@ function find_min_sleep()
 	return minsleeptill
 end
 
+-- returns how much longer the task wants to sleep
+function task_get_sleep(task)
+	if task.sleeptill ~= nil then
+		return task.sleeptill
+	elseif task.sleepevent ~= nil then
+		return math.huge
+	elseif task.sleepsignal ~= nil then
+		return math.huge
+	else
+		return nil
+	end
+end
+
 set_sleep_func(function (time) 
+	if time == math.huge then -- we've got no events to wake us up, so if we ever get this the program is over
+		print("task: deadlock")
+		os.exit(1)
+	end
+
 	if time > 0 then -- if we're supposed to go to sleep
 		timer.watchdog_disable() -- disable watchdog
 		timer.rawsleep(time) -- then give the entire process naptime
 	else -- no sleeping
-		timer.yield() -- just yield
+		timer.yield() -- just yield the process
 	end
 	
 	return { }
 end)
+

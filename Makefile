@@ -16,7 +16,7 @@ clean:
 .PHONY: usbinstall
 usbinstall:
 	rm -rf usbinstall/cbclua.tgz
-	tar -czf usbinstall/cbclua.tgz cbclua --exclude=".*" --exclude="*~" -h
+	tar -czf usbinstall/cbclua.tgz cbclua --exclude=".*" --exclude="*~" -h -p
 
 .PHONY: interact
 interact:

@@ -327,9 +327,9 @@ set_sleep_func(function (time)
 	end
 
 	if time > 0 then -- if we're supposed to go to sleep
-		timer.rawsleep(time) -- then give the entire process naptime
+		timer.raw_sleep(time) -- then give the entire process naptime
 	else -- no sleeping
-		timer.rawyield() -- just yield the process
+		timer.raw_yield() -- just yield the process
 	end
 	
 	return { }

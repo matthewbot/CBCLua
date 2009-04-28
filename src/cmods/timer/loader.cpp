@@ -6,7 +6,7 @@ extern "C" int luaopen_std_timer(lua_State *L) {
 	lua_newtable(L);
 	luaL_register(L, NULL, luafuncs);
 	
-	starttime();
+	start_timers();
 	
 	return 1;
 }

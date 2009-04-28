@@ -327,10 +327,9 @@ set_sleep_func(function (time)
 	end
 
 	if time > 0 then -- if we're supposed to go to sleep
-		timer.watchdog_disable() -- disable watchdog
 		timer.rawsleep(time) -- then give the entire process naptime
 	else -- no sleeping
-		timer.yield() -- just yield the process
+		timer.rawyield() -- just yield the process
 	end
 	
 	return { }

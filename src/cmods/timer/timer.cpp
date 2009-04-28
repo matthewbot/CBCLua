@@ -3,6 +3,7 @@
 
 #include <sys/time.h>
 #include <unistd.h>
+#include <sched.h>
 #include <cstdlib>
 
 using namespace std;
@@ -30,12 +31,22 @@ static double seconds_start;
 
 unsigned long mseconds() { return raw_mseconds() - mseconds_start; }
 double seconds() { return raw_seconds() - seconds_start; }
-void reset() {
+void starttime() {
 	mseconds_start = raw_mseconds();
 	seconds_start = raw_seconds();
 }
 
+// The raw timing functions put the entire process to sleep
+
 void rawsleep(double secs) {
+	watchdog_disable();
     usleep((unsigned long)(secs * 1000000));
+    watchdog();
+}
+
+void rawyield() {
+	watchdog_disable();
+	sched_yield();
+	watchdog();
 }
 

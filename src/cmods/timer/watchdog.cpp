@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "watchdog.h"
 #include <pthread.h>
 #include <unistd.h>
 #include <iostream>

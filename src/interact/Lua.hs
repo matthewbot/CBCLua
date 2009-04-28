@@ -17,6 +17,12 @@ startLocalLua outcall = do
 	outputthread <- forkIO $ readProc outh outcall
 	return $ Lua inh outh proc outputthread
 	
+startRemoteLua :: String -> OutputCallback -> IO Lua
+startRemoteLua ipaddr outcall = do
+	(Just inh, Just outh, _, proc) <- createProcess (shell $ "ssh root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\""){ std_in=CreatePipe, std_out=CreatePipe }
+	outputthread <- forkIO $ readProc outh outcall
+	return $ Lua inh outh proc outputthread
+	
 closeLua :: Lua -> IO ()
 closeLua lua = do
 	forM_ (map ($ lua) [inputh, outputh]) hClose

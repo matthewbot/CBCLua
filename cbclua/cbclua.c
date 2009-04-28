@@ -2,8 +2,7 @@
 // It allows users to run cbclua through the cbcui
 
 int main(int argc, char **argv) {
-	printf("cbclua: v0.1 loading\n");
-	system("/mnt/user/code/cbclua/run.sh cbc");
+	system("/mnt/user/code/cbclua/run.sh cbcconsole");
 
 	return 0;
 }

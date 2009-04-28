@@ -21,7 +21,7 @@ end
 
 -- Scan to see if we were launched in cbc mode
 
-if hasarg("cbc") then
+if hasarg("cbcconsole") then
 	debug.traceback = cbctraceback -- patch debug.traceback to not use tabs so they're readable on CBC display
 end
 

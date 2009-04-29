@@ -2,9 +2,13 @@
 #include "watchdog.h"
 
 #include <sys/time.h>
+#include <sys/select.h>
 #include <unistd.h>
 #include <sched.h>
 #include <cstdlib>
+
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -38,10 +42,41 @@ void start_timers() {
 
 // The raw timing functions put the entire process to sleep
 
-void raw_sleep(double secs) {
+const vector<bool> raw_sleep(double seconds, const vector<int> &fds) {
 	watchdog_disable();
-    usleep((unsigned long)(secs * 1000000));
+	
+	int highestfd;
+	if (fds.size() > 0)
+		highestfd = *max_element(fds.begin(), fds.end());
+	else
+		highestfd = 0;
+		
+	fd_set fdset;
+	FD_ZERO(&fdset);
+	
+	for (vector<int>::const_iterator i = fds.begin(); i != fds.end(); ++i) {
+		FD_SET(*i, &fdset);
+	}
+	
+	if (seconds >= 0) {
+		struct timeval timeout;
+		timeout.tv_sec = (long)seconds;
+		timeout.tv_usec = (long)((seconds - timeout.tv_sec) * 1000000);
+		
+		select(highestfd + 1, &fdset, NULL, NULL, &timeout);
+	} else {
+		select(highestfd + 1, &fdset, NULL, NULL, NULL);
+	}
+	
+	vector<bool> setvecs(fds.size());
+	
+	for (vector<int>::const_iterator i = fds.begin(); i != fds.end(); ++i) {
+		setvecs.push_back(FD_ISSET(*i, &fdset) != 0);
+	}
+		
     watchdog();
+    
+    return setvecs;
 }
 
 void raw_yield() {

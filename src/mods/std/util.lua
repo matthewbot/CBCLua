@@ -60,3 +60,11 @@ function prettyprint(table, indent)
 		end
 	end
 end
+
+--[[ Misc functions ]]--
+
+function bind(method, obj)
+	return function(...)
+		return method(obj, ...)
+	end
+end

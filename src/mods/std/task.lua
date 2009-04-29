@@ -4,32 +4,7 @@
 This module contains the task scheduler and related functions.
 It implements co-operative multitasking in lua using coroutines.
 
--- Implementation details / notes to Matt's forgetfullness --
-
-The sleep function is a replaceable part of the task system that
-is called whenever the task system determines that every process
-is sleeping or waiting for an event. The sleep function causes 
-the lua process to sleep for a maximum of the time specified. When
-finished, it can optionally return a set of events that may have
-caused the sleep to terminate. 
-
-The motivation of the sleep function system is to allow cbclua
-programs to boil down to a select loop on the create's serial port
-and, perhaps one day, data from cbcui. This allows minimum CPU usage
-while still also giving the best possible response time.
-
-To determine which tasks to run, the schedular looks at three things,
-the tasks' sleeptill field (set by sleep), sleepevent (set by sleep_event),
-and sleepsignal (set by Signal:wait()).
-
-If the sleeptill specifies a time in the past, the task is 
-considered ready. 
-
-A task with a sleepevent field holding a string event is considered ready
-if the sleep function signals the event.
-
-A task with a sleepsignal is considered ready if the sleepsignals's ctr
-is higher than the task's signalctr
+TODO: rewrite description
 
 ]]
 module("std.task")
@@ -105,28 +80,19 @@ function sleep(secs)
 	local task = tasklist[tasklist_current]
 	task.sleeptill = timer.seconds() + secs -- set processes sleep amount to the requested amount
 	co.yield()
-	task.sleeptill = nil
 end
 
--- Waits until the specified event is triggered, or timeout
--- returns true if event was triggered
-function sleep_event(event, timeout)
+-- Waits until data comes in on the specified file, or timeout passes
+function sleep_io(file, timeout)
 	local curtask = tasklist[tasklist_current]
 	
 	if timeout then
 		curtask.sleeptill = timer.seconds() + timeout -- task system wakes tasks up if the sleeptill or sleepevent passes
-	else
-		curtask.sleeptill = nil -- nil causes the task system to not wake us until the event
 	end
 	
-	curtask.sleepevent = event
+	curtask.sleepfile = file
 	
-	local reason = co.yield()
-	
-	curtask.sleeptill = nil
-	curtask.sleepevent = nil
-	
-	return reason == "sleepevent" -- return true if reason was the event, false if timeout
+	return co.yield() == "sleepfile" -- return true if reason was the event, false if timeout
 end
 
 -- Ends the specified task
@@ -157,10 +123,6 @@ function Signal:wait(timeout)
 	end
 	
 	co.yield()
-	
-	task.sleepsignal = nil
-	task.signalctr = nil
-	task.sleeptill = nil
 end
 
 -- Schedular implementation stuff
@@ -169,18 +131,10 @@ end
 local run_cycle
 local run_sleep
 local find_min_sleep
+local find_all_files
 local task_is_ready
 local task_get_sleep
 local resume_task
-local def_sleep_func
-
--- the sleep function is responsible for sleeping up to the specified amount of time,
--- and returning any "events" that have occured in the mean time
-local sleepfunc
-
-function set_sleep_func(newfunc)
-	sleepfunc = newfunc
-end
 		
 -- This function runs the tasks in order. It is called from start.lua, and shouldn't be used outside of there
 function run()
@@ -190,9 +144,9 @@ function run()
 	local result = true
 	
 	while tasklist_count >= 1 do -- while there are processes
-		local events = run_sleep() -- sleeps until the nearest task wants to wake up
+		local files = run_sleep() -- sleeps until the nearest task wants to wake up
 
-		if not(run_cycle(events)) then
+		if not(run_cycle(files)) then
 			result = false
 			break
 		end
@@ -203,11 +157,11 @@ function run()
 	return result
 end
 
-function run_cycle(events)
+function run_cycle(files)
 	local curtime = timer.seconds()
 	
 	for taskid, task in ipairs(tasklist) do -- for each task id
-		local reason = task_is_ready(task, curtime, events)
+		local reason = task_is_ready(task, curtime, files)
 		if reason then -- if the task is ready		
 			timer.watchdog() -- if this doesn't get called enough the timer module produces a stall warning
 			
@@ -219,12 +173,12 @@ function run_cycle(events)
 	return true
 end
 
-function task_is_ready(task, curtime, events)
+function task_is_ready(task, curtime, files)
 	local hascheck = false
 	
-	if task.sleepevent ~= nil then -- determine and form the correct ready check
+	if task.sleepfile ~= nil then -- determine and form the correct ready check
 		hascheck = true
-		if events[task.sleepevent] then return "sleepevent" end
+		if files[task.sleepfile] then return "sleepevent" end
 	end
 	
 	if task.sleepsignal ~= nil then
@@ -251,6 +205,7 @@ function resume_task(task, reason)
 	local tco = task.co
 	
 	task.sleepevent = nil -- clear its sleep fields
+	task.sleepfile = nil
 	task.sleeptill = 0
 	
 	tasklist_current = id 
@@ -270,23 +225,32 @@ end
 
 function run_sleep() 
 	local minsleep = find_min_sleep() -- find the amount of time till the next task needs to wake up
+	local files = find_all_files()
 	
-	if minsleep == nil then -- if at least one process isn't sleeping (and needs to be re-awaken ASAP)
-		collectgarbage("step", 1) -- run a GC step
-		return sleepfunc(0) -- call the sleep function to pick up on possible events
-	else -- if they're all sleeping
-		local sleeptime = minsleep - timer.seconds()  -- calculate the time we need to sleep
-		if sleeptime > 0.1 then -- if we're sleeping for more than a tenth of a second
-			collectgarbage("collect") -- run a full GC cycle
-			sleeptime = minsleep - timer.seconds() -- recalculate the time
-		end
+	local sleeptime
+	
+	if minsleep == math.huge then -- if no process needs to be waken up on IO
+		sleeptime = -1 -- pass -1 to the C function
+	elseif minsleep == nil then
+		sleeptime = 0
+	else
+		sleeptime = minsleep - timer.seconds()  -- calculate the time we need to sleep
 		
 		if sleeptime < 0 then
 			sleeptime = 0
 		end
-		
-		return sleepfunc(sleeptime) -- call sleep function to put us to sleep
 	end
+	
+	local bools = { timer.raw_sleep(sleeptime, unpack(files)) }
+	local files = { }
+	
+	for num,file in ipairs(files) do
+		if bools[num] then
+			files[file] = true
+		end
+	end
+	
+	return files
 end
 
 function find_min_sleep()
@@ -307,6 +271,24 @@ function find_min_sleep()
 	return minsleeptill
 end
 
+function find_all_files()
+	local files = { }
+	local files_set = { }
+	
+	for checktask = 1,tasklist_nextid do
+		local task = tasklist[checktask]
+		if task then
+			local file = task.sleepfile
+			if file and files_set[file] == nil then
+				table.insert(files, file)
+				files_set[file] = true
+			end
+		end
+	end
+	
+	return files
+end
+
 -- returns how much longer the task wants to sleep
 function task_get_sleep(task)
 	if task.sleeptill ~= nil then
@@ -319,19 +301,4 @@ function task_get_sleep(task)
 		return nil
 	end
 end
-
-set_sleep_func(function (time) 
-	if time == math.huge then -- we've got no events to wake us up, so if we ever get this the program is over
-		print("task: deadlock")
-		os.exit(1)
-	end
-
-	if time > 0 then -- if we're supposed to go to sleep
-		timer.raw_sleep(time) -- then give the entire process naptime
-	else -- no sleeping
-		timer.raw_yield() -- just yield the process
-	end
-	
-	return { }
-end)
 

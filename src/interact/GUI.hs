@@ -16,9 +16,9 @@ data UI = UI {
     recompileprgm :: MenuItem,    
     about :: MenuItem,
     output :: TextView,
-    outputscroll :: ScrolledWindow,
+ --   outputscroll :: ScrolledWindow,
     log :: TextView,
-    logscroll :: ScrolledWindow,
+--    logscroll :: ScrolledWindow,
     stop :: Button,
     status :: Statusbar,
     
@@ -58,9 +58,9 @@ makeUI = do
         
     mainwindow <- xmlGetWidget xml castToWindow "mainwindow"
     output <- xmlGetWidget xml castToTextView "output"
-    outputscroll <- xmlGetWidget xml castToScrolledWindow "outputscroll"
+ --   outputscroll <- xmlGetWidget xml castToScrolledWindow "outputscroll"
     log <- xmlGetWidget xml castToTextView "log"
-    logscroll <- xmlGetWidget xml castToScrolledWindow "logscroll"
+ --   logscroll <- xmlGetWidget xml castToScrolledWindow "logscroll"
     stop <- xmlGetWidget xml castToButton "stop"
     status <- xmlGetWidget xml castToStatusbar "status"
     
@@ -73,7 +73,7 @@ makeUI = do
     
     keybuffer <- newIORef ""
     
-    let ui = UI mainwindow connect disconnect openprgm recompileprgm about output outputscroll log logscroll stop status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
+    let ui = UI mainwindow connect disconnect openprgm recompileprgm about output log stop status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
     
     onDestroy mainwindow         $ putMVar lastaction CloseAction >> mainQuit
     onClicked stop               $ tryPutMVar lastaction StopAction >> return ()
@@ -89,8 +89,8 @@ makeUI = do
     tagtable <- textTagTableNew
     forM_ [ usertag, luatag ] $ textTagTableAdd tagtable
     
-    buf <- textBufferNew $ Just tagtable
-    textViewSetBuffer output buf
+    textViewSetBuffer output =<< (textBufferNew $ Just tagtable)
+    textViewSetBuffer log =<< (textBufferNew $ Just tagtable)
     
     onDelete ipdialog         $ const $ widgetHide ipdialog >> return True
     onClicked cancelbtn       $ widgetHide ipdialog
@@ -173,14 +173,15 @@ writeText :: (UI -> TextView) -> UI -> String -> String -> IO ()
 writeText outputfield ui tagname msg = do
     buf <- textViewGetBuffer $ outputfield ui
     end <- textBufferGetEndIter buf
-
     textBufferInsert buf end $ msg
+    newend <- textBufferGetEndIter buf
+    
     when (tagname /= "") $ do
         textIterBackwardChars end $ length msg
-        newend <- textBufferGetEndIter buf
         textBufferApplyTagByName buf tagname end newend
     
-    textViewScrollToIter (outputfield ui) end 0 (Just (0, 1))
+    endmark <- textBufferCreateMark buf Nothing newend True
+    textViewScrollToMark (outputfield ui) endmark 0 $ Just (1.0, 1.0)
     return ()
 
 uiPutStrTag :: UI -> String -> String -> IO ()
@@ -198,6 +199,3 @@ uiLogStr ui msg = writeText GUI.log ui "" msg
 uiLogStrLn :: UI -> String -> IO ()
 uiLogStrLn ui msg = uiLogStr ui $ msg ++ "\n"
     
-
-        
-        

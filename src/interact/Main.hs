@@ -28,5 +28,12 @@ main = do
 			ConnectIPAction ip -> do
 				closeLua =<< readIORef luaref
 				writeIORef luaref =<< startRemoteLua ip (uiPutStrTag ui "luatag")
+				uiLogStrLn ui "Remote interaction started"
+			DisconnectAction -> do
+				closeLua =<< readIORef luaref
+				luaref <- newIORef =<< startLocalLua (uiPutStrTag ui "luatag")
+				uiLogStrLn ui "Local interaction started"
 			_ ->
 				putStrLn $ show action
+				
+				

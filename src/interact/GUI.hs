@@ -169,9 +169,9 @@ uiDeleteChars ui count = do
     
     textBufferDelete buf prevend end
 
-uiPutStrTag :: UI -> String -> String -> IO ()
-uiPutStrTag ui tagname msg = do
-    buf <- textViewGetBuffer $ output ui
+writeText :: (UI -> TextView) -> UI -> String -> String -> IO ()
+writeText outputfield ui tagname msg = do
+    buf <- textViewGetBuffer $ outputfield ui
     end <- textBufferGetEndIter buf
 
     textBufferInsert buf end $ msg
@@ -180,14 +180,23 @@ uiPutStrTag ui tagname msg = do
         newend <- textBufferGetEndIter buf
         textBufferApplyTagByName buf tagname end newend
     
-    textViewScrollToIter (output ui) end 0 (Just (0, 1))
+    textViewScrollToIter (outputfield ui) end 0 (Just (0, 1))
     return ()
+
+uiPutStrTag :: UI -> String -> String -> IO ()
+uiPutStrTag = writeText output
     
 uiPutStr :: UI -> String -> IO ()
 uiPutStr ui msg = uiPutStrTag ui "luatag" msg
     
 uiPutStrLn :: UI -> String -> IO ()
 uiPutStrLn ui msg = uiPutStr ui $ msg ++ "\n"
+
+uiLogStr :: UI -> String -> IO ()
+uiLogStr ui msg = writeText GUI.log ui "" msg
+
+uiLogStrLn :: UI -> String -> IO ()
+uiLogStrLn ui msg = uiLogStr ui $ msg ++ "\n"
     
 
         

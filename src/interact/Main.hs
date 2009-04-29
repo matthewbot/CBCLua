@@ -13,6 +13,8 @@ main = do
 	ui <- makeUI
 	luaref <- newIORef =<< startLocalLua (uiPutStrTag ui "luatag")
 
+	uiLogStrLn ui "Local interaction started"
+
 	forever $ do
 		action <- getUIAction ui
 		case action of

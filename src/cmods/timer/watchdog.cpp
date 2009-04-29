@@ -7,15 +7,15 @@
 
 using namespace std;
 
-static long watchdog_lasttime=0L;
+static volatile long watchdog_lasttime=0L;
 static pthread_t watchdogthread;
-static bool watchdog_enabled=false;
-static bool watchdog_started=false;
+static volatile bool watchdog_enabled=false;
+static volatile bool watchdog_started=false;
 
 extern "C" void *watchdog_func(void *unused) {
 	while (watchdog_started) {
 		if (watchdog_enabled && raw_mseconds() - watchdog_lasttime > 500) {
-			printf("watchdog: timer passed. program is likely stalled.\n");
+			cerr << "watchdog: timer passed. program is likely stalled" << endl;
 			watchdog_enabled = false;
 		}	
 		

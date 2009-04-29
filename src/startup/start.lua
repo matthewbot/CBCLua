@@ -1,6 +1,7 @@
 -- This file is the lua program run by the run script
 
 io.stdout:setvbuf("no") -- turn off standard output buffering
+io.stdin:setvbuf("no")
 
 -- load the other startup files
 
@@ -9,56 +10,23 @@ dofile(startupdir .. "/class.lua")
 dofile(startupdir .. "/module.lua")
 dofile(startupdir .. "/util.lua")
 
--- Scan the argument list to see if lua was launched in interactive mode
-
-if hasarg("-i") then
-	print "cbclua: beginning interaction"
-	
-	package.preload['std.task'] = function () error("module std.task not supported in interact mode") end
-	
-	return
-end
-
 -- Scan to see if we were launched in cbc mode
 
 if hasarg("cbcconsole") then
 	debug.traceback = cbctraceback -- patch debug.traceback to not use tabs so they're readable on CBC display
 end
 
--- Load the main module
+-- Then do mode-specific setup
 
-local status, result = xpcall(function() 
-	return require("main") 
-end, function (errmsg)
-	print(debug.traceback("cbclua: error while loading main module: " .. errmsg, 2))
-end)
-
-if status == false then
-	os.exit(1)
+if hasarg("interact") then
+	dofile(startupdir .. "/interact.lua")
+else
+	dofile(startupdir .. "/runmain.lua")
 end
 
--- Make sure the main module looks ok
-
-local mainmod = result
-
-if type(mainmod) ~= "table" then
-	print("cbclua: main module is missing the module header")
-	os.exit(1)
-end
-	
-local mainfunc = mainmod.main
-	
-if mainfunc == nil then
-	print("cbclua: main module is missing main function")
-	os.exit(1)
-end
+-- Finally, enter the task schedular!
 
 local task = require "std.task"
-task.start(mainfunc, "main")
-
--- Print a final status message
-print("cbclua: starting main task")
-dostartup() -- if the program has a startup function run it
 if task.run() then
 	print("cbclua: program finished")
 else

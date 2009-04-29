@@ -14,6 +14,7 @@ local co = require "coroutine"
 local debug = require "debug"
 local os = require "os"
 local math = require "math"
+local table = require "table"
 
  -- This is the list of couroutines that are currently running
 local tasklist = { }
@@ -31,7 +32,7 @@ function start(func, name)
 	tasklist_nextid = tasklist_nextid + 1
 	tasklist_count = tasklist_count + 1
 	
-	tasklist[id] = { co = co.create(func), id = id, name = name or tostring(id) }
+	tasklist[id] = { co = co.create(func), id = id, name = name or tostring(id), sleeptill = 0 }
 	
 	return id
 end
@@ -39,10 +40,9 @@ end
 -- Causes the current task to yield, giving other tasks a chance to run
 -- Not calling this will cause other tasks to stall, so be careful!
 function yield()
-	local task = tasklist[tasklist_current]
-	task.sleeptill = 0
+	local curtask = tasklist[tasklist_current]
+	curtask.sleeptill = 0
 	co.yield()
-	task.sleeptill = nil
 end
 
 -- Returns the task number of the current task
@@ -178,7 +178,7 @@ function task_is_ready(task, curtime, files)
 	
 	if task.sleepfile ~= nil then -- determine and form the correct ready check
 		hascheck = true
-		if files[task.sleepfile] then return "sleepevent" end
+		if files[task.sleepfile] then return "sleepfile" end
 	end
 	
 	if task.sleepsignal ~= nil then
@@ -206,7 +206,7 @@ function resume_task(task, reason)
 	
 	task.sleepevent = nil -- clear its sleep fields
 	task.sleepfile = nil
-	task.sleeptill = 0
+	task.sleeptill = nil
 	
 	tasklist_current = id 
 	local goodresume,msg = co.resume(tco, reason) -- perform resume
@@ -241,16 +241,21 @@ function run_sleep()
 		end
 	end
 	
+	if sleeptime == -1 and #files == 0 then
+		print("task: deadlock")
+		os.exit(1)
+	end
+	
 	local bools = { timer.raw_sleep(sleeptime, unpack(files)) }
-	local files = { }
+	local gotfiles = { }
 	
 	for num,file in ipairs(files) do
 		if bools[num] then
-			files[file] = true
+			gotfiles[file] = true
 		end
 	end
 	
-	return files
+	return gotfiles
 end
 
 function find_min_sleep()
@@ -260,9 +265,7 @@ function find_min_sleep()
 		local task = tasklist[checktask]
 		if task then
 			local sleepamt = task_get_sleep(task)
-			if sleepamt == nil then -- if its not sleeping
-				return nil -- return sentinel
-			elseif sleepamt < minsleeptill then -- if it sleeping but needs to be woken up sooner than our current soonest
+			if sleepamt ~= nil and sleepamt < minsleeptill then -- if it sleeping but needs to be woken up sooner than our current soonest
 				minsleeptill = sleepamt -- then it is now the current soonest
 			end
 		end

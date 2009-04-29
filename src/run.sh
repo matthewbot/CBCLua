@@ -15,11 +15,8 @@ else
 	LUA_BIN="lua"
 fi
 
-if [ "$MODE" == "cbc-console" ]; then # if we're being run from the console
+if [ "$MODE" == "cbcconsole" ]; then # if we're being run from the console
 	./loadusb.sh # do USB loading stuffs
-	LUA_OPTS="cbcconsole" # this will cause some output reformatting for the tiny screen
-elif [ "$MODE" == "interact" ]; then
-	LUA_OPTS="-i"
 fi
 
-$LUA_BIN $LUA_OPTS startup/start.lua $LUA_START_OPTS
+$LUA_BIN startup/start.lua $MODE

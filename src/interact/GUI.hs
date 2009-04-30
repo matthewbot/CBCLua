@@ -16,9 +16,7 @@ data UI = UI {
     recompileprgm :: MenuItem,    
     about :: MenuItem,
     output :: TextView,
- --   outputscroll :: ScrolledWindow,
-    log :: TextView,
---    logscroll :: ScrolledWindow,
+    outputscroll :: ScrolledWindow,
     stop :: Button,
     status :: Statusbar,
     
@@ -58,9 +56,7 @@ makeUI = do
         
     mainwindow <- xmlGetWidget xml castToWindow "mainwindow"
     output <- xmlGetWidget xml castToTextView "output"
- --   outputscroll <- xmlGetWidget xml castToScrolledWindow "outputscroll"
-    log <- xmlGetWidget xml castToTextView "log"
- --   logscroll <- xmlGetWidget xml castToScrolledWindow "logscroll"
+    outputscroll <- xmlGetWidget xml castToScrolledWindow "outputscroll"
     stop <- xmlGetWidget xml castToButton "stop"
     status <- xmlGetWidget xml castToStatusbar "status"
     
@@ -73,7 +69,7 @@ makeUI = do
     
     keybuffer <- newIORef ""
     
-    let ui = UI mainwindow connect disconnect openprgm recompileprgm about output log stop status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
+    let ui = UI mainwindow connect disconnect openprgm recompileprgm about output outputscroll stop status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
     
     onDestroy mainwindow         $ putMVar lastaction CloseAction >> mainQuit
     onClicked stop               $ tryPutMVar lastaction StopAction >> return ()
@@ -91,7 +87,6 @@ makeUI = do
     forM_ [ usertag, luatag, systag ] $ textTagTableAdd tagtable
     
     textViewSetBuffer output =<< (textBufferNew $ Just tagtable)
-    textViewSetBuffer log =<< (textBufferNew $ Just tagtable)
     
     onDelete ipdialog         $ const $ widgetHide ipdialog >> return True
     onClicked cancelbtn       $ widgetHide ipdialog
@@ -178,6 +173,7 @@ writeText outputfield ui tagname msg = do
     newend <- textBufferGetEndIter buf
     
     when (tagname /= "") $ do
+    	end <- textBufferGetEndIter buf
         textIterBackwardChars end $ length msg
         textBufferApplyTagByName buf tagname end newend
     
@@ -193,10 +189,4 @@ uiPutStr ui msg = uiPutStrTag ui "luatag" msg
     
 uiPutStrLn :: UI -> String -> IO ()
 uiPutStrLn ui msg = uiPutStr ui $ msg ++ "\n"
-
-uiLogStr :: UI -> String -> IO ()
-uiLogStr ui msg = writeText GUI.log ui "" msg
-
-uiLogStrLn :: UI -> String -> IO ()
-uiLogStrLn ui msg = uiLogStr ui $ msg ++ "\n"
     

@@ -21,19 +21,15 @@ clearLua state sepname = do
 		closeLua $ fromJust lua
 		when (isJust sepname) $ outputUISeperator state $ fromJust sepname
 
-outputUISeperator state name = uiPutStrTag (getUI state)"systag" $ "\n=====" ++ name ++ "=====\n"
+outputUISeperator state name = uiPutStrTag (getUI state)"systag" $ "\n=====[" ++ name ++ "]=====\n"
 
 startLocalInteraction state = do
 	clearLua state $ Just "LOCAL"
 	writeIORef (getLuaRef state) . Just =<< (startLocalLua $ makeCallbacks state)
-	
-	uiLogStrLn (getUI state) "Local interaction started"
 
 startRemoteInteraction state ip = do
-	clearLua state $ Just "REMOTE"
+	clearLua state $ Just ip
 	writeIORef (getLuaRef state) . Just =<< (startRemoteLua ip $ makeCallbacks state)
-	
-	uiLogStrLn (getUI state) $ "Remote interaction to " ++ ip ++ " started"
 
 main = do 
 	ui <- makeUI
@@ -60,4 +56,4 @@ main = do
 				putStrLn $ show action
 				
 handleOutput state msg = uiPutStr (getUI state) msg	
-handleError state = return ()	
+handleError state = putStrLn "handleError" >> startLocalInteraction state

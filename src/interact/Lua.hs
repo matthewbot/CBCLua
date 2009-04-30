@@ -13,18 +13,17 @@ data LuaCallbacks = LuaCallbacks { onOutput :: String -> IO (), onTerminate :: I
 
 startLua :: String -> LuaCallbacks -> IO Lua
 startLua command calls = do
-	(Just inh, Just outh, _, proc) <- createProcess (shell command){ std_in=CreatePipe, std_out=CreatePipe }
+	(inh, outh, _, proc) <- runInteractiveCommand command
 	outputthread <- forkIO $ readProc outh calls
 	return $ Lua inh outh proc outputthread
 	
 startLocalLua = startLua "lua -i 2>&1"
 
-startRemoteLua ipaddr = startLua $ "ssh root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\""
+startRemoteLua ipaddr = startLua $ "ssh root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\" 2>&1"
 	
 closeLua :: Lua -> IO ()
 closeLua lua = do
 	terminateProcess $ process lua
-
 	forM_ (map ($ lua) [inputh, outputh]) hClose
 	
 writeLua :: Lua -> String -> IO ()
@@ -36,8 +35,9 @@ readProc :: Handle -> LuaCallbacks -> IO ()
 readProc handle callbacks = do
 	result <- try cpyloop
 	case result of
-		Left exception ->
-		 	putStrLn $ "readProc going down: " ++ (show exception)
+		Left error -> do
+		 	putStrLn $ "readProc going down: " ++ (show error)
+		 	when (isEOFError error) $ onTerminate callbacks
 		Right _ ->
 			return ()
 			

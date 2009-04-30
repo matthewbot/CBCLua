@@ -72,10 +72,11 @@ downloadProgram state dir = do
 	let ui = getUI state
 	writeIORef (getProgramDirRef state) $ Just dir
 	Just ip <- readIORef (getCurIPRef state)
-	setCurrentDirectory dir
 	uiPutSysStrLn ui "\nDownloading..."
 	forkIO $ do
-		system $ "tar -czf - * --exclude=\".*\" --exclude=\"*~\" -h -p | ssh root@" ++ ip ++ " \"rm -rf /mnt/user/code/cbclua/code/*; tar -C /mnt/user/code/cbclua/code -zxf - -p\""
+		let command = "tar -C \"" ++ dir ++ "\" -czf - . --exclude=\"^.*\" --exclude=\"*~\" -h -p | ssh root@" ++ ip ++ " \"rm -rf /mnt/user/code/cbclua/code/*; tar -C /mnt/user/code/cbclua/code -zxf - -p\""
+		putStrLn command
+		system command
 		uiPutSysStr ui "Done!"
 		startRemoteInteraction state ip
 	return ()

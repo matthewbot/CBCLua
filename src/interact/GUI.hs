@@ -86,8 +86,9 @@ makeUI = do
     
     usertag <- makeTag "usertag" "blue"
     luatag <- makeTag "luatag" "black"
+    systag <- makeTag "systag" "red"
     tagtable <- textTagTableNew
-    forM_ [ usertag, luatag ] $ textTagTableAdd tagtable
+    forM_ [ usertag, luatag, systag ] $ textTagTableAdd tagtable
     
     textViewSetBuffer output =<< (textBufferNew $ Just tagtable)
     textViewSetBuffer log =<< (textBufferNew $ Just tagtable)

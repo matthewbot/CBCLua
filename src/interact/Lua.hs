@@ -9,38 +9,42 @@ import Data.Maybe
 	
 data Lua = Lua { inputh :: Handle, outputh :: Handle, process :: ProcessHandle, outputthread :: ThreadId }
 
-type OutputCallback = String -> IO ()
+data LuaCallbacks = LuaCallbacks { onOutput :: String -> IO (), onTerminate :: IO () }
 
-startLocalLua :: OutputCallback -> IO Lua
-startLocalLua outcall = do
-	(Just inh, Just outh, _, proc) <- createProcess (shell "lua -i 2>&1"){ std_in=CreatePipe, std_out=CreatePipe }
-	outputthread <- forkIO $ readProc outh outcall
+startLua :: String -> LuaCallbacks -> IO Lua
+startLua command calls = do
+	(Just inh, Just outh, _, proc) <- createProcess (shell command){ std_in=CreatePipe, std_out=CreatePipe }
+	outputthread <- forkIO $ readProc outh calls
 	return $ Lua inh outh proc outputthread
 	
-startRemoteLua :: String -> OutputCallback -> IO Lua
-startRemoteLua ipaddr outcall = do
-	(Just inh, Just outh, _, proc) <- createProcess (shell $ "ssh root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\""){ std_in=CreatePipe, std_out=CreatePipe }
-	outputthread <- forkIO $ readProc outh outcall
-	return $ Lua inh outh proc outputthread
+startLocalLua = startLua "lua -i 2>&1"
+
+startRemoteLua ipaddr = startLua $ "ssh root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\""
 	
 closeLua :: Lua -> IO ()
 closeLua lua = do
-	forM_ (map ($ lua) [inputh, outputh]) hClose
-		
 	terminateProcess $ process lua
+
+	forM_ (map ($ lua) [inputh, outputh]) hClose
 	
 writeLua :: Lua -> String -> IO ()
 writeLua lua str = hPutStr handle str >> hFlush handle
 	where
 		handle = inputh lua
 	
-readProc :: Handle -> OutputCallback -> IO ()
-readProc handle callback = 
-	try cpyloop >>= either (putStrLn . ("readProc going down: " ++) . show) (const $ return ())
+readProc :: Handle -> LuaCallbacks -> IO ()
+readProc handle callbacks = do
+	result <- try cpyloop
+	case result of
+		Left exception ->
+		 	putStrLn $ "readProc going down: " ++ (show exception)
+		Right _ ->
+			return ()
+			
 	where
 		cpyloop = forever $ do
 			str <- readHandle handle
-			callback str
+			callbacks `onOutput` str
 	
 readHandle :: Handle -> IO String
 readHandle handle = do

@@ -12,12 +12,11 @@ data UI = UI {
     mainwindow :: Window,
     connect :: MenuItem,
     disconnect :: MenuItem,
-    openprgm :: MenuItem,
-    recompileprgm :: MenuItem,    
+    downloadprgm :: MenuItem,
+    reloadprgm :: MenuItem,    
     about :: MenuItem,
     output :: TextView,
     outputscroll :: ScrolledWindow,
-    stop :: Button,
     status :: Statusbar,
     
     ipdialog :: Dialog,
@@ -33,10 +32,9 @@ data UI = UI {
 
 data GUIAction = ConnectIPAction String | 
                  DisconnectAction | 
-                 OpenProgramAction FilePath | 
-                 RecompileProgramAction | 
+                 DownloadProgramAction FilePath | 
+                 ReloadProgramAction | 
                  InputAction String | 
-                 StopAction | 
                  CloseAction
                  deriving (Eq, Show)
                  
@@ -50,14 +48,13 @@ makeUI = do
     
     Just xml <- xmlNew "ui.glade"
     
-    [connect, disconnect, openprgm, recompileprgm, about] <-
+    [connect, disconnect, downloadprgm, reloadprgm, about] <-
         mapM (xmlGetWidget xml castToMenuItem)
-        ["connect", "disconnect", "openprgm", "recompileprgm", "about"]
+        ["connect", "disconnect", "downloadprgm", "reloadprgm", "about"]
         
     mainwindow <- xmlGetWidget xml castToWindow "mainwindow"
     output <- xmlGetWidget xml castToTextView "output"
     outputscroll <- xmlGetWidget xml castToScrolledWindow "outputscroll"
-    stop <- xmlGetWidget xml castToButton "stop"
     status <- xmlGetWidget xml castToStatusbar "status"
     
     ipdialog <- xmlGetWidget xml castToDialog "ipdialog"
@@ -69,14 +66,13 @@ makeUI = do
     
     keybuffer <- newIORef ""
     
-    let ui = UI mainwindow connect disconnect openprgm recompileprgm about output outputscroll stop status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
+    let ui = UI mainwindow connect disconnect downloadprgm reloadprgm about output outputscroll status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
     
     onDestroy mainwindow         $ putMVar lastaction CloseAction >> mainQuit
-    onClicked stop               $ tryPutMVar lastaction StopAction >> return ()
     onActivateLeaf disconnect    $ tryPutMVar lastaction DisconnectAction >> return ()
     onActivateLeaf connect       $ entrySetText ipentry "" >> windowPresent ipdialog
-    onActivateLeaf openprgm      $ onOpenPrgm ui
-    onActivateLeaf recompileprgm $ tryPutMVar lastaction RecompileProgramAction >> return ()
+    onActivateLeaf downloadprgm  $ onOpenPrgm ui
+    onActivateLeaf reloadprgm    $ tryPutMVar lastaction ReloadProgramAction >> return ()
     onActivateLeaf about         $ dialogRun aboutdialog >> widgetHide aboutdialog >> return ()
     onKeyPress output            $ onTypeOutput ui
     
@@ -113,7 +109,7 @@ makeUI = do
             
             when (result == ResponseOk) $ do
                 Just programdir <- fileChooserGetFilename filechooser
-                tryPutMVar (lastaction ui) $ OpenProgramAction programdir
+                tryPutMVar (lastaction ui) $ DownloadProgramAction programdir
                 return ()
                     
             widgetDestroy filechooser
@@ -189,4 +185,10 @@ uiPutStr ui msg = uiPutStrTag ui "luatag" msg
     
 uiPutStrLn :: UI -> String -> IO ()
 uiPutStrLn ui msg = uiPutStr ui $ msg ++ "\n"
+
+uiPutSysStr :: UI -> String -> IO ()
+uiPutSysStr ui msg = uiPutStrTag ui "systag" msg
+
+uiPutSysStrLn :: UI -> String -> IO ()
+uiPutSysStrLn ui msg = uiPutSysStr ui $ msg ++ "\n"
     

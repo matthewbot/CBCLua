@@ -48,17 +48,17 @@
                     <property name="visible">True</property>
                     <property name="no_show_all">True</property>
                     <child>
-                      <widget class="GtkMenuItem" id="openprgm">
+                      <widget class="GtkMenuItem" id="downloadprgm">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">_Open Program</property>
+                        <property name="label" translatable="yes">_Download Program</property>
                         <property name="use_underline">True</property>
                       </widget>
                     </child>
                     <child>
-                      <widget class="GtkMenuItem" id="recompileprgm">
+                      <widget class="GtkMenuItem" id="reloadprgm">
                         <property name="visible">True</property>
                         <property name="no_show_all">True</property>
-                        <property name="label" translatable="yes">_Recompile Program</property>
+                        <property name="label" translatable="yes">_Reload Program</property>
                         <property name="use_underline">True</property>
                       </widget>
                     </child>
@@ -113,38 +113,13 @@
           </packing>
         </child>
         <child>
-          <widget class="GtkHBox" id="hbox1">
-            <property name="visible">True</property>
-            <child>
-              <widget class="GtkButton" id="stop">
-                <property name="label" translatable="yes">Stop</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </widget>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="padding">8</property>
-                <property name="pack_type">end</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-          </widget>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
           <widget class="GtkStatusbar" id="status">
             <property name="visible">True</property>
             <property name="spacing">2</property>
           </widget>
           <packing>
             <property name="expand">False</property>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </widget>
@@ -263,15 +238,22 @@
     <property name="type_hint">dialog</property>
     <property name="has_separator">False</property>
     <property name="program_name">CBCLua Interact</property>
-    <property name="version">v0.1</property>
+    <property name="version">v0.3</property>
     <property name="authors">Matthew Thompson
 
 Special Thanks to
 Nease Highschool Robotics
+Jeffrey Hsu
+Will Rolke
+Quintin Carlson
+Utkarsh Pandy
+Nathan Sauder
+
+Norman High
 Jeremy Rand
 Braden McDorman
 </property>
-    <property name="artists">Jeffrey Hsu</property>
+    <property name="artists"></property>
     <child internal-child="vbox">
       <widget class="GtkVBox" id="dialog-vbox2">
         <property name="visible">True</property>

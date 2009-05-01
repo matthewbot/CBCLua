@@ -19,6 +19,7 @@ function interact()
 	env._NAME = "interact"
 	cbcluamodule(env)
 	autoglobals(env)
+	autorequire(env)
 	
 	print("cbclua: interaction started")
 	while true do

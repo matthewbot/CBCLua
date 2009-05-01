@@ -7,9 +7,11 @@ local mod_mt = { }
 function cbcluamodule(mod)
 	if mod._CBCLUAMODULE then return end
 	
+	mod._M = nil
 	mod._IMPORTS = { }
 	mod._SUBMODS = { }
 	mod._GLOBALS = { }
+	mod._AUTOREQS = { }
 	mod._CBCLUAMODULE = true
 	setmetatable(mod, mod_mt)
 end
@@ -19,6 +21,29 @@ end
 function autoglobals(mod)
 	cbcluamodule(mod)
 	rawset(mod, "_AUTOGLOBALS", true)
+end
+
+-- Automatically require packages beginning with the prefix (defaults to std)
+
+function autorequire(arg, mod)
+	if mod == nil and type(arg) == "string" then -- just given a string
+		return function (mod) -- make a closure for module() to call
+			cbcluamodule(mod)
+			table.insert(mod._AUTOREQS, arg)
+		end
+	else
+		local prefix
+		
+		if mod == nil then
+			mod = arg
+			prefix = "std"
+		else
+			prefix = arg
+		end
+		
+		cbcluamodule(mod)
+		table.insert(mod._AUTOREQS, prefix)
+	end
 end
 
 -- Module modifier that puts the module in KISS-C compat mode
@@ -111,10 +136,22 @@ function mod_mt.__index(mod, key)
 		return _G
 	end
 	
+	if key == '_M' then
+		return _M
+	end
+	
 	for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value
 		local val = importmod[key]
 		if val then
 			return val
+		end
+	end
+	
+	for _,autoreqprefix in ipairs(mod._AUTOREQS) do
+		local modname = autoreqprefix .. "." .. key
+		local ok, automod = pcall(require, modname)
+		if ok then
+			return automod
 		end
 	end
 	

@@ -3,6 +3,7 @@ module("std.util")
 --[[ Waiting functions ]]--
 
 local task = require "std.task"
+local table = require "table"
 
 function wait(pred) 
 	while not(pred()) do
@@ -64,7 +65,14 @@ end
 --[[ Misc functions ]]--
 
 function bind(method, obj)
-	return function(...)
+	return function (...)
 		return method(obj, ...)
+	end
+end
+
+function bindargs(method, ...)
+	local arg = {...}
+	return function (...)
+		return method(unpack(table.concat(arg, {...}))) -- not particularly efficient
 	end
 end

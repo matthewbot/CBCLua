@@ -137,7 +137,7 @@ function mod_mt.__index(mod, key)
 	end
 	
 	if key == '_M' then
-		return _M
+		return mod
 	end
 	
 	for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value

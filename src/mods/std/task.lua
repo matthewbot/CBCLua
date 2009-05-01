@@ -204,7 +204,7 @@ function resume_task(task, reason)
 	local id = task.id
 	local tco = task.co
 	
-	task.sleepevent = nil -- clear its sleep fields
+	task.sleepsignal = nil -- clear its sleep fields
 	task.sleepfile = nil
 	task.sleeptill = nil
 	

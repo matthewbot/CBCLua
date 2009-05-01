@@ -44,7 +44,7 @@ function SerialComm:get_avail()
 end
 
 function SerialComm:check(amt)
-	return #self.readbuf > amt
+	return #self.readbuf >= amt
 end
 
 function SerialComm:clear()
@@ -54,18 +54,20 @@ end
 function SerialComm:wait(amt, timeout)
 	if timeout ~= nil then
 		local start = timer.seconds()
-	
+
 		while #self.readbuf < amt do
 			local remaining = timeout - (timer.seconds() - start)
-	
+
 			if remaining <= 0 then
 				return false
 			end
-		
+	
 			self.readsig:wait(remaining)
 		end
 	else
-		self.readsig:wait()
+		while #self.readbuf < amt do
+			self.readsig:wait()
+		end
 	end
 		
 	return true
@@ -111,10 +113,19 @@ end
 
 function get16(data, pos) -- reads a 16 bit value of the string data at position pos
 	local high, low = string.byte(data, pos, pos+1)
-	return high*256 + low -- no bit fiddling in lua since everything is a double internally
+	local val = high*256 + low -- no bit fiddling in lua since everything is a double internally
+	if val > 32768 then
+		val = val - 65536
+	end
+	
+	return val
 end
 
 function make16(val) -- returns a new string containing the first 16 bits of val
+	if val < 0 then
+		val = val + 65536
+	end
+	
 	local high = math.floor(val / 256) -- again, sans bit fiddling
 	local low = val % 256
 	

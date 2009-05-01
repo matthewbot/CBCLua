@@ -28,7 +28,8 @@ static int lua_raw_sleep(lua_State *L) {
 	double timeout = checknumber(L, 1);
 	
 	int fdcount = lua_gettop(L)-1;
-	vector<int> fds(fdcount);
+	vector<int> fds;
+	fds.reserve(fdcount);
 	
 	for (int i=0; i < fdcount; i++) {
 		FILE **file = (FILE **)lua_touserdata(L, i+2);

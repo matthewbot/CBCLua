@@ -68,7 +68,8 @@ const vector<bool> raw_sleep(double seconds, const vector<int> &fds) {
 		select(highestfd + 1, &fdset, NULL, NULL, NULL);
 	}
 	
-	vector<bool> setvecs(fds.size());
+	vector<bool> setvecs;
+	setvecs.reserve(fds.size());
 	
 	for (vector<int>::const_iterator i = fds.begin(); i != fds.end(); ++i) {
 		setvecs.push_back(FD_ISSET(*i, &fdset) != 0);

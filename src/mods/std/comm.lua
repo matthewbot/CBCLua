@@ -14,6 +14,8 @@ local io = require 'io'
 local SerialComm = create_class "SerialComm" -- local so ppl can't make their own
 local serial_instance = nil -- holds the singleton instance
 
+function open_serial() return SerialComm() end
+
 function SerialComm:construct()
 	if serial_instance ~= nil then
 		error("Only one SerialComm can created at a time!")
@@ -22,6 +24,8 @@ function SerialComm:construct()
 	self.readbuf = ""
 	self.rx = assert(io.open("/tmp/uart1rx", "rb"), "failed to open uart1rx")
 	self.tx = assert(io.open("/tmp/uart1tx", "wb"), "failed to open uart1tx")
+	self.rx:setvbuf("no")
+	self.tx:setvbuf("no")
 	self.readsig = task.Signal()
 	self.readtask = task.start(util.bind(SerialComm.read_task, self), "serial read")
 	
@@ -29,7 +33,7 @@ function SerialComm:construct()
 end
 
 function SerialComm:close()
-	task.stop(self.task)
+	task.stop(self.readtask)
 	self.tx:close()
 	self.rx:close()
 	serial_instance = nil -- clear the singleton holder so we can be recreated
@@ -104,7 +108,8 @@ end
 function SerialComm:read_task()
 	while true do
 		task.sleep_io(self.rx)
-		self.readbuf = self.readbuf + file:read(9999)
+		self.readbuf = self.readbuf + self.rx:read(9999)
+		self.readsig:notify()
 	end
 end
 

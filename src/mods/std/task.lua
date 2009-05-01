@@ -229,10 +229,8 @@ function run_sleep()
 	
 	local sleeptime
 	
-	if minsleep == math.huge then -- if no process needs to be waken up on IO
+	if minsleep == math.huge then -- if no process needs to be woken up
 		sleeptime = -1 -- pass -1 to the C function
-	elseif minsleep == nil then
-		sleeptime = 0
 	else
 		sleeptime = minsleep - timer.seconds()  -- calculate the time we need to sleep
 		

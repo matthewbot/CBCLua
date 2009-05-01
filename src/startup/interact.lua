@@ -1,3 +1,12 @@
+if coroutine.coco == nil then
+	print("cbclua: ----------")
+	print("cbclua: No CoCo in this lua interpreter.")
+	print("cbclua: This means you cannot call any")
+	print("cbclua: blocking task functions from within")
+	print("cbclua: an interaction command")
+	print("cbclua: ----------")
+end
+
 local task = require "std.task"
 
 local interact

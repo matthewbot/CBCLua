@@ -51,12 +51,6 @@ function SerialComm:clear()
 	self.readbuf = ""
 end
 
-function SerialComm:wait_amt(amt)
-	while #self.readbuf < amt do
-		self.readsig:wait()
-	end
-end
-
 function SerialComm:wait(amt, timeout)
 	if timeout ~= nil then
 		local start = timer.seconds()
@@ -82,7 +76,7 @@ function SerialComm:drop(amt)
 end
 
 function SerialComm:read(amt)
-	self:wait_amt(amt)
+	self:wait(amt)
 	local data = self.readbuf:sub(1, amt)
 	self:drop(amt)
 	return data
@@ -108,7 +102,7 @@ end
 function SerialComm:read_task()
 	while true do
 		task.sleep_io(self.rx)
-		self.readbuf = self.readbuf + self.rx:read(9999)
+		self.readbuf = self.readbuf .. timer.raw_getio(self.rx)
 		self.readsig:notify()
 	end
 end

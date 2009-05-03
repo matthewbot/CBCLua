@@ -122,7 +122,7 @@ function Signal:wait(timeout)
 		task.sleeptill = timer.seconds() + timeout
 	end
 	
-	co.yield()
+	return co.yield() == "sleepsignal"
 end
 
 -- Schedular implementation stuff

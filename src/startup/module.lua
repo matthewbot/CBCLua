@@ -36,7 +36,7 @@ function autorequire(arg, mod)
 		
 		if mod == nil then
 			mod = arg
-			prefix = "std"
+			prefix = "std."
 		else
 			prefix = arg
 		end
@@ -148,7 +148,7 @@ function mod_mt.__index(mod, key)
 	end
 	
 	for _,autoreqprefix in ipairs(mod._AUTOREQS) do
-		local modname = autoreqprefix .. "." .. key
+		local modname = autoreqprefix .. key
 		local ok, automod = pcall(require, modname)
 		if ok then
 			return automod

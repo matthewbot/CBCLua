@@ -20,6 +20,7 @@ function interact()
 	cbcluamodule(env)
 	autoglobals(env)
 	autorequire(env)
+	autorequire("", env)
 	
 	print("cbclua: interaction started")
 	while true do
@@ -49,7 +50,10 @@ function run_command(env)
 		
 		line = line:gsub("^local ", "")
 		lines = lines .. line .. " "
-		local chunk, msg = loadstring(lines, "=stdin")
+		local chunk, msg = loadstring("return " .. lines, "=stdin")
+		if chunk == nil then
+			chunk, msg = loadstring(lines, "=stdin")
+		end
 		
 		if chunk then
 			setfenv(chunk, env)

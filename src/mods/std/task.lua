@@ -25,7 +25,7 @@ local tasklist_current
  -- Creates a new task and returns a task number
 function start(func, name) 
 	if type(func) ~= "function" then
-		error("bad argument #1 to 'task.new' (Lua function expected)");
+		error("bad argument #1 to 'task.start' (Lua function expected)");
 	end
 
 	local id = tasklist_nextid -- some book-keeping
@@ -160,13 +160,16 @@ end
 function run_cycle(files)
 	local curtime = timer.seconds()
 	
-	for taskid, task in ipairs(tasklist) do -- for each task id
-		local reason = task_is_ready(task, curtime, files)
-		if reason then -- if the task is ready		
-			timer.watchdog() -- if this doesn't get called enough the timer module produces a stall warning
+	for taskid=1,tasklist_nextid do -- for each task id
+		local task = tasklist[taskid]
+		if task ~= nil then
+			local reason = task_is_ready(task, curtime, files)
+			if reason then -- if the task is ready		
+				timer.watchdog() -- if this doesn't get called enough the timer module produces a stall warning
 			
-			if not(resume_task(task, reason)) then return false end
-			curtime = timer.seconds()
+				if not(resume_task(task, reason)) then return false end
+				curtime = timer.seconds()
+			end
 		end
 	end
 	

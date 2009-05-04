@@ -140,6 +140,11 @@ function mod_mt.__index(mod, key)
 		return mod
 	end
 	
+	local val = _G[key] -- otherwise, go through global functions
+	if type(val) == "function" then
+		return val
+	end	
+	
 	for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value
 		local val = importmod[key]
 		if val then
@@ -153,11 +158,6 @@ function mod_mt.__index(mod, key)
 		if ok then
 			return automod
 		end
-	end
-	
-	local val = _G[key] -- otherwise, go through global functions
-	if type(val) == "function" then
-		return val
 	end
 	
 	error("Undefined global '" .. key .. "'", 2)
@@ -184,3 +184,38 @@ function mod_mt.__newindex(mod, key, value)
 	
 	error("Undefined global '" .. key .. "'", 2)
 end
+
+-- This function is used to do delayed module loading
+-- original use was in the startup code, log and task have dependencies on each other
+-- since log wants to display the current task and task wants to log messages
+-- log uses a require_later on task to break the cyclic dependency
+
+local mock_mod_mt = { }
+
+function require_later(name)
+	local mock_mod = { name = name }
+	setmetatable(mock_mod, mock_mod_mt)
+	return mock_mod
+end
+
+local function get_mod(mock_mod)
+	local mod = rawget(mock_mod, mod)
+	
+	if mod == nil then
+		mod = require(mock_mod.name)
+		rawset(mock_mod, "mod", mod)
+	end
+	
+	return mod
+end
+
+function mock_mod_mt.__index(mock_mod, key)
+	local mod = get_mod(mock_mod)
+	return mod[key]
+end
+
+function mock_mod_mt.__newindex(mock_mod, key, val)
+	local mod = get_mod(mock_mod)
+	mod[key] = val
+end
+	

@@ -19,7 +19,7 @@ extern "C" void *watchdog_func(void *unused) {
 			watchdog_enabled = false;
 		}	
 		
-		usleep(200 * 1000); // 200 msecs
+		usleep(200 * 1000); // 100 msecs
 	}
 	
 	return NULL;

@@ -8,6 +8,8 @@ local util = require 'std.util'
 local string = require 'string'
 local io = require 'io'
 
+import("std.log")
+
 -- Define SerialPort class
 
 SerialPort = create_class "SerialPort" -- local so ppl can't make their own
@@ -27,6 +29,8 @@ function SerialPort:construct()
 	self.readtask = task.start(util.bind(SerialPort.read_task, self), "serial read")
 	
 	serial_instance = self
+	
+	log("serial port opened")
 end
 
 function SerialPort:close()
@@ -34,6 +38,8 @@ function SerialPort:close()
 	self.tx:close()
 	self.rx:close()
 	serial_instance = nil -- clear the singleton holder so we can be recreated
+	
+	log("serial port closed")
 end
 
 function SerialPort:get_avail()

@@ -16,6 +16,8 @@ local os = require "os"
 local math = require "math"
 local table = require "table"
 
+import("std.log")
+
  -- This is the list of couroutines that are currently running
 local tasklist = { }
 local tasklist_nextid = 1
@@ -27,6 +29,8 @@ function start(func, name)
 	if type(func) ~= "function" then
 		error("bad argument #1 to 'task.start' (Lua function expected)");
 	end
+	
+	log("started task " .. name)
 
 	local id = tasklist_nextid -- some book-keeping
 	tasklist_nextid = tasklist_nextid + 1
@@ -50,6 +54,15 @@ function get_current()
 	return tasklist_current
 end
 
+function get_name(task)
+	local task = tasklist[task]
+	if task then
+		return task.name
+	else
+		return nil
+	end
+end
+
 -- Returns the number of tasks currently running
 function get_running_count()
 	return tasklist_count
@@ -57,7 +70,9 @@ end
 
 -- Ends the current task
 function exit()
-	stop(tasklist_current)
+	local task = task[tasklist_current]
+	stop(tasklist_current, true)
+	log("task " .. task.name .. " exited")
 	co.yield()
 end
 
@@ -66,10 +81,9 @@ function terminate(msg, code)
 	local curtask = tasklist[tasklist_current]
 
 	if msg ~= nil then
-		print("task: program terminated by task " .. curtask.name .. " :")
-		print(msg)
+		log("program terminated by task " .. curtask.name .. " :\n" .. msg)
 	else
-		print("task: program terminated by task " .. curtask.name)
+		log("program terminated by task " .. curtask.name)
 	end
 	
 	os.exit(code or 0)
@@ -96,9 +110,14 @@ function sleep_io(file, timeout)
 end
 
 -- Ends the specified task
-function stop(tasknum)
+function stop(tasknum, nolog)
+	local task = tasklist[tasknum]
 	tasklist[tasknum] = nil
 	tasklist_count = tasklist_count - 1
+	
+	if nolog ~= true then
+		log("stopped task " .. task.name)
+	end
 end
 
 -- Signals
@@ -151,9 +170,7 @@ function run()
 			break
 		end
 	end
-	
-	timer.watchdog_term() -- must be sure to term watchdog, it occasionally will segfault the process if the shared object is unloaded while the thread is still running
-	
+
 	return result
 end
 
@@ -216,11 +233,11 @@ function resume_task(task, reason)
 	tasklist_current = nil
 				
 	if not(goodresume) then -- if the coroutine raised an error
-		print("--------")
-		print(debug.traceback(tco, "error in task '" .. task.name .. "':\n" .. msg)) -- stack trace
+		log(true, debug.traceback(tco, "error in task '" .. task.name .. "':\n" .. msg)) -- stack trace
 		return false
 	elseif co.status(tco) == "dead" then -- if the coroutine ended
-		stop(id) -- take it off the list
+		stop(id, true) -- take it off the list
+		log("task " .. task.name .. " ended")
 	end
 	
 	return true
@@ -243,7 +260,7 @@ function run_sleep()
 	end
 	
 	if sleeptime == -1 and #files == 0 then
-		print("task: deadlock")
+		log("deadlock, ending program :(")
 		os.exit(1)
 	end
 	

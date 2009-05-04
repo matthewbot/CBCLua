@@ -20,7 +20,6 @@ const luaL_Reg luafuncs[] = {
 	{"raw_sleep", lua_raw_sleep},
 	{"raw_yield", lbind<raw_yield>},
 	{"watchdog", lbind<watchdog>},
-	{"watchdog_disable", lbind<watchdog_disable>},
 	{"watchdog_term", lbind<watchdog_term>},
 	{"raw_getio", lua_getio},
 	
@@ -48,7 +47,7 @@ static int lua_raw_sleep(lua_State *L) {
 	return fdcount;
 }
 
-// -- TODO: If this sprouts any more IO functions, make a new module
+// -- NOTE: If this sprouts any more IO functions, make a new module
 
 static int lua_getio(lua_State *L) {
 	FILE **file = (FILE **)lua_touserdata(L, 1);

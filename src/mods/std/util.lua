@@ -5,22 +5,26 @@ module("std.util")
 local task = require "std.task"
 local table = require "table"
 
-function wait(pred) 
+function wait(pred, time) 
+	if time == nil then
+		time = 0.050
+	end
+
 	while not(pred()) do
-		task.yield()
+		task.sleep(time)
 	end
 end
 
-function wait_greater(pred, thresh)
+function wait_greater(pred, thresh, time)
 	wait(function ()
 		return pred() > thresh
-	end)
+	end, time)
 end
 
-function wait_less(pred, thresh)
+function wait_less(pred, thresh, time)
 	wait(function ()
 		return pred() < thresh
-	end)
+	end, time)
 end
 	
 --[[ Table functions ]]--

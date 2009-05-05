@@ -50,7 +50,14 @@ function log(disp, src, msg)
 			io.write(src, ": ")
 		end
 		
-		io.write(msg, "\n")
+		if msg:find("\n", 1, true) then
+			local newmsg = msg:gsub("\n", "\n  ")
+			io.write("\n  ", newmsg)
+		else
+			io.write(msg)
+		end
+		
+		io.write("\n")
 	end
 end
 

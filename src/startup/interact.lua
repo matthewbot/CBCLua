@@ -1,10 +1,9 @@
 if coroutine.coco == nil then
-	print("cbclua: ----------")
-	print("cbclua: No CoCo in this lua interpreter.")
-	print("cbclua: This means you cannot call any")
-	print("cbclua: blocking task functions from within")
-	print("cbclua: an interaction command")
-	print("cbclua: ----------")
+cbclua_log([[
+No CoCo in this lua interpreter.
+This means you cannot call any
+blocking task functions from within
+an interaction command]])
 end
 
 local task = require "std.task"
@@ -82,10 +81,18 @@ function run_chunk(chunk)
 			table.insert(lines, line)
 		end
 		
+		local out = ""
+		
 		for i=1,#lines-3 do
-			print(lines[i])
+			if out == "" then
+				out = lines[i]
+			else
+				out = out .. "\n" .. lines[i]
+			end
 		end
+		
+		print(out)
 	end)
 end
 		
-task.start(interact, "interaction")
+task.start(interact, "interaction", false, true)

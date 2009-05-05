@@ -82,5 +82,6 @@ end
 local mmnames = { 'add', 'sub', 'mul', 'div', 'mod', 'pow', 'unm', 'concat', 'len', 'eq', 'lt', 'le', 'newindex', 'call' }
 
 for _,mmname in pairs(mmnames) do
+	mmname = "__" .. mmname
 	inst_mt[mmname] = make_metamethod(mmname)
 end

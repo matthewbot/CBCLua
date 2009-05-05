@@ -4,6 +4,10 @@
 This module contains the task scheduler and related functions.
 It implements co-operative multitasking in lua using coroutines.
 
+Its fairly beastly, and I'd refactor it into something more OO/cleaner/multiple files except I've
+probably created and then fixed 15+ bugs in this thing over writing this version, and I'd probably
+make many more in rewriting it.
+
 TODO: rewrite description
 
 ]]
@@ -25,18 +29,20 @@ local tasklist_count = 0
 local tasklist_current
 
  -- Creates a new task and returns a task number
-function start(func, name) 
+function start(func, name, daemon, cstack) 
 	if type(func) ~= "function" then
-		error("bad argument #1 to 'task.start' (Lua function expected)");
+		error("bad argument #1 to 'task.start' (Lua function expected)")
 	end
 	
-	log("started task " .. name)
-
 	local id = tasklist_nextid -- some book-keeping
 	tasklist_nextid = tasklist_nextid + 1
 	tasklist_count = tasklist_count + 1
 	
-	tasklist[id] = { co = co.create(func), id = id, name = name or tostring(id) }
+	name = name or tostring(id)
+	
+	tasklist[id] = { co = co.create(func, cstack and 0 or -1), id = id, name = name, daemon = daemon }
+	
+	log("started task " .. name)
 	
 	return id
 end
@@ -162,6 +168,7 @@ local find_all_files
 local task_is_ready
 local task_get_sleep
 local resume_task
+local all_tasks_ended
 		
 -- This function runs the tasks in order. It is called from start.lua, and shouldn't be used outside of there
 function run()
@@ -170,7 +177,7 @@ function run()
 	
 	local result = true
 	
-	while tasklist_count >= 1 do -- while there are processes
+	while not all_tasks_ended() do -- while there are processes
 		local files = run_sleep() -- sleeps until the nearest task wants to wake up
 
 		if not(run_cycle(files)) then
@@ -340,5 +347,21 @@ function task_get_sleep(task)
 	else
 		return 0
 	end
+end
+
+-- returns true if all non-daemon tasks have ended
+function all_tasks_ended()
+	if tasklist_count == 0 then
+		return true
+	end
+	
+	for i = 1,tasklist_nextid do
+		local task = tasklist[i]
+		if task and not task.daemon then
+			return false
+		end
+	end
+	
+	return true
 end
 

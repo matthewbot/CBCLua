@@ -65,7 +65,7 @@ function run_command(env)
 		end
 		
 		if not(msg:find("<eof>", 1, true)) then
-			print("Error", msg)
+			print(msg)
 			return
 		end
 	end

@@ -56,9 +56,18 @@ end
 
 function _G.print(...)
 	local vals = { }
+	local first = true
 	for num = 1,select('#', ...) do
 		local val = select(num, ...)
-		table.insert(vals, tostring(val))
+		local str = tostring(val)
+		
+		if first then
+			first = false
+		else
+			str = "\t" .. str
+		end
+		
+		table.insert(vals, str)
 	end
 	
 	return log(true, "print", table.concat(vals))

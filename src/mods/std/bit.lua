@@ -24,8 +24,8 @@ end
 -- Utility functions for big-endian 16 bit words (create)
 
 function get16(data, pos) -- reads a 16 bit value of the string data at position pos
-	local high, low = string.byte(data, pos, pos+1)
-	local val = high*256 + low -- no bit fiddling in lua since everything is a double internally
+	local val = getu16(data, pos)
+	
 	if val > 32768 then
 		val = val - 65536
 	end
@@ -38,11 +38,21 @@ function make16(val) -- returns a new string containing the first 16 bits of val
 		val = val + 65536
 	end
 	
+	return makeu16(val)
+end
+
+function getu16(data, pos) -- reads a 16 bit value of the string data at position pos
+	local high, low = string.byte(data, pos, pos+1)
+	local val = high*256 + low -- no bit fiddling in lua since everything is a double internally
+	
+	return val
+end
+
+function makeu16(val) -- returns a new string containing the first 16 bits of val
 	local high = math.floor(val / 256) -- again, sans bit fiddling
 	local low = val % 256
 	
 	return string.char(high, low)
 end
-
 
 	

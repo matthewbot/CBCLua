@@ -36,7 +36,7 @@ function start(func, name)
 	tasklist_nextid = tasklist_nextid + 1
 	tasklist_count = tasklist_count + 1
 	
-	tasklist[id] = { co = co.create(func), id = id, name = name or tostring(id), sleeptill = 0 }
+	tasklist[id] = { co = co.create(func), id = id, name = name or tostring(id) }
 	
 	return id
 end
@@ -112,6 +112,14 @@ end
 -- Ends the specified task
 function stop(tasknum, nolog)
 	local task = tasklist[tasknum]
+	if task == nil then 
+		if not nolog then
+			error("stopping bad task id " .. tasknum, 2) 
+		else
+			return
+		end
+	end
+		
 	tasklist[tasknum] = nil
 	tasklist_count = tasklist_count - 1
 	
@@ -190,6 +198,8 @@ function run_cycle(files)
 		end
 	end
 	
+	collectgarbage("step")
+	
 	return true
 end
 
@@ -263,7 +273,7 @@ function run_sleep()
 		log("deadlock, ending program :(")
 		os.exit(1)
 	end
-	
+
 	local bools = { timer.raw_sleep(sleeptime, unpack(files)) }
 	local gotfiles = { }
 	
@@ -283,7 +293,12 @@ function find_min_sleep()
 		local task = tasklist[checktask]
 		if task then
 			local sleepamt = task_get_sleep(task)
-			if sleepamt ~= nil and sleepamt < minsleeptill then -- if it sleeping but needs to be woken up sooner than our current soonest
+			
+			if sleepamt == 0 then
+				return 0
+			end
+			
+			if sleepamt < minsleeptill then -- if it sleeping but needs to be woken up sooner than our current soonest
 				minsleeptill = sleepamt -- then it is now the current soonest
 			end
 		end
@@ -313,13 +328,17 @@ end
 -- returns how much longer the task wants to sleep
 function task_get_sleep(task)
 	if task.sleeptill ~= nil then
-		return task.sleeptill
-	elseif task.sleepevent ~= nil then
+		if task.sleepsignal ~= nil and task.signalctr < task.sleepsignal.ctr then
+			return 0
+		else
+			return task.sleeptill
+		end
+	elseif task.sleepfile ~= nil then
 		return math.huge
 	elseif task.sleepsignal ~= nil then
 		return math.huge
 	else
-		return nil
+		return 0
 	end
 end
 

@@ -12,7 +12,7 @@ import("std.log")
 
 -- Define SerialPort class
 
-SerialPort = create_class "SerialPort" -- local so ppl can't make their own
+SerialPort = create_class "SerialPort"
 local serial_instance = nil -- holds the singleton instance
 
 function SerialPort:construct()

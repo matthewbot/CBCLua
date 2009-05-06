@@ -26,7 +26,7 @@ function SerialPort:construct()
 	self.rx:setvbuf("no")
 	self.tx:setvbuf("no")
 	self.readsig = task.Signal()
-	self.readtask = task.start(util.bind(SerialPort.read_task, self), "serial read")
+	self.readtask = task.start(util.bind(SerialPort.read_task, self), "serial read", true)
 	
 	serial_instance = self
 	

@@ -75,7 +75,11 @@ local function make_metamethod(metamethodname)
 			return metameth(inst, ...)
 		end
 		
-		error("Missing " .. metamethod .. " metamethod for class " .. inst.class.name, 2)
+		if metamethodname == "__newindex" then
+			rawset(inst, ...)
+		else
+			error("Missing " .. metamethodname .. " metamethod for class " .. inst.class.name, 2)
+		end
 	end
 end
 

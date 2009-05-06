@@ -1,33 +1,50 @@
+local task = require "std.task"
+
 if coroutine.coco == nil then
-cbclua_log([[
+print[[
 No CoCo in this lua interpreter.
 This means you cannot call any
 blocking task functions from within
-an interaction command]])
+an interaction command.
+----------]]
 end
 
-local task = require "std.task"
-
 local interact
-local run_command
+local read_chunk
 local run_chunk
+local print_results
+local print_errors
+
+local env = { }
+env._M = env
+env._NAME = "interact"
+cbcluamodule(env)
+autoglobals(env)
+autorequire(env)
+autorequire("", env)
+function env._WRAPVALUES(...) return ... end
 
 function interact()
-	local env = { }
-	env._M = env
-	env._NAME = "interact"
-	cbcluamodule(env)
-	autoglobals(env)
-	autorequire(env)
-	autorequire("", env)
+	io.writeln("Interaction started")
 	
-	print("cbclua: interaction started")
 	while true do
-		run_command(env)
+		local chunk 
+		repeat
+			chunk = read_chunk()
+		until chunk ~= nil
+		
+		local ok, results = run_chunk(chunk)
+		if ok then
+			if #results > 0 then
+				print_results(results)
+			end
+		else
+			print_errors(results)
+		end
 	end
 end
 
-function run_command(env)
+function read_chunk()
 	local lines = ""
 	
 	while true do
@@ -36,63 +53,81 @@ function run_command(env)
 		else
 			io.write(">> ")
 		end
+		
 		task.sleep_io(io.stdin)
 		
 		local line = io.read()
 		
 		if line == "" then
 			if lines ~= "" then
-				print("command canceled")
+				io.writeln("Command canceled")
 			end
-			return
+			
+			return nil
 		end
 		
 		line = line:gsub("^local ", "")
-		lines = lines .. line .. " "
-		local chunk, msg = loadstring("return " .. lines, "=stdin")
+		lines = lines .. line .. "\n"
+		
+		local chunk, msg 
+		
+		if not line:match("^%s*import") then
+			chunk, msg = loadstring("return _WRAPVALUES(" .. lines .. ")", "=stdin")
+		end
+		
 		if chunk == nil then
 			chunk, msg = loadstring(lines, "=stdin")
 		end
 		
 		if chunk then
-			setfenv(chunk, env)
-			local rets = { select(2, run_chunk(chunk)) }
-			if #rets > 0 then
-				print(unpack(rets))
-			end
-			return
+			return chunk
 		end
 		
 		if not(msg:find("<eof>", 1, true)) then
-			print(msg)
-			return
+			io.writeln(msg)
+			lines = ""
 		end
 	end
 end
 
 function run_chunk(chunk)
-	return xpcall(
+	setfenv(chunk, env)
+	local results = {xpcall(
 		chunk
 	, function (errmsg)
-		local trace = debug.traceback(errmsg, 2)
-		
-		lines = { }
-		for line in string.gmatch(trace, "(.-)\n") do
-			table.insert(lines, line)
+		return debug.traceback(errmsg, 2)
+	end)}
+	
+	local ok = table.remove(results, 1)
+	
+	if ok then
+		return ok, results
+	else
+		return ok, results[1] -- results[1] will be the error msg
+	end
+end
+
+function print_results(results)
+	for num,v in ipairs(results) do
+		if num > 1 then
+			io.write(", ")
 		end
-		
-		local out = ""
-		
-		for i=1,#lines-3 do
-			if out == "" then
-				out = lines[i]
-			else
-				out = out .. "\n" .. lines[i]
-			end
-		end
-		
-		print(out)
-	end)
+	
+		io.write(tostring(v))
+	end
+
+	io.write("\n")
+end
+
+function print_errors(trace)
+	lines = { }
+	for line in string.gmatch(trace, "(.-)\n") do
+		table.insert(lines, line)
+	end
+
+	for i=1,#lines-3 do
+		io.writeln(lines[i])
+	end
 end
 		
 task.start(interact, "interaction", false, true)

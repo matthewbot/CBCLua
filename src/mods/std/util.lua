@@ -3,7 +3,9 @@ module("std.util")
 --[[ Waiting functions ]]--
 
 local task = require "std.task"
+local cbc = require "std.cbc"
 local table = require "table"
+local io = require "io"
 
 function wait(pred, time) 
 	if time == nil then
@@ -25,6 +27,22 @@ function wait_less(pred, thresh, time)
 	wait(function ()
 		return pred() < thresh
 	end, time)
+end
+
+function wait_any(args, time)
+	if time == nil then
+		time = 0.050
+	end
+	
+	while true do
+		for name,pred in pairs(args) do
+			if pred() then
+				return name
+			end
+		end
+		
+		task.sleep(time)
+	end
 end
 	
 --[[ Table functions ]]--
@@ -79,4 +97,17 @@ function bindargs(method, ...)
 	return function (...)
 		return method(unpack(table.concat(arg, {...}))) -- not particularly efficient
 	end
+end
+
+--[[ User interaction functions ]]--
+
+function prompt(msg)
+	io.writeln(msg, " (press A)")
+	wait(cbc.a_button)
+end
+
+function wait_continue(msg)
+	io.writeln(msg)
+	io.writeln("Press A to continue")
+	wait(cbc.a_button)
 end

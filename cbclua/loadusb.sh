@@ -13,35 +13,31 @@ while true; do
 		USBCOUNT=`ls /sys/bus/usb/devices | wc -l`
 		if [ "$USBCOUNT" == "6" ] || [ "$USBCOUNT" == "10" ]; then # count with and without camera
 			if [ "$PRINTEDMSG" == "0" ]; then
-				echo "cbclua: Waiting for USB drive"
+				echo "Waiting for USB drive"
 				PRINTEDMSG=1
 			fi
 
 			sleep 1
 			continue
+		else
+			break
 		fi
-		
-		break
 	fi
 	
-	echo "cbclua: usb mounted"
-	
 	if [ -e /mnt/usercode/cbclua.tgz ]; then
-		echo "cbclua: applying update"
+		echo "Applying USB update 'cbclua.tgz'"
 		rm -rf /mnt/user/code/cbclua
 		tar -xzfp /mnt/usercode/cbclua.tgz -C /mnt/user/code
 		umount /mnt/usercode
 		sync
-		echo "cbclua: done. Please recompile cbclua.c"
-		echo "cbclua: (remove cbclua.tgz to stop updating)"
+		echo "Update complete"
 		exit 0
 	fi
 	
 	if [ -d /mnt/usercode/lua ]; then
-		echo "cbclua: loading new code"
+		echo "Loading USB code in folder 'lua'"
 		rm -rf /mnt/user/code/cbclua/code
 		cp -r /mnt/usercode/lua /mnt/user/code/cbclua/code
-		sync &
 	fi
 	
 	umount /mnt/usercode

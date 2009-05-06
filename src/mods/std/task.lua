@@ -87,9 +87,9 @@ function terminate(msg, code)
 	local curtask = tasklist[tasklist_current]
 
 	if msg ~= nil then
-		log("program terminated by task " .. curtask.name .. " :\n" .. msg)
+		print("program terminated by task " .. curtask.name .. " :\n" .. msg)
 	else
-		log("program terminated by task " .. curtask.name)
+		print("program terminated by task " .. curtask.name)
 	end
 	
 	os.exit(code or 0)
@@ -250,7 +250,7 @@ function resume_task(task, reason)
 	tasklist_current = nil
 				
 	if not(goodresume) then -- if the coroutine raised an error
-		log(true, debug.traceback(tco, "error in task '" .. task.name .. "':\n" .. msg)) -- stack trace
+		print(debug.traceback(tco, "error in task '" .. task.name .. "':\n" .. msg)) -- stack trace
 		return false
 	elseif co.status(tco) == "dead" then -- if the coroutine ended
 		stop(id, true) -- take it off the list

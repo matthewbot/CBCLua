@@ -4,78 +4,90 @@ local timer = require "std.timer"
 local task = require_later "std.task"
 local io = require "io"
 local string = require "string"
-local table = require "table"
+local os = require "os"
 
---
+-- Private State --
 
-local logfile = io.open("log", "w")
+local logname = "log" -- in current directory (more portable)
+local logfile = io.tmpfile() -- start in the temporary log
+local started = false
+
 local time_func = timer.seconds
+
+-- Predeclares
+
+local get_module
+local get_task
+local log_file_header
+
+-- Public Interface
+
+function start()
+	if started then return end
+
+	local real_logfile = assert(io.open(logname, "w"), "failed to open log file for writing")
+
+	logfile:seek("set")
+	real_logfile:write(logfile:read("*a")) -- copy our temp log to the real log
+	
+	logfile:close()
+	logfile = real_logfile -- switch to the real log
+		
+	logfile:flush()
+	logfile:setvbuf("line") -- turn on line buffering, so if program hard crashes log won't be lost in a buffer
+	
+	started = true
+end
 
 function set_time_func(func) -- used to change log timestamps to use botball time
 	log("new time function set")
 	time_func = func
 end
 
-local function log_header(src)
-	local taskname = task.get_name(task.get_current())
-	if taskname == nil then
-		taskname = "system"
-	end
-	return string.format(">>> [%06.2f] <%s> %s:\n", time_func(), taskname, src)
-end
+function log(msg, depth)
+	local module = get_module((depth or 1) + 1)
+	local time = time_func()
+	local task = get_task()
+	local header = log_file_header(time, task, module)
 
-local function get_module(depth)
-	depth = depth or 2
-	
-	return getfenv(depth+1)._NAME or "unknown"
-end
-
-function log(disp, src, msg)
-	local header
-
-	if src == nil then -- log(msg)
-		msg = disp
-		src = get_module()
-		disp = false
-	elseif msg == nil then -- log(disp, msg)
-		msg = src
-		src = get_module()
-	end
-	
-	local header = log_header(src)
 	logfile:write(header, msg, "\n")
-	
-	if disp then
-		if src ~= "print" then
-			io.write(src, ": ")
-		end
-		
-		if msg:find("\n", 1, true) then
-			local newmsg = msg:gsub("\n", "\n  ")
-			io.write("\n  ", newmsg)
-		else
-			io.write(msg)
-		end
-		
-		io.write("\n")
-	end
 end
 
-function _G.print(...)
-	local vals = { }
-	local first = true
-	for num = 1,select('#', ...) do
-		local val = select(num, ...)
-		local str = tostring(val)
+function _G.print(msg, ...)
+	local buf = tostring(msg)
+
+	for i=1,select("#", ...) do
+		local val = select(i, ...)
 		
-		if first then
-			first = false
-		else
-			str = "\t" .. str
-		end
-		
-		table.insert(vals, str)
+		buf = buf .. "\t" .. tostring(val)
 	end
 	
-	return log(true, "print", table.concat(vals))
+	log(buf, 2)
+	io.writeln(buf)
 end
+
+-- Helper functions
+
+function get_module(depth)
+	local mod = getfenv((depth or 1) + 1)
+	local modname
+
+	if mod then
+		modname = mod._NAME
+	end
+	
+	modname = modname or "cbclua"
+	
+	return modname
+end
+
+function get_task()
+	local taskname = task.get_name(task.get_current())
+	
+	return taskname or "system"
+end
+		
+function log_file_header(time, task, module)
+	return string.format(">>> [%06.2f] <%s> %s:\n", time, task, module)
+end
+		

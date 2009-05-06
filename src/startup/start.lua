@@ -16,14 +16,10 @@ if hasarg("cbcconsole") then
 	debug.traceback = cbctraceback -- patch debug.traceback to not use tabs so they're readable on CBC display
 end
 
--- Load system module
+-- Load system modules
 
 local task = require "std.task"
-local log = require "std.log"
-
-function cbclua_log(msg)
-	return log.log(true, "cbclua", msg)
-end
+local log = require "std.log" -- This replaces global print with something that logs
 
 -- Then do mode-specific setup
 
@@ -36,8 +32,8 @@ end
 -- Finally, enter the task schedular!
 
 if task.run() then
-	cbclua_log("program finished")
+	print("Program finished")
 else
-	cbclua_log("program terminated due to errors")
+	print("Program terminated due to errors")
 	os.exit(1)
 end

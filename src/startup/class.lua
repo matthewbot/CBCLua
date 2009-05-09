@@ -83,7 +83,7 @@ local function make_metamethod(metamethodname)
 	end
 end
 
-local mmnames = { 'add', 'sub', 'mul', 'div', 'mod', 'pow', 'unm', 'concat', 'len', 'eq', 'lt', 'le', 'newindex', 'call' }
+local mmnames = { 'add', 'sub', 'mul', 'div', 'mod', 'pow', 'unm', 'concat', 'len', 'eq', 'lt', 'le', 'newindex', 'call', 'tostring' }
 
 for _,mmname in pairs(mmnames) do
 	mmname = "__" .. mmname

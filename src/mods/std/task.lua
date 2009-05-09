@@ -115,6 +115,23 @@ function sleep_io(file, timeout)
 	return co.yield() == "sleepfile" -- return true if reason was the event, false if timeout
 end
 
+-- Sleeps for multiple signals (for a single signal, using Signal.wait is simpler)
+function sleep_signals(...)
+	local curtask = tasklist[tasklist_current]
+	
+	local sleepsignals = { }
+	for i=1,select("#", ...) do
+		local signal = select(i, ...)
+		
+		sleepsignals[signal] = signal.ctr
+	end
+	
+	curtask.sleepsignals = sleepsignals
+	
+	co.yield()
+end
+
+
 -- Ends the specified task
 function stop(tasknum, nolog)
 	local task = tasklist[tasknum]
@@ -148,8 +165,7 @@ end
 
 function Signal:wait(timeout)
 	local task = tasklist[tasklist_current]
-	task.sleepsignal = self
-	task.signalctr = self.ctr
+	task.sleepsignals = { [self] = self.ctr }
 	
 	if timeout then
 		task.sleeptill = timer.seconds() + timeout
@@ -163,6 +179,7 @@ end
 -- predeclare some functions
 local run_cycle
 local run_sleep
+local check_sleepsignals
 local find_min_sleep
 local find_all_files
 local task_is_ready
@@ -210,6 +227,16 @@ function run_cycle(files)
 	return true
 end
 
+function check_sleepsignals(sleepsignals)
+	for signal, ctr in pairs(sleepsignals) do
+		if signal.ctr > ctr then
+			return true
+		end
+	end
+	
+	return false
+end
+
 function task_is_ready(task, curtime, files)
 	local hascheck = false
 	
@@ -218,9 +245,9 @@ function task_is_ready(task, curtime, files)
 		if files[task.sleepfile] then return "sleepfile" end
 	end
 	
-	if task.sleepsignal ~= nil then
+	if task.sleepsignals ~= nil then
 		hascheck = true
-		if task.sleepsignal.ctr > task.signalctr then return "sleepsignal" end
+		if check_sleepsignals(task.sleepsignals) then return "sleepsignal" end
 	end
 	
 	if task.sleeptill ~= nil then 
@@ -241,7 +268,7 @@ function resume_task(task, reason)
 	local id = task.id
 	local tco = task.co
 	
-	task.sleepsignal = nil -- clear its sleep fields
+	task.sleepsignals = nil -- clear its sleep fields
 	task.sleepfile = nil
 	task.sleeptill = nil
 	
@@ -334,15 +361,21 @@ end
 
 -- returns how much longer the task wants to sleep
 function task_get_sleep(task)
-	if task.sleeptill ~= nil then
-		if task.sleepsignal ~= nil and task.signalctr < task.sleepsignal.ctr then
-			return 0
-		else
-			return task.sleeptill
-		end
-	elseif task.sleepfile ~= nil then
-		return math.huge
-	elseif task.sleepsignal ~= nil then
+	local hascheck = false
+	
+	local sleepsignals = task.sleepsignals
+	
+	if sleepsignals ~= nil and check_sleepsignals(sleepsignals) then
+		return 0
+	end
+	
+	local sleeptill = task.sleeptill
+	
+	if sleeptill ~= nil then 
+		return sleeptill
+	end
+	
+	if task.sleepfile or sleepsignals then
 		return math.huge
 	else
 		return 0

@@ -289,7 +289,7 @@ end
 
 function run_sleep() 
 	local minsleep = find_min_sleep() -- find the amount of time till the next task needs to wake up
-	local files = find_all_files()
+	local files = find_all_files() -- find all files that are blocking tasks on reading
 	
 	local sleeptime
 	
@@ -304,7 +304,7 @@ function run_sleep()
 	end
 	
 	if sleeptime == -1 and #files == 0 then
-		log("deadlock, ending program :(")
+		print("Deadlock detected, ending program :(") -- You won't see this in pthreads
 		os.exit(1)
 	end
 

@@ -19,6 +19,7 @@ end
 -- Load system modules
 
 local task = require "std.task"
+local sched = require "std.task.sched"
 local log = require "std.log" -- This replaces global print with something that logs
 
 -- Then do mode-specific setup
@@ -31,7 +32,7 @@ end
 
 -- Finally, enter the task schedular!
 
-if task.run() then
+if sched.run() then
 	print("Program finished")
 else
 	print("Program terminated due to errors")

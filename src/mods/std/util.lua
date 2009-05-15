@@ -6,6 +6,44 @@ local task = require "std.task"
 local cbc = require "std.cbc"
 local table = require "table"
 local io = require "io"
+
+function wait(pred, time) 
+	if time == nil then
+		time = 0.050
+	end
+
+	while not(pred()) do
+		task.sleep(time)
+	end
+end
+
+function wait_greater(pred, thresh, time)
+	wait(function ()
+		return pred() > thresh
+	end, time)
+end
+
+function wait_less(pred, thresh, time)
+	wait(function ()
+		return pred() < thresh
+	end, time)
+end
+
+function wait_any(args, time)
+	if time == nil then
+		time = 0.050
+	end
+	
+	while true do
+		for name,pred in pairs(args) do
+			if pred() then
+				return name
+			end
+		end
+		
+		task.sleep(time)
+	end
+end
 	
 --[[ Table functions ]]--
 
@@ -43,6 +81,21 @@ function prettyprint(table, indent)
 		else
 			print(indent_str .. k .. ": " .. tostring(v))
 		end
+	end
+end
+
+--[[ Misc functions ]]--
+
+function bind(method, obj)
+	return function (...)
+		return method(obj, ...)
+	end
+end
+
+function bindargs(method, ...)
+	local arg = {...}
+	return function (...)
+		return method(unpack(table.concat(arg, {...}))) -- not particularly efficient
 	end
 end
 

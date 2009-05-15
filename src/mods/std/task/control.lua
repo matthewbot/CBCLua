@@ -7,7 +7,7 @@ local sched = require "std.task.sched"
 local timer = require "std.timer"
 local coroutine = require "coroutine"
 
--- Public functionst
+-- Primitive sleep functions
 
 function sleep(time) -- sleeps until time has passed
 	return sleep_till(time + timer.seconds())
@@ -39,5 +39,46 @@ end
 
 function yield() -- allows other tasks to run but resumes this one ASAP
 	return coroutine.yield{ endtime = 0 }
+end
+
+-- Wait functions (all use predicates)
+
+-- waits until pred is true, or time to pass
+function waitp(pred, time, tdelta) 
+	if type(pred) == "table" and pred.wait then -- if its a table/object with a wait method
+		return pred:wait(time) -- call the wait method instead (this lets it be used with signals for instance)
+	end
+	
+	return wait_anyp({ [true] = pred }, time, tdelta) -- otherwise, this is just wait_anyp with a single predicate
+end
+
+function wait_anyp(preds, time, tdelta)
+	if tdelta == nil then
+		tdelta = 0.05
+	end
+	
+	local endtime 
+	if time ~= nil then 
+		endtime = timer.seconds() + time
+	end
+	
+	while true do
+		for name,pred in pairs(args) do
+			if pred() then
+				return name
+			end
+		end
+		
+		if endtime ~= nil then 
+			local remaining = endtime - timer.seconds()
+			if remaining < 0 then
+				return false
+			end
+			
+			task.sleep(math.min(remaining, tdelta))
+		else
+			task.sleep(tdelta)
+		end
+	end
 end
 	

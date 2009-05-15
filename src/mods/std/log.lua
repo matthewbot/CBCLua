@@ -82,8 +82,14 @@ function get_module(depth)
 end
 
 function get_task()
-	local taskname = task.get_name(task.get_current())
+	local curtask = task.get_current()
 	
+	if curtask then
+		return curtask:get_name()
+	else
+		return "system"
+	end
+
 	return taskname or "system"
 end
 		

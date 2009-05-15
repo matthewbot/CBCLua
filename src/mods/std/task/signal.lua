@@ -15,7 +15,7 @@ import "std.task.control"
 
 --
 
-Signal = create_class "std.task.signal.Signal"
+Signal = create_class "Signal"
 
 function Signal:construct()
 	self.ctr = 0

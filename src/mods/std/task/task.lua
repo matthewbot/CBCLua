@@ -10,7 +10,7 @@ local current_task
 
 -- Task class
 
-Task = create_class "std.task.list.Task"
+Task = create_class "Task"
 
 function Task:construct(func, name, daemon, cstack)
 	self.co = coroutine.create(func, cstack and 0 or -1)

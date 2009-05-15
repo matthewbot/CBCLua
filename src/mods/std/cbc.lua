@@ -11,7 +11,7 @@ global{"sensors", "motors", "servos"}
 
 --[[ Sensors ]]--
 
-local Sensor = create_class("Sensor")
+local Sensor = create_class "Sensor"
 
 function Sensor:construct(num, type)
 	self.num = num
@@ -50,7 +50,7 @@ end
 
 --[[ Motors ]]--
 
-local Motor = create_class("Motor")
+local Motor = create_class "Motor"
 
 function Motor:construct(num)
 	self.num = num
@@ -90,7 +90,7 @@ end
 
 --[[ Servos ]]--
 
-local Servo = create_class("Servo")
+local Servo = create_class "Servo"
 
 function Servo:construct(num)
 	self.num = num

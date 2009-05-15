@@ -6,6 +6,14 @@ local inst_mt = { }
 
 function create_class(name, ...)
 	local class = { }
+	
+	if not name:find(".", 1, true) then
+		local outermod = getfenv(2)
+		if outermod ~= nil then
+			name = getfenv(2)._NAME .. "." .. name
+		end
+	end
+	
 	class.name = name
 	class.mixins = {...}
 	class.methods = { }

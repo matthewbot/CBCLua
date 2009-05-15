@@ -77,6 +77,8 @@ local function make_metamethod(metamethodname)
 		
 		if metamethodname == "__newindex" then
 			rawset(inst, ...)
+		elseif metamethodname == "__tostring" then
+			return "<" .. inst.class.name .. ">"
 		else
 			error("Missing " .. metamethodname .. " metamethod for class " .. inst.class.name, 2)
 		end

@@ -9,6 +9,7 @@ const luaL_Reg luafuncs[] = {
 	{"bk", lbind<bk>},
 	{"motor", lbind<motor>},
 	{"setpwm", lbind<setpwm>},
+	{"getpwm", lbind<getpwm>},
 	{"off", lbind<off>},
 	
 	{"mav", lbind<mav>},

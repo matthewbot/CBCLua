@@ -74,7 +74,7 @@ local function make_motor_wrapper(rawfuncname, realfuncname)
 	end
 end
 
-local motorfuncnames = { "fd", "bk", "off", "mav", "mtp", "mrp" }
+local motorfuncnames = { "fd", "bk", "off", "mav", "mtp", "mrp", "getpwm", "setpwm" }
 for _,funcname in ipairs(motorfuncnames) do
 	Motor[funcname] = make_motor_wrapper(funcname)
 end
@@ -82,6 +82,7 @@ end
 Motor.getpos = make_motor_wrapper("get_motor_position_counter", "getpos")
 Motor.clearpos = make_motor_wrapper("clear_motor_position_counter", "clearpos")
 Motor.getdone = make_motor_wrapper("get_motor_done", "getdone")
+Motor.pwm = make_motor_wrapper("setpwm", "pwm")
 
 motors = { }
 for i=0,3 do

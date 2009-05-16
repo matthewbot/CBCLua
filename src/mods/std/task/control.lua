@@ -46,10 +46,10 @@ end
 -- waits until pred is true, or time to pass
 function wait(pred, time, tdelta) 
 	if type(pred) == "table" and pred.wait then -- if its a table/object with a wait method
-		return pred:wait(time) -- call the wait method instead (this lets it be used with signals for instance)
+		return pred:wait(time, tdelta) -- call the wait method instead (this lets it be used with signals for instance)
 	end
 	
-	return wait_any_p({ [true] = pred }, time, tdelta) -- otherwise, this is just wait_anyp with a single predicate
+	return wait_any({ [true] = pred }, time, tdelta) -- otherwise, this is just wait_any with a single predicate
 end
 
 function wait_any(preds, time, tdelta)
@@ -63,7 +63,7 @@ function wait_any(preds, time, tdelta)
 	end
 	
 	while true do
-		for name,pred in pairs(args) do
+		for name,pred in pairs(preds) do
 			if pred() then
 				return name
 			end

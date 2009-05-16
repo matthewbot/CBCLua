@@ -38,7 +38,7 @@ function Signal:wait(time)
 			if remaining <= 0 then return false end
 			if self.ctr > startctr then return true end		
 			
-			sleep_cycle_before(remaining)
+			sleep_cycle_till(remaining)
 		end
 	else
 		repeat

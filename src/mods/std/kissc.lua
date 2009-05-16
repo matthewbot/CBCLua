@@ -5,7 +5,8 @@ local timer = require "std.timer"
 local raw = require "raw.cbc"
 
 -- define some common KISS-C functions in terms of the cbclua standard library
-
+start_process = task.start
+kill_process = task.stop
 sleep = task.sleep
 defer = task.yield
 seconds = timer.seconds
@@ -14,9 +15,7 @@ seconds = timer.seconds
 -- putting the entire process to sleep
 
 function block_motor_done(mot)
-	while not(raw.get_motor_done(mot))
-		sleep(0.020)
-	end
+	task.wait(function () return raw.get_motor_done(mot) end)
 end
 
 bmd = block_motor_done

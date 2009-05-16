@@ -44,15 +44,15 @@ end
 -- Wait functions (all use predicates)
 
 -- waits until pred is true, or time to pass
-function waitp(pred, time, tdelta) 
+function wait(pred, time, tdelta) 
 	if type(pred) == "table" and pred.wait then -- if its a table/object with a wait method
 		return pred:wait(time) -- call the wait method instead (this lets it be used with signals for instance)
 	end
 	
-	return wait_anyp({ [true] = pred }, time, tdelta) -- otherwise, this is just wait_anyp with a single predicate
+	return wait_any_p({ [true] = pred }, time, tdelta) -- otherwise, this is just wait_anyp with a single predicate
 end
 
-function wait_anyp(preds, time, tdelta)
+function wait_any(preds, time, tdelta)
 	if tdelta == nil then
 		tdelta = 0.05
 	end

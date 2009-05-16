@@ -19,7 +19,7 @@ startLua command calls = do
 	
 startLocalLua = startLua "lua -i 2>&1"
 
-startRemoteLua ipaddr = startLua $ "ssh root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\" 2>&1"
+startRemoteLua ipaddr = startLua $ "ssh -o ConnectTimeout=1 root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\" 2>&1"
 	
 closeLua :: Lua -> IO ()
 closeLua lua = do

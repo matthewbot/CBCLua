@@ -31,8 +31,8 @@ main = do
 				clearLua state Nothing
 				exitWith ExitSuccess
 			InputAction str -> do
-				Just lua <- readIORef luaref
-				writeLua lua str
+				lua <- readIORef luaref
+				when (isJust lua) $ writeLua (fromJust lua) str
 			ConnectIPAction ip -> do
 				startRemoteInteraction state ip
 			DisconnectAction -> do
@@ -40,11 +40,13 @@ main = do
 			DownloadProgramAction dir -> do
 				downloadProgram state dir
 			ReloadProgramAction -> do
-				Just dir <- readIORef programdirref
-				downloadProgram state dir
+				mdir <- readIORef programdirref
+				case mdir of
+					Just dir -> downloadProgram state dir
+					Nothing -> uiPutSysStrLn ui "\nMust download program first!"
 				
 handleOutput state msg = uiPutStr (getUI state) msg	
-handleError state = putStrLn "handleError" >> startLocalInteraction state
+handleError state = uiPutSysStrLn (getUI state) "Connection Error!" >> startLocalInteraction state
 
 makeCallbacks :: InteractState -> LuaCallbacks
 makeCallbacks state = LuaCallbacks (handleOutput state) (handleError state)
@@ -71,13 +73,17 @@ startRemoteInteraction state ip = do
 downloadProgram state dir = do
 	let ui = getUI state
 	writeIORef (getProgramDirRef state) $ Just dir
-	Just ip <- readIORef (getCurIPRef state)
-	uiPutSysStrLn ui "\nDownloading..."
-	forkIO $ do
-		let command = "tar -C \"" ++ dir ++ "\" -czf - . --exclude=\"^.*\" --exclude=\"*~\" -h -p | ssh root@" ++ ip ++ " \"rm -rf /mnt/user/code/cbclua/code/*; tar -C /mnt/user/code/cbclua/code -zxf - -p\""
-		putStrLn command
-		system command
-		uiPutSysStr ui "Done!"
-		startRemoteInteraction state ip
+	mip <- readIORef (getCurIPRef state)
+	when (isJust mip) $ do
+		let ip = fromJust mip
+		uiPutSysStrLn ui "\nDownloading..."
+		forkIO $ do
+			let command = "tar -C \"" ++ dir ++ "\" -czf - . --exclude=\"^.*\" --exclude=\"*~\" -h -p | ssh root@" ++ ip ++ " \"rm -rf /mnt/user/code/cbclua/code/*; tar -C /mnt/user/code/cbclua/code -zxf - -p\""
+			putStrLn command
+			system command
+			uiPutSysStr ui "Done!"
+			startRemoteInteraction state ip
+		return ()
+	when (isNothing mip) $ uiPutSysStrLn ui "\nCan't download while not connected!"
 	return ()
 

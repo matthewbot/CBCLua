@@ -36,8 +36,8 @@ else
 CC := arm-linux-g++
 LD := arm-linux-g++
 STRIP := arm-linux-strip
-cflags += -Os -DCBCLUA_CBC -mcpu=arm926ej-s -ffast-math
-ldflags += -ffast-math -Os
+cflags += -O3 -DCBCLUA_CBC -mcpu=arm926ej-s -ffast-math
+ldflags += -ffast-math -O3
 endif
 
 all: $(modbin)

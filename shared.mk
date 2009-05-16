@@ -19,11 +19,10 @@ modbuilddir := $(rootdir)/build/$(arch)/$(modname)
 moddir := $(rootdir)/$(archdir)/cmods/$(modpath)
 modbin := $(moddir)/$(modname).so
 includedir := $(rootdir)/src/include
-archincludedir := $(rootdir)/src/include-$(arch)
 objects := $(patsubst %.cpp,%.o,$(addprefix $(modbuilddir)/,$(wildcard *.cpp))) $(sharedobjs)
 headers := $(wildcard *.h) $(wildcard *.hpp) $(wildcard $(includedir)/*.h) $(wildcard $(includedir)/*.hpp) $(sharedheaders)
 
-cflags += -Wall -pipe -fpic -I$(includedir) -I$(archincludedir) -I$(shareddir)
+cflags += -Wall -pipe -fpic -I$(includedir) -I$(shareddir)
 ldflags += -shared -ldl
 
 ifeq '$(arch)' 'local'
@@ -36,7 +35,7 @@ else
 CC := arm-linux-g++
 LD := arm-linux-g++
 STRIP := arm-linux-strip
-cflags += -O3 -DCBCLUA_CBC -mcpu=arm926ej-s -ffast-math
+cflags += -O3 -DCBCLUA_CBC -mcpu=arm926ej-s -ffast-math -I$(rootdir)/src/lua-5.1.4-arm
 ldflags += -ffast-math -O3
 endif
 

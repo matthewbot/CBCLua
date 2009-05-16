@@ -223,3 +223,4 @@ cbclua_bin := ../../cbclua/lua
 cbclua_install: $(cbclua_bin)
 $(cbclua_bin): $(LUA_T)
 	cp $(LUA_T) $(cbclua_bin)
+	arm-linux-strip $(cbclua_bin)

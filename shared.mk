@@ -8,6 +8,8 @@ endif
 
 rootdir := ../../..
 
+include $(rootdir)/config.mk
+
 shareddir := $(rootdir)/src/cmods/shared
 sharedbuilddir := $(rootdir)/build/$(arch)/shared
 sharedobjs := $(patsubst %.cpp,%.o,$(addprefix $(sharedbuilddir)/,$(notdir $(wildcard $(shareddir)/*.cpp))))
@@ -28,7 +30,7 @@ ifeq '$(arch)' 'local'
 CC := g++
 LD := g++
 STRIP := strip
-cflags += -O2 -DCBCLUA_COMP -I/usr/include/lua5.1
+cflags += -O2 -DCBCLUA_COMP $(CONF_LOCAL_LUA_CFLAGS)
 ldflags += -O2
 else
 CC := arm-linux-g++

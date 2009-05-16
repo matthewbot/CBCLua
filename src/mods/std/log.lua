@@ -76,9 +76,7 @@ function get_module(depth)
 		modname = mod._NAME
 	end
 	
-	modname = modname or "cbclua"
-	
-	return modname
+	return modname or "cbclua"
 end
 
 function get_task()
@@ -89,8 +87,6 @@ function get_task()
 	else
 		return "system"
 	end
-
-	return taskname or "system"
 end
 		
 function log_file_header(time, task, module)

@@ -17,28 +17,32 @@ modbuilddir := $(rootdir)/build/$(arch)/$(modname)
 moddir := $(rootdir)/$(archdir)/cmods/$(modpath)
 modbin := $(moddir)/$(modname).so
 includedir := $(rootdir)/src/include
+archincludedir := $(rootdir)/src/include-$(arch)
 objects := $(patsubst %.cpp,%.o,$(addprefix $(modbuilddir)/,$(wildcard *.cpp))) $(sharedobjs)
 headers := $(wildcard *.h) $(wildcard *.hpp) $(wildcard $(includedir)/*.h) $(wildcard $(includedir)/*.hpp) $(sharedheaders)
 
-cflags += -Wall -pipe -fpic -I$(includedir) -I$(shareddir) -ffast-math -Os
-ldflags += -shared -ldl -ffast-math -Os
+cflags += -Wall -pipe -fpic -I$(includedir) -I$(archincludedir) -I$(shareddir)
+ldflags += -shared -ldl
 
 ifeq '$(arch)' 'local'
 CC := g++
 LD := g++
-cflags += -O2 -DCBCLUA_COMP
+STRIP := strip
+cflags += -O2 -DCBCLUA_COMP -I/usr/include/lua5.1
+ldflags += -O2
 else
 CC := arm-linux-g++
 LD := arm-linux-g++
-cflags += -Os -DCBCLUA_CBC -mcpu=arm926ej-s
+STRIP := arm-linux-strip
+cflags += -Os -DCBCLUA_CBC -mcpu=arm926ej-s -ffast-math
+ldflags += -ffast-math -Os
 endif
-
-
 
 all: $(modbin)
 
 $(modbin): $(objects) | $(moddir)
 	$(LD) -o $(modbin) $(objects) $(ldflags)
+	$(STRIP) $(modbin)
 	
 $(modbuilddir)/%.o: %.cpp $(headers) | $(modbuilddir)
 	$(CC) -c $< -o $@ $(cflags)

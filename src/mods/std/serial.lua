@@ -4,7 +4,7 @@ module(...)
 
 local task = require 'std.task'
 local timer = require 'std.timer'
-local util = require 'std.util'
+local func = require 'std.func'
 local string = require 'string'
 local io = require 'io'
 
@@ -26,7 +26,7 @@ function SerialPort:construct()
 	self.rx:setvbuf("no")
 	self.tx:setvbuf("no")
 	self.readsig = task.Signal()
-	self.readtask = task.start(util.bind(SerialPort.read_task, self), "serial read", true)
+	self.readtask = task.start(func.bind(self, "read_task"), "serial read", true)
 	
 	serial_instance = self
 	

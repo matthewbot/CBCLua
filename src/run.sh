@@ -33,4 +33,4 @@ else
 	LUA_BIN="lua"
 fi
 
-$LUA_BIN startup/start.lua $HOST $MODE # start cbclua
+exec $LUA_BIN startup/start.lua $HOST $MODE # start cbclua

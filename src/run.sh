@@ -3,7 +3,6 @@
 echo "CBCLua 0.4 loading..."
 echo "Developed at Nease High, FL"
 
-MODE=$1
 cd `dirname $0`
 
 export LUA_PATH="code/?.lua;code/?/mod.lua;mods/?.lua;mods/?/mod.lua"
@@ -16,7 +15,13 @@ else
 	HOST="pc"
 fi
 
-if [ "$MODE" == "cbcconsole" ] && [ "$HOST" == "chumby" ]; then # if we're being run from the console
+if [ "$1" == "interact" ]; then
+	MODE="interact"
+else
+	MODE="console"
+fi
+
+if [ "$HOST" == "chumby" ] && [ "$MODE" == "console" ]; then # if we're being run from the console
 	if [ `iwconfig 2>&1 | grep WLAN | wc -l` == "0" ]; then # if theres no wifi plugged in
 		./loadusb.sh # do USB loading stuffs
 	fi
@@ -28,4 +33,4 @@ else
 	LUA_BIN="lua"
 fi
 
-$LUA_BIN startup/start.lua $MODE # start lua
+$LUA_BIN startup/start.lua $HOST $MODE # start cbclua

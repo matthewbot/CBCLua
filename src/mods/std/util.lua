@@ -1,11 +1,20 @@
 module("std.util")
 
---[[ Waiting functions ]]--
-
 local task = require "std.task"
 local cbc = require "std.cbc"
 local table = require "table"
 local io = require "io"
+
+--[[ System functions ]]--
+
+function get_host() -- pc or chumby
+	return _G.host
+end
+
+function get_mode() -- interact or console
+	return _G.mode
+end
+
 	
 --[[ Table functions ]]--
 

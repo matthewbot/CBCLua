@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 int main(int argc, char **argv) {
-	execl("/mnt/user/code/cbclua/run.sh", "cbcconsole", (char *)0); // exec replaces the current process with a new one
+	execl("/mnt/user/code/cbclua/run.sh", (char *)0); // exec replaces the current process with a new one
 	
 	fprintf(stderr, "Failed to exec run.sh! Please re-install cbclua\n");
 }

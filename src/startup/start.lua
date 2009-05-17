@@ -5,16 +5,14 @@ io.stdin:setvbuf("no")
 
 -- load the other startup files
 
-startupdir = arg[0]:match("(.*)\/")
-dofile(startupdir .. "/class.lua")
-dofile(startupdir .. "/module.lua")
-dofile(startupdir .. "/util.lua")
-
--- Scan to see if we were launched in cbc mode
-
-if hasarg("cbcconsole") then
-	debug.traceback = cbctraceback -- patch debug.traceback to not use tabs so they're readable on CBC display
+local startupdir = arg[0]:match("(.*)\/") .. "/"
+local function dostartup(file)
+	dofile(startupdir .. file)
 end
+
+dostartup("class.lua")
+dostartup("module.lua")
+dostartup("util.lua")
 
 -- Load system modules
 
@@ -22,12 +20,19 @@ local task = require "std.task"
 local sched = require "std.task.sched"
 local log = require "std.log" -- This replaces global print with something that logs
 
--- Then do mode-specific setup
+-- Then do mode and host specific setup
 
-if hasarg("interact") then
-	dofile(startupdir .. "/interact.lua")
+host = arg[1]
+mode = arg[2]
+
+if mode == "interact" then
+	dostartup("interact.lua")
 else
-	dofile(startupdir .. "/runmain.lua")
+	if host == "chumby" then
+		debug.traceback = cbctraceback
+	end
+	
+	dostartup("runmain.lua")
 end
 
 -- Finally, enter the task schedular!

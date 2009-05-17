@@ -15,6 +15,10 @@ function get_mode() -- interact or console
 	return _G.mode
 end
 
+function on_cbc_console() -- true if we're on a CBC in console mode, false if not (usually the only thing that matters)
+	return get_host() == "cbc" and get_mode() == "console"
+end
+
 	
 --[[ Table functions ]]--
 
@@ -57,13 +61,42 @@ end
 
 --[[ User interaction functions ]]--
 
+function wait_enter()
+	if on_cbc_console() then
+		error("Can't call wait_enter on the cbc console!")
+	end
+	
+	task.sleep_io(io.stdin)
+	io.read()
+end
+
 function prompt(msg)
-	io.writeln(msg, " (press A)")
-	wait(cbc.a_button)
+	io.write(msg)
+	if on_cbc_console() then
+		io.writeln(" (press A)")
+		wait(cbc.a_button)
+	else
+		io.write(" (push Enter)")
+		wait_enter()
+	end
 end
 
 function wait_continue(msg)
 	io.writeln(msg)
-	io.writeln("Press A to continue")
-	wait(cbc.a_button)
+	if on_cbc_console() then
+		io.writeln("Press A to continue")
+		wait(cbc.a_button)
+	else
+		io.write("Press Enter to continue")
+		wait_enter()
+	end
+end
+
+--[[ Other functions ]]--
+
+function bind(obj, methname)
+	local func = obj.methname
+	return function (...)
+		return func(obj, ...)
+	end
 end

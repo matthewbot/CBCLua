@@ -56,7 +56,7 @@ function wait_for_start(light_sensor, time)
 	print("Match started")
 	start_time = timer.seconds()
 	set_time_func(get_game_time) -- this makes the logging system report the time in game time
-	task.start(shutdown_task, "shutdown task")
+	task.start(shutdown_task, "shutdown task", true)
 end
 
 -- Helpers

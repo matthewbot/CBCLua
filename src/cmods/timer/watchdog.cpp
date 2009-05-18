@@ -13,7 +13,7 @@ static volatile bool watchdog_enabled=false;
 static volatile bool watchdog_started=false;
 
 extern "C" void *watchdog_func(void *unused) {
-	while (watchdog_started) {
+	while (true) {
 		if (watchdog_enabled && raw_mseconds() - watchdog_lasttime > 500) {
 			cerr << "watchdog: timer passed. program is likely stalled" << endl;
 			watchdog_enabled = false;
@@ -30,17 +30,15 @@ static void watchdog_start() {
 		cerr << "watchdog: failed to create watchdog thread" << endl;
 		exit(1);
 	}
-	
 	watchdog_started = true;
 }
 
 void watchdog_term() {
-	watchdog_started = false;
-	pthread_join(watchdogthread, NULL);
+	// So far it seems like the thread dies on its own
 }
 
 void watchdog() {
-	if (!watchdog_started)
+	if (watchdog_started == false)
 		watchdog_start();
 	
 	watchdog_lasttime = raw_mseconds();

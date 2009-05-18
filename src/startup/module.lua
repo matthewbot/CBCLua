@@ -140,6 +140,10 @@ function mod_mt.__index(mod, key)
 		return mod
 	end
 	
+	if key == 'super' then
+		return super
+	end
+	
 	local val = _G[key] -- otherwise, go through global functions
 	if type(val) == "function" then
 		return val

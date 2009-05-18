@@ -95,7 +95,7 @@ end
 --[[ Other functions ]]--
 
 function bind(obj, methname)
-	local func = obj.methname
+	local func = obj[methname]
 	return function (...)
 		return func(obj, ...)
 	end

@@ -37,9 +37,11 @@ end
 
 -- Finally, enter the task schedular!
 
-if sched.run() then
+local ok, msg = sched.run()
+if ok then
 	print("Program finished")
 else
+	print(msg)
 	print("Program terminated due to errors")
 	os.exit(1)
 end

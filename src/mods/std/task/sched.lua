@@ -1,6 +1,7 @@
 module(...)
 
 local timer = require "std.timer"
+local util = require "std.util"
 local os = require "os"
 local math = require "math"
 local table = require "table"
@@ -29,10 +30,14 @@ end
 
 function run()
 	while true do
-		local endtime, files = run_cycle()
+		local ok, msg, endtime, files = run_cycle()
+	
+		if ok == false then
+			return false, msg
+		end
 	
 		if real_count() == 0 then
-			return
+			return true
 		end
 	
 		if wake_all_flag then
@@ -52,21 +57,30 @@ function run_cycle()
 	local files_set = { }
 
 	for task in running_tasks() do
-		local result = task:resume()
-		local endtime = result.endtime
-		local file = result.file
+		local ok, result = task:resume()
 		
-		if endtime and endtime < minendtime then
-			minendtime = endtime
+		if not ok then
+			return false, result
 		end
+		
+		if task:status() == "suspended" then
+			local endtime = result.endtime
+			local file = result.file
+		
+			if endtime and endtime < minendtime then
+				minendtime = endtime
+			end
 			
-		if file and files_set[file] == nil then
-			files_set[file] = true
-			table.insert(files, file)
-		end	
+			if file and files_set[file] == nil then
+				files_set[file] = true
+				table.insert(files, file)
+			end
+		else -- dead task
+			stop(task)
+		end
 	end
 	
-	return minendtime, files
+	return true, "", minendtime, files
 end
 
 function run_sleep(endtime, files) 

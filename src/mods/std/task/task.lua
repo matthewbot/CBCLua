@@ -26,6 +26,10 @@ function Task:is_daemon()
 	return self.daemon == true
 end
 
+function Task:status()
+	return coroutine.status(self.co)
+end
+
 function Task:resume()
 	assert(current_task == nil, "Can't resume task from within a task!")
 
@@ -36,10 +40,10 @@ function Task:resume()
 	current_task = nil
 	
 	if ok then
-		return result
+		return true, result
 	else
 		local msg = debug.traceback(co, "error in task '" .. self.name .. "':\n" .. result)
-		error(msg, 0)
+		return false, msg
 	end
 end
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "CBCLua 0.4 loading..."
-echo "Developed at Nease High, FL"
+echo "CBCLua 0.5 loading..."
+echo "Developed at Nease High School, FL"
 
 cd `dirname $0`
 

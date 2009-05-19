@@ -2,7 +2,7 @@ module(...)
 
 local task = require "std.task"
 local math = require "math"
-import "raw.cbc"
+local raw = require "raw.cbc"
 
 global{
 	image_width = 160,
@@ -39,7 +39,7 @@ end
 
 function Channel:get_blob(num)
 	if num == nil then
-		num == 0
+		num = 0
 	end
 
 	local blob = self.blobs[num]
@@ -47,10 +47,12 @@ function Channel:get_blob(num)
 		return blob
 	end
 	
-	blob = Blob(num)
+	blob = Blob(num, self)
 	self.blobs[num] = blob
 	return blob
 end
+
+Channel.__index = Channel.get_blob
 
 function Channel:get_count()
 	return track_count(self.num)
@@ -84,12 +86,12 @@ end
 function Blob:__index(key)
 	key = "track_" .. key
 	
-	local func = self[key]
+	local func = rawget(self, key)
 	if func then
 		return func(self)
 	end
 
-	func = _M[key]
+	func = raw[key]
 	if func then
 		return func(self.chan.num, self.num)
 	end

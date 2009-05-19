@@ -75,9 +75,9 @@ function wait_any(preds, time, tdelta)
 				return false
 			end
 			
-			task.sleep(math.min(remaining, tdelta))
+			sleep(math.min(remaining, tdelta))
 		else
-			task.sleep(tdelta)
+			sleep(tdelta)
 		end
 	end
 end

@@ -56,6 +56,8 @@ function run_cycle()
 	local files = { }
 	local files_set = { }
 
+	start_new_tasks()
+
 	for task in running_tasks() do
 		local ok, result = task:resume()
 		
@@ -63,7 +65,9 @@ function run_cycle()
 			return false, result
 		end
 		
-		if task:status() == "suspended" then
+		local status = task:status()
+		
+		if result then
 			local endtime = result.endtime
 			local file = result.file
 		
@@ -75,7 +79,7 @@ function run_cycle()
 				files_set[file] = true
 				table.insert(files, file)
 			end
-		else -- dead task
+		elseif status == "dead" then
 			stop(task)
 		end
 	end

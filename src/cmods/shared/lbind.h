@@ -39,6 +39,11 @@ template <void (* func)(int, int)> static int lbind(lua_State *L) {
 	return 0;
 }
 
+template <void (* func)(int, int, int, int, int, int, int)> static int lbind(lua_State *L) {
+	func(checkint(L, 1), checkint(L, 2), checkint(L, 3), checkint(L, 4), checkint(L, 5), checkint(L, 6), checkint(L, 7));
+	return 0;
+}
+
 template <int (* func)(int, int)> static int lbind(lua_State *L) {
 	int ret = func(checkint(L, 1), checkint(L, 2));
 	lua_pushinteger(L, ret);

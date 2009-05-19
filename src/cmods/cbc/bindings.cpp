@@ -19,6 +19,7 @@ const luaL_Reg luafuncs[] = {
 	{"get_motor_done", lbind<get_motor_done>},
 	{"clear_motor_position_counter", lbind<clear_motor_position_counter>},
 	{"get_motor_position_counter", lbind<get_motor_position_counter>},
+	{"set_pid_gains", lbind<set_pid_gains>},
 	
 	{"accel_x", lbind<accel_x>},
 	{"accel_y", lbind<accel_y>},

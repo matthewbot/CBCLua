@@ -11,7 +11,7 @@ global{"sensors", "motors", "servos"}
 
 --[[ Sensors ]]--
 
-local Sensor = create_class "Sensor"
+Sensor = create_class "Sensor"
 
 function Sensor:construct(num, type)
 	self.num = num
@@ -50,7 +50,7 @@ end
 
 --[[ Motors ]]--
 
-local Motor = create_class "Motor"
+Motor = create_class "Motor"
 
 function Motor:construct(num)
 	self.num = num
@@ -74,7 +74,7 @@ local function make_motor_wrapper(rawfuncname, realfuncname)
 	end
 end
 
-local motorfuncnames = { "fd", "bk", "off", "mav", "mtp", "mrp", "getpwm", "setpwm" }
+local motorfuncnames = { "fd", "bk", "off", "mav", "mtp", "mrp", "getpwm", "setpwm", "set_pid_gains" }
 for _,funcname in ipairs(motorfuncnames) do
 	Motor[funcname] = make_motor_wrapper(funcname)
 end
@@ -91,7 +91,7 @@ end
 
 --[[ Servos ]]--
 
-local Servo = create_class "Servo"
+Servo = create_class "Servo"
 
 function Servo:construct(num)
 	self.num = num

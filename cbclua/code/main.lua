@@ -5,10 +5,10 @@ module("main")
 -- is loaded from a thumb drive
 
 local cbc = require "std.cbc"
-local util = require "std.util"
+local task = require "std.task"
 
 function main()
 	print("Push black button")
-	util.wait(cbc.black_button)
+	task.wait(cbc.black_button)
 	print("Hello World! From lua!")
 end

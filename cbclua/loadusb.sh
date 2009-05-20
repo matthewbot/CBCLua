@@ -24,16 +24,6 @@ while true; do
 		fi
 	fi
 	
-	if [ -e /mnt/usercode/cbclua.tgz ]; then
-		echo "Applying USB update 'cbclua.tgz'"
-		rm -rf /mnt/user/code/cbclua
-		tar -xzfp /mnt/usercode/cbclua.tgz -C /mnt/user/code
-		umount /mnt/usercode
-		sync
-		echo "Update complete"
-		exit 0
-	fi
-	
 	if [ -d /mnt/usercode/lua ]; then
 		echo "Loading USB code in folder 'lua'"
 		rm -rf /mnt/user/code/cbclua/code

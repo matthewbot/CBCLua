@@ -79,8 +79,8 @@ downloadProgram state dir = do
 		uiPutSysStrLn ui "\nDownloading..."
 		forkIO $ do
 			let command = "tar -C \"" ++ dir ++ "\" -czf - . --exclude=\"^.*\" --exclude=\"*~\" -h -p | ssh root@" ++ ip ++ " \"rm -rf /mnt/user/code/cbclua/code/*; tar -C /mnt/user/code/cbclua/code -zxf - -p\""
-			putStrLn command
-			system command
+			(_, _, _, handle) <- runInteractiveCommand command 
+			waitForProcess handle
 			uiPutSysStr ui "Done!"
 			startRemoteInteraction state ip
 		return ()

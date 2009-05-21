@@ -36,7 +36,6 @@ readProc handle callbacks = do
 	result <- try cpyloop
 	case result of
 		Left error -> do
-		 	putStrLn $ "readProc going down: " ++ (show error)
 		 	when (isEOFError error) $ onTerminate callbacks
 		Right _ ->
 			return ()

@@ -56,8 +56,6 @@ function run_cycle()
 	local files = { }
 	local files_set = { }
 
-	start_new_tasks()
-
 	for task in running_tasks() do
 		local ok, result = task:resume()
 		
@@ -82,6 +80,10 @@ function run_cycle()
 		elseif status == "dead" then
 			stop(task)
 		end
+	end
+	
+	if start_new_tasks() then -- if any new tasks were started
+		wake_all() -- we need to wake up all tasks again so that they get started and sleep information gets recomputed
 	end
 	
 	return true, "", minendtime, files

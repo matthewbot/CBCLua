@@ -8,35 +8,42 @@ import "std.task.task"
 
 local tasks = { } -- set of all tasks (keys are tasks, value is always true)
 local tasks_tostart = { } -- set of all tasks waiting to be started
+local task_count = 0
 
 -- Public functions
 
 function start(...) -- args are func, name, daemon, cstack
 	local task = Task(...)
 	tasks_tostart[task] = true
+	task_count = task_count + 1
 	return task
+end
+
+function async(func)
+	return start(func, "async task", true)
 end
 
 function stop(task)
 	if tasks_tostart[task] then
 		tasks_tostart[task] = nil
-		return
-	end
-
-	if tasks[task] == nil then
-		error("Attempting to stop non-existent task " .. task, 2)
+	else
+		if tasks[task] == nil then
+			error("Attempting to stop non-existent task " .. task, 2)
+		end
+	
+		tasks[task] = nil
 	end
 	
-	tasks[task] = nil
+	task_count = task_count - 1
 end
 
 function exit()
-	tasks[get_current()] = nil
+	stop(get_current())
 	coroutine.yield()
 end
 
 function count()
-	return #tasks
+	return task_count
 end
 
 function real_count()

@@ -14,7 +14,7 @@ Task = create_class "Task"
 
 function Task:construct(func, name, daemon, cstack)
 	self.co = coroutine.create(func, cstack and 0 or -1)
-	self.name = name
+	self.name = name or "unknown"
 	self.daemon = daemon
 end
 

@@ -1,8 +1,10 @@
 module(...)
 
 local task = require "std.task"
-local math = require "math"
+local util = require "std.util"
 local raw = require "raw.cbc"
+local math = require "math"
+local os = require "os"
 
 global{
 	image_width = 160,
@@ -143,6 +145,13 @@ for i=1,4 do
 	channels[i] = Channel(i)
 end
 
-	
+-- CBC performance tweak
+
+local util = require "std.util"
+
+if util.get_host() == "chumby" then
+	os.execute("echo 0 > /sys/video4linux/video0/auto_exposure")
+	os.execute("echo 1 > /sys/video4linux/video0/exposure")
+end
 		
 		

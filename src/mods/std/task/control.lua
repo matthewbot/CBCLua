@@ -6,6 +6,7 @@ module(...)
 local sched = require "std.task.sched"
 local timer = require "std.timer"
 local coroutine = require "coroutine"
+local math = require "math"
 
 -- Primitive sleep functions
 

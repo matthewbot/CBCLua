@@ -14,14 +14,15 @@ global{
 -- Public Functions
 
 function update()
-	task.wait(track_is_new_data_available)
-	track_update()
+	task.wait(function () return raw.track_is_new_data_available() == 1 end)
+	raw.track_update()
 end
 
 function run(func)
 	local result
 
 	repeat
+		task.yield()
 		update()
 		result = func()
 	until result ~= nil
@@ -57,7 +58,7 @@ end
 Channel.__index = Channel.get_blob
 
 function Channel:get_count()
-	return track_count(self.num)
+	return raw.track_count(self.num)
 end
 
 function Channel:get_all()
@@ -88,7 +89,7 @@ end
 function Blob:__index(key)
 	key = "track_" .. key
 	
-	local func = rawget(self, key)
+	local func = Blob[key] -- look up as a function of Blob
 	if func then
 		return func(self)
 	end
@@ -141,7 +142,7 @@ end
 
 global("channels", { })
 
-for i=1,4 do 
+for i=0,3 do 
 	channels[i] = Channel(i)
 end
 
@@ -150,8 +151,8 @@ end
 local util = require "std.util"
 
 if util.get_host() == "chumby" then
-	os.execute("echo 0 > /sys/video4linux/video0/auto_exposure")
-	os.execute("echo 1 > /sys/video4linux/video0/exposure")
+	os.execute("echo 0 > /sys/class/video4linux/video0/auto_exposure")
+	os.execute("echo 1 > /sys/class/video4linux/video0/exposure")
 end
 		
 		

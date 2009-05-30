@@ -29,6 +29,9 @@ function check_io_flag(file)
 end
 
 function run()
+	collectgarbage("count") -- do a full garbage collection since we accumulate stuff loading the program
+	collectgarbage("stop") -- than stop the automatic collector
+
 	while true do
 		local ok, msg, endtime, files = run_cycle()
 	
@@ -98,6 +101,15 @@ function run_sleep(endtime, files)
 		sleepamt = endtime - timer.seconds()
 		if sleepamt < 0 then
 			sleepamt = 0
+		end
+	end
+	
+	if sleepamt ~= 0 then -- if we're about to go to sleep
+		collectgarbage("step") -- perform an incremental gc step
+		collectgarbage("stop") -- have to re-stop it again
+		
+		if sleepamt ~= -1 then	
+			sleepamt = endtime - timer.seconds()
 		end
 	end
 	

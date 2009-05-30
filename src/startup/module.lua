@@ -144,6 +144,10 @@ function mod_mt.__index(mod, key)
 		return super
 	end
 	
+	if mod._GLOBALS[key] then -- the global is defined, but it doesn't exist
+		return nil -- return nil
+	end
+	
 	local val = _G[key] -- otherwise, go through global functions
 	if type(val) == "function" then
 		return val
@@ -186,7 +190,11 @@ function mod_mt.__newindex(mod, key, value)
 		return -- ignore it, lua's module system is creating globals inside our tables
 	end
 	
-	error("Undefined global '" .. key .. "'", 2)
+	if mod._GLOBALS[key] then
+		rawset(mod, key, value)
+	else
+		error("Undefined global '" .. key .. "'", 2)
+	end
 end
 
 -- This function is used to do delayed module loading

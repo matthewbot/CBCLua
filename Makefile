@@ -3,7 +3,7 @@ luadir := lua-5.1.4
 modules := $(filter-out %shared, $(wildcard src/cmods/*))
 cbc-modules := $(addprefix cbc-, $(modules))
 
-all: $(modules)
+all: $(modules) interact
 
 .PHONY: local
 local: $(modules)

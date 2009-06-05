@@ -61,13 +61,13 @@ end
 
 --[[ User interaction functions ]]--
 
-function wait_enter()
+function wait_enter(fmt)
 	if on_cbc_console() then
 		error("Can't call wait_enter on the cbc console!")
 	end
 	
 	task.sleep_io(io.stdin)
-	io.read()
+	return io.read(fmt)
 end
 
 function prompt(msg)

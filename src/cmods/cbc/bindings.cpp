@@ -26,6 +26,7 @@ const luaL_Reg luafuncs[] = {
 	{"accel_z", lbind<accel_z>},
 	
 	{"set_servo_position", lbind<set_servo_position>},
+	{"get_servo_position", lbind<get_servo_position>},
 	{"enable_servos", lbind<enable_servos>},
 	{"disable_servos", lbind<disable_servos>},
 	

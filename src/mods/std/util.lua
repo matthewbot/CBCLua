@@ -74,7 +74,7 @@ function prompt(msg)
 	io.write(msg)
 	if on_cbc_console() then
 		io.writeln(" (press A)")
-		wait(cbc.a_button)
+		task.wait(cbc.a_button)
 	else
 		io.write(" (push Enter)")
 		wait_enter()
@@ -85,7 +85,7 @@ function wait_continue(msg)
 	io.writeln(msg)
 	if on_cbc_console() then
 		io.writeln("Press A to continue")
-		wait(cbc.a_button)
+		task.wait(cbc.a_button)
 	else
 		io.write("Press Enter to continue")
 		wait_enter()

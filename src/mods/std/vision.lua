@@ -14,8 +14,12 @@ global{
 -- Public Functions
 
 function update()
-	task.wait(function () return raw.track_is_new_data_available() == 1 end)
+	task.wait(has_new_frame)
 	raw.track_update()
+end
+
+function has_new_frame()
+	return raw.track_is_new_data_available() == 1 -- TODO fix in C library
 end
 
 function run(func)

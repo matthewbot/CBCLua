@@ -110,6 +110,9 @@ function run_sleep(endtime, files)
 		
 		if sleepamt ~= -1 then	
 			sleepamt = endtime - timer.seconds()
+			if sleepamt < 0 then
+				sleepamt = 0
+			end
 		end
 	end
 	

@@ -28,7 +28,7 @@ function stop(task)
 		tasks_tostart[task] = nil
 	else
 		if tasks[task] == nil then
-			error("Attempting to stop non-existent task " .. task, 2)
+			return
 		end
 	
 		tasks[task] = nil

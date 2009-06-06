@@ -29,6 +29,7 @@ function class_mt.__call(class, ...)
 	
 	local construct = inst.construct
 	if construct then
+		--pass_errors(construct, inst, ...)
 		construct(inst, ...)
 	end
 	

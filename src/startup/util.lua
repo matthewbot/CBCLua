@@ -45,6 +45,6 @@ end
 
 function assert(val, msg)
 	if not val then
-		error(msg or "assertion failed!")
+		error(msg or "assertion failed!", 2)
 	end
 end

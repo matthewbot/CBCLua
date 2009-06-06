@@ -15,14 +15,22 @@ local run_chunk
 local print_results
 local print_errors
 
-local env = { } -- make up a module to run our code in
-env._M = env
-env._NAME = "interact-env"
+local env = { _M = env, _NAME = "interact-env" } -- make up a module to run our code in
 cbcluamodule(env)
 autoglobals(env) -- allow globals to be created
 autorequire("std.", env) -- automatically require the standard modules
-autorequire("", env) -- automatically require top-level program modules
-pcall(import, "interact", env) -- attempt to import the interact module into the env module
+
+local ok, msg = xpcall(
+	chunk
+, function (errmsg)
+	return debug.traceback(errmsg, 2)
+end)
+
+if not ok then
+	io.writeln("Error while loading interact module")
+	io.writeln(msg)
+end
+
 function env._WRAPVALUES(...) return ... end
 
 function interact()

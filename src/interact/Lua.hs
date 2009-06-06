@@ -22,9 +22,9 @@ startLocalLua = startLua "lua -i 2>&1"
 startRemoteLua ipaddr = startLua $ "ssh -o ConnectTimeout=1 -o StrictHostKeyChecking=no root@" ++ ipaddr ++ " \"/mnt/user/code/cbclua/run.sh interact 2>&1\" 2>&1"
 	
 closeLua :: Lua -> IO ()
-closeLua lua = do
-	terminateProcess $ process lua
-	forM_ (map ($ lua) [inputh, outputh]) hClose
+closeLua lua = do	
+	try $ terminateProcess $ process lua
+	forM_ (map ($ lua) [inputh, outputh]) $ try . hClose
 	
 writeLua :: Lua -> String -> IO ()
 writeLua lua str = hPutStr handle str >> hFlush handle

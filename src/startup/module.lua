@@ -32,17 +32,8 @@ function autorequire(arg, mod)
 			table.insert(mod._AUTOREQS, arg)
 		end
 	else
-		local prefix
-		
-		if mod == nil then
-			mod = arg
-			prefix = "std."
-		else
-			prefix = arg
-		end
-		
 		cbcluamodule(mod)
-		table.insert(mod._AUTOREQS, prefix)
+		table.insert(mod._AUTOREQS, arg)
 	end
 end
 
@@ -55,16 +46,20 @@ function kissc_compat(mod)
 end
 
 -- This function loads a module, then makes it visible in the current module
+-- from the outside however, the imported module is not visible
 
-function import(name)
-	local outermod = getfenv(2)	
+function import(name, mod)
+	local outermod = mod or getfenv(2)	
 	assert(outermod._NAME, "import may only be called from within a module!")
 
 	table.insert(outermod._IMPORTS, require(name))
 end
 
-function submodule(name)
-	local outermod = getfenv(2)
+-- This function loads a module, then makes it visible in the current module
+-- the module is also visible from the outside
+
+function submodule(name, mod)
+	local outermod = mod or getfenv(2)
 	assert(outermod._NAME, "submodule may only be called from within a module!")
 	
 	table.insert(outermod._SUBMODS, require(name))

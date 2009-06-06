@@ -38,6 +38,8 @@ end
 -- Finally, enter the task schedular!
 
 local ok, msg = sched.run()
+run_shutdown_hooks()
+
 if ok then
 	print("Program finished")
 else

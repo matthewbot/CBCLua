@@ -47,4 +47,22 @@ function assert(val, msg)
 	if not val then
 		error(msg or "assertion failed!", 2)
 	end
+	
+	return val
 end
+
+-- shutdown hooks
+
+local shutdown_hooks = { }
+
+function add_shutdown_hook(hook)
+	table.insert(shutdown_hooks, hook)
+end
+
+function run_shutdown_hooks()
+	for i=#shutdown_hooks,1,-1 do
+		local hook = shutdown_hooks[i]
+		pcall(hook)
+	end
+end
+		

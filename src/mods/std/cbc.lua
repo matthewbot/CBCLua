@@ -125,3 +125,13 @@ for _,button in ipairs(buttons) do
 	local btnfunc = button .. "_button" -- all button functions end in _button
 	_M[btnfunc] = _M[btnfunc] -- looks weird, but on the right we're going to find it in our import, and then on the left we're going to make it a module variable
 end
+
+-- [[ Shutdown hook ]]--
+
+add_shutdown_hook(function ()
+	disable_servos()
+
+	for _, mot in pairs(motors) do
+		mot:off()
+	end
+end)

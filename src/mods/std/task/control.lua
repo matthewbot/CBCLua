@@ -53,14 +53,17 @@ function wait(pred, time, tdelta)
 	return wait_any({ [true] = pred }, time, tdelta) -- otherwise, this is just wait_any with a single predicate
 end
 
-function wait_any(preds, time, tdelta)
-	if tdelta == nil then
-		tdelta = 0.05
+function wait_any(preds)
+	local tdelta=0.05
+	if preds.tdelta then
+		tdelta = preds.tdelta
+		preds.tdelta = nil
 	end
 	
 	local endtime 
-	if time ~= nil then 
-		endtime = timer.seconds() + time
+	if preds.timeout then 
+		endtime = timer.seconds() + preds.timeout
+		preds.timeout = nil
 	end
 	
 	while true do

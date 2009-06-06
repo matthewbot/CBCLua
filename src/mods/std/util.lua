@@ -67,7 +67,7 @@ function wait_enter(fmt)
 	end
 	
 	task.sleep_io(io.stdin)
-	return io.read(fmt)
+	return io.read(fmt or "*l")
 end
 
 function prompt(msg)

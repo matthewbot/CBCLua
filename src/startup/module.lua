@@ -184,12 +184,22 @@ function mod_mt.__newindex(mod, key, value)
 	if type(value) == "table" and getfenv(2) == _G then -- if its a table being assigned in, and the caller's environment is global
 		return -- ignore it, lua's module system is creating globals inside our tables
 	end
-	
-	if mod._GLOBALS[key] then
-		rawset(mod, key, value)
-	else
-		error("Undefined global '" .. key .. "'", 2)
+
+	for _,submod in ipairs(mod._SUBMODS) do -- look in sub modules
+		if submod._GLOBALS[key] then
+			rawset(submod, key, value)
+			return
+		end
 	end
+	
+	for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value
+		if importmod._GLOBALS[key] then
+			rawset(importmod, key, value)
+			return
+		end
+	end
+
+	error("Undefined global '" .. key .. "'", 2)
 end
 
 -- This function is used to do delayed module loading

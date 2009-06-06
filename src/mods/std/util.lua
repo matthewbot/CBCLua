@@ -100,3 +100,9 @@ function bind(obj, methname)
 		return func(obj, ...)
 	end
 end
+
+function after_do(func, endfunc)
+	local returns = { func() }
+	endfunc(unpack(returns))
+	return unpack(returns)
+end

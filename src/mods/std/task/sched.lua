@@ -66,21 +66,18 @@ function run_cycle()
 			return false, result
 		end
 		
-		local status = task:status()
-		
 		if result then
 			local endtime = result.endtime
-			local file = result.file
-		
 			if endtime and endtime < minendtime then
 				minendtime = endtime
 			end
 			
-			if file and files_set[file] == nil then
+			local file = result.file
+			if file and not files_set[file] then
 				files_set[file] = true
 				table.insert(files, file)
 			end
-		elseif status == "dead" then
+		else
 			stop(task)
 		end
 	end

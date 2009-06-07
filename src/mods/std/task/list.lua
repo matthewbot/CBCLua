@@ -13,7 +13,7 @@ local task_count = 0
 -- Public functions
 
 function start(...) -- args are func, name, daemon, cstack
-	local task = Task(...)
+	local task = pass_errors(Task, ...)
 	tasks_tostart[task] = true
 	task_count = task_count + 1
 	return task
@@ -24,17 +24,14 @@ function async(func)
 end
 
 function stop(task)
+	task:kill()
+	
 	if tasks_tostart[task] then
 		tasks_tostart[task] = nil
-	else
-		if tasks[task] == nil then
-			return
-		end
-	
+	elseif tasks[task] then
 		tasks[task] = nil
+		task_count = task_count - 1
 	end
-	
-	task_count = task_count - 1
 end
 
 function exit()

@@ -31,7 +31,7 @@ function sleep_io(file) -- sleeps until file has data to read
 end
 
 function sleep_cycle() -- sleeps for one "task cycle", waking up when another process needs to be run
-	return coroutine.yield()
+	return coroutine.yield{}
 end
 
 function sleep_cycle_till(endtime) -- sleeps for one "task cycle" or until endtime, whichever comes first

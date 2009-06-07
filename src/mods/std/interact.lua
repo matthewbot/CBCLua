@@ -58,10 +58,15 @@ local interact_depth=0
 function run()
 	interact_depth = interact_depth + 1
 
+	local prevchunk
 	while true do
 		local chunk 
 		repeat
 			chunk = read_chunk()
+			
+			if chunk == "repeat" then
+				chunk = prevchunk
+			end
 		until chunk ~= nil
 		
 		if chunk == "exit" then
@@ -80,6 +85,8 @@ function run()
 		else
 			print_errors(results)
 		end
+		
+		prevchunk = chunk
 	end
 	
 	interact_depth = interact_depth - 1
@@ -101,6 +108,10 @@ function read_chunk()
 		
 		task.sleep_io(io.stdin)
 		local line = io.read() or ":exit"
+		
+		if line == "" and lines == "" then
+			return "repeat"
+		end
 		
 		local command = line:match("^:(%w+)")
 		if command then

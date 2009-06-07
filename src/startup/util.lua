@@ -33,8 +33,9 @@ local errorlvl = 0
 -- IE, any errors occuring in the block blame the current function's caller, not the current function
 function pass_errors(func, ...) 
 	errorlvl = errorlvl + 2
-	func(...)
+	local results = { func(...) }
 	errorlvl = errorlvl - 2
+	return unpack(results)
 end
 
 function error(msg, depth)

@@ -49,7 +49,11 @@ function Task:resume()
 	current_task = nil
 	
 	if ok then
-		return true, result
+		if self:running() then
+			return true, result
+		else
+			return true, nil -- must return nil if we ended, we don't care what the task returned with
+		end
 	else
 		local msg = debug.traceback(co, "error in task '" .. self.name .. "':\n" .. result)
 		return false, msg

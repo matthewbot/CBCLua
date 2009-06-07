@@ -21,7 +21,7 @@ end
 
 function async(func, ...)
 	local args = {...}
-	return start(function () func(unpack(args)) end, "async task", true)
+	return start(function () return func(unpack(args)) end, "async task", true)
 end
 
 function stop(task)

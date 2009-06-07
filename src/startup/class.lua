@@ -94,6 +94,8 @@ local function make_metamethod(metamethodname)
 			rawset(inst, ...)
 		elseif metamethodname == "__tostring" then
 			return "<" .. inst.class.name .. ">"
+		elseif metamethodname == "__eq" then
+			return rawequal(inst, ...)
 		else
 			error("Missing " .. metamethodname .. " metamethod for class " .. inst.class.name, 2)
 		end

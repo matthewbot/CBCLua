@@ -20,7 +20,8 @@ function start(...) -- args are func, name, daemon, cstack
 end
 
 function async(func, ...)
-	return start(function () func(...) end, "async task", true)
+	local args = {...}
+	return start(function () func(unpack(args)) end, "async task", true)
 end
 
 function stop(task)

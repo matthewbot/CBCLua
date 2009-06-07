@@ -19,8 +19,8 @@ function start(...) -- args are func, name, daemon, cstack
 	return task
 end
 
-function async(func)
-	return start(func, "async task", true)
+function async(func, ...)
+	return start(function () func(...) end, "async task", true)
 end
 
 function stop(task)
@@ -57,6 +57,27 @@ end
 
 function running_tasks()
 	return pairs(tasks)
+end
+
+function dump_list()
+	for task in running_tasks() do
+		local buf = ""
+				
+		if task:is_daemon() then
+			buf = buf .. "D"
+		else
+			buf = buf .. "T"
+		end
+		
+		if task == get_current() then
+			buf = buf .. "["
+		else
+			buf = buf .. "|"
+		end
+			
+		buf = buf .. " " .. task:get_name()
+		print(buf)
+	end
 end
 
 function start_new_tasks()

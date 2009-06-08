@@ -18,7 +18,7 @@ function update()
 	raw.track_update()
 end
 
-has_new_frame = track_is_new_data_available
+has_new_frame = raw.track_is_new_data_available
 
 function run(func)
 	local result

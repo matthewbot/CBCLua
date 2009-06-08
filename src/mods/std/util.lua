@@ -112,7 +112,7 @@ function set_cbc_proc(file, val)
 		return
 	end
 	
-	local file = io.open(file)
-	file:write(val)
+	local file = io.open(file, "w")
+	file:write(val, "\n")
 	file:close()
 end

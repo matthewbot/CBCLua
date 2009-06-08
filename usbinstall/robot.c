@@ -1,5 +1,5 @@
 int main() {
-	printf("Installing CBCLua v0.5!\n");
+	printf("Installing CBCLua v0.8!\n");
 	
 	system("mkdir -p /mnt/tmpusb");
 	system("mount /dev/sdb1 /mnt/tmpusb -t vfat -o ro");

@@ -18,9 +18,7 @@ function update()
 	raw.track_update()
 end
 
-function has_new_frame()
-	return raw.track_is_new_data_available() == 1 -- TODO fix in C library
-end
+has_new_frame = track_is_new_data_available
 
 function run(func)
 	local result
@@ -104,14 +102,34 @@ function Blob:__index(key)
 	end
 end
 
-local xscale = (image_width - 1)/2
-function Blob:track_x_float()
-	return (self.x - xscale) / xscale
+local xscale_num = (image_width - 1)/2
+local function xscale(num)
+	return (num - xscale_num) / xscale_num
 end
 
-local yscale = (image_width - 1)/2
-function Blob:track_y_float()
-	return (yscale - self.y) / yscale
+for _,field in ipairs{"x", "bbox_left", "bbox_right"} do
+	Blob["track_" .. field .. "_float"] = function (self)
+		return xscale(self[field])
+	end
+end
+
+function Blob:track_bbox_width_float()
+	return self.bbox_right_float - self.bbox_left_float
+end
+
+local yscale_num = (image_width - 1)/2
+local function yscale(num)
+	return (num - yscale_num) / yscale_num
+end
+
+for _,field in ipairs{"y", "bbox_top", "bbox_bottom"} do
+	Blob["track_" .. field .. "_float"] = function (self)
+		return yscale(self[field])
+	end
+end
+
+function Blob:track_bbox_height_float()
+	return self.bbox_bottom_float - self.bbox_top_float
 end
 
 function Blob:horiz_dist_to(other)

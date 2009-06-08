@@ -33,7 +33,7 @@ const luaL_Reg luafuncs[] = {
 	{"analog10", lbind<analog10>},
 	{"digital", lbind_bool<digital>},
 	
-	{"track_is_new_data_available", lbind<track_is_new_data_available>},
+	{"track_is_new_data_available", lbind_bool<track_is_new_data_available>},
 	{"track_update", lbind<track_update>},
 	{"track_get_frame", lbind<track_get_frame>},
 	{"track_count", lbind<track_count>},

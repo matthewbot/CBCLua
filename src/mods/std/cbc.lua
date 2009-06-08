@@ -6,51 +6,53 @@ module(...)
 
 import "raw.cbc"
 local task = require "std.task"
+local util = require "std.util"
 
 global{"sensors", "motors", "servos"}
 
---[[ Sensors ]]--
+--[[ SensorBase ]]--
+-- Base class for any kind of sensor-looking thing
 
-Sensor = create_class "Sensor"
+SensorBase = create_class "SensorBase"
 
-function Sensor:construct(num, type)
+function SensorBase:__call()
+	return self:read()
+end
+
+--[[ CBCSensor ]]--
+-- Private class representing raw CBC sensors
+
+local CBCDigitalSensor = create_class("CBCDigitalSensor", SensorBase)
+
+function CBCDigitalSensor:construct(num)
 	self.num = num
-	self.type = type
 end
 
-function Sensor:get_type()
-	return self.type
+function CBCDigitalSensor:read()
+	return digital(self.num)
 end
 
-function Sensor:read()
-	if self.type == "analog" then
-		return analog10(self.num)
-	else
-		return digital(self.num)
-	end
+local CBCAnalogSensor = create_class("CBCAnalogSensor", SensorBase)
+
+function CBCAnalogSensor:construct(num)
+	self.num = num
 end
 
-function Sensor:read_float()
-	if self.type == "analog" then
-		return analog10(self.num)/1024
-	else
-		error("Attempting to read a digital sensor as a floating value", 2)
-	end
+function CBCAnalogSensor:read()
+	return analog10(self.num)
 end
-
-Sensor.__call = Sensor.read -- Calling a sensor reads it
 
 sensors = { } -- array of sensors
 for i=0,7 do
-	sensors[i] = Sensor(i, "digital")
+	sensors[i] = CBCDigitalSensor(i)
 end
 for i=8,15 do
-	sensors[i] = Sensor(i, "analog")
+	sensors[i] = CBCAnalogSensor(i)
 end
 
 --[[ Motors ]]--
 
-Motor = create_class "Motor"
+local Motor = create_class "Motor"
 
 function Motor:construct(num)
 	self.num = num
@@ -82,7 +84,6 @@ end
 Motor.getpos = make_motor_wrapper("get_motor_position_counter", "getpos")
 Motor.clearpos = make_motor_wrapper("clear_motor_position_counter", "clearpos")
 Motor.getdone = make_motor_wrapper("get_motor_done", "getdone")
-Motor.pwm = make_motor_wrapper("setpwm", "pwm")
 
 motors = { }
 for i=0,3 do
@@ -91,7 +92,7 @@ end
 
 --[[ Servos ]]--
 
-Servo = create_class "Servo"
+local Servo = create_class "Servo"
 
 function Servo:construct(num)
 	self.num = num
@@ -124,6 +125,22 @@ local buttons = { "black", "up", "down", "left", "right", "a", "b" }
 for _,button in ipairs(buttons) do
 	local btnfunc = button .. "_button" -- all button functions end in _button
 	_M[btnfunc] = _M[btnfunc] -- looks weird, but on the right we're going to find it in our import, and then on the left we're going to make it a module variable
+end
+
+--[[ Control functions ]]--
+
+local dimlevel_proc = "/proc/sys/sense1/dimlevel"
+
+function dim_screen()
+	util.set_cbc_proc(dimlevel_proc, 1)
+end
+
+function bright_screen()
+	util.set_cbc_proc(dimlevel_proc, 0)
+end
+
+function off_screen()
+	util.set_cbc_proc(dimlevel_proc, 2)
 end
 
 -- [[ Shutdown hook ]]--

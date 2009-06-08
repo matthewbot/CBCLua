@@ -1,7 +1,7 @@
 module("std.util")
 
 local task = require "std.task"
-local cbc = require "std.cbc"
+local cbc = require_later "std.cbc"
 local table = require "table"
 local io = require "io"
 
@@ -105,4 +105,14 @@ function after_do(func, endfunc)
 	local returns = { func() }
 	endfunc(unpack(returns))
 	return unpack(returns)
+end
+
+function set_cbc_proc(file, val)
+	if get_host() ~= "chumby" then
+		return
+	end
+	
+	local file = io.open(file)
+	file:write(val)
+	file:close()
 end

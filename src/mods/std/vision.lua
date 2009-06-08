@@ -154,9 +154,5 @@ end
 
 local util = require "std.util"
 
-if util.get_host() == "chumby" then
-	os.execute("echo 0 > /sys/class/video4linux/video0/auto_exposure")
-	os.execute("echo 1 > /sys/class/video4linux/video0/exposure")
-end
-		
-		
+util.set_cbc_proc("/sys/class/video4linux/video0/auto_exposure", 0)
+util.set_cbc_proc("/sys/class/video4linux/video0/exposure", 1)

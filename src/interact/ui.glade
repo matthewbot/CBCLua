@@ -238,7 +238,7 @@
     <property name="type_hint">dialog</property>
     <property name="has_separator">False</property>
     <property name="program_name">CBCLua Interact</property>
-    <property name="version">v0.8</property>
+    <property name="version">v0.8.1</property>
     <property name="authors">Matthew Thompson
 
 Special Thanks to

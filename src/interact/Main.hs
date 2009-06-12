@@ -46,7 +46,10 @@ main = do
 					Nothing -> uiPutSysStrLn ui "\nMust download program first!"
 				
 handleOutput state msg = uiPutStr (getUI state) msg	
-handleError state = uiPutSysStrLn (getUI state) "Connection Error!" >> startLocalInteraction state
+handleError state = do 
+	uiPutSysStrLn (getUI state) "Connection Error!"
+	writeIORef (getLuaRef state) Nothing
+	startLocalInteraction state
 
 makeCallbacks :: InteractState -> LuaCallbacks
 makeCallbacks state = LuaCallbacks (handleOutput state) (handleError state)
@@ -54,9 +57,8 @@ makeCallbacks state = LuaCallbacks (handleOutput state) (handleError state)
 clearLua :: InteractState -> Maybe String -> IO ()
 clearLua state sepname = do
 	lua <- readIORef $ getLuaRef state
-	when (isJust lua) $ do 
-		closeLua $ fromJust lua
-		when (isJust sepname) $ outputUISeperator state $ fromJust sepname
+	when (isJust lua) $ closeLua $ fromJust lua
+	when (isJust sepname) $ outputUISeperator state $ fromJust sepname
 
 outputUISeperator state name = uiPutStrTag (getUI state) "systag" $ "\n=====[" ++ name ++ "]=====\n"
 

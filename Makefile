@@ -24,12 +24,12 @@ clean:
 	rm -rf build usbdrive/userhook0_data.tgz local/Interact local/ui.glade local/cmods/* cbclua/cmods/* cbclua/lua src/interact/*.hi src/interact/*.o src/interact/Interact src/lua-5.1.4-arm/*.o
 	
 .PHONY: usbinstall
-usbinstall: $(cbc-modules)
+usbinstall: cbc
 	rm -rf usbinstall/cbclua.tgz
 	tar -czf usbinstall/cbclua.tgz cbclua --exclude=".*" --exclude="*~" -h -p
 
 .PHONY: wifiinstall
-wifiinstall: $(cbc-modules)
+wifiinstall: cbc
 	./wifiinstall.sh
 
 .PHONY: interact

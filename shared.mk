@@ -1,5 +1,7 @@
 # All paths in this file must be relative to src/cmods/somemodule!
 
+cbcdebug := no
+
 ifeq '$(arch)' 'cbc'
 archdir := cbclua
 else
@@ -35,15 +37,22 @@ else
 CC := arm-linux-g++
 LD := arm-linux-g++
 STRIP := arm-linux-strip
-cflags += -O3 -DCBCLUA_CBC -mcpu=arm926ej-s -ffast-math -I$(rootdir)/src/lua-5.1.4-arm
+cflags += -I$(rootdir)/src/lua-5.1.4-arm -DCBCLUA_CBC
+ifeq '$(cbcdebug)' 'no'
+cflags += -O3 -mcpu=arm926ej-s -ffast-math 
 ldflags += -ffast-math -O3
+else
+cflags += -g
+endif
 endif
 
 all: $(modbin)
 
 $(modbin): $(objects) | $(moddir)
 	$(LD) -o $(modbin) $(objects) $(ldflags)
+ifeq '$(cbcdebug)' 'no'
 	$(STRIP) $(modbin)
+endif
 	
 $(modbuilddir)/%.o: %.cpp $(headers) | $(modbuilddir)
 	$(CC) -c $< -o $@ $(cflags)

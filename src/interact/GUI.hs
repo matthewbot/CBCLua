@@ -15,6 +15,7 @@ data UI = UI {
     disconnect :: MenuItem,
     downloadprgm :: MenuItem,
     reloadprgm :: MenuItem,    
+    killprgm :: MenuItem,
     about :: MenuItem,
     output :: TextView,
     outputscroll :: ScrolledWindow,
@@ -36,6 +37,7 @@ data GUIAction = ConnectIPAction String |
                  DisconnectAction | 
                  DownloadProgramAction FilePath | 
                  ReloadProgramAction | 
+                 KillProgramAction |
                  InputAction String | 
                  CloseAction
                  deriving (Eq, Show)
@@ -50,9 +52,9 @@ makeUI = do
     
     Just xml <- xmlNew "ui.glade"
     
-    [connect, disconnect, downloadprgm, reloadprgm, about] <-
+    [connect, disconnect, downloadprgm, reloadprgm, killprgm, about] <-
         mapM (xmlGetWidget xml castToMenuItem)
-        ["connect", "disconnect", "downloadprgm", "reloadprgm", "about"]
+        ["connect", "disconnect", "downloadprgm", "reloadprgm", "killprgm", "about"]
         
     mainwindow <- xmlGetWidget xml castToWindow "mainwindow"
     output <- xmlGetWidget xml castToTextView "output"
@@ -69,13 +71,14 @@ makeUI = do
     keybuffer <- newIORef ""
     lastip <- newIORef Nothing
     
-    let ui = UI mainwindow connect disconnect downloadprgm reloadprgm about output outputscroll status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer lastip
+    let ui = UI mainwindow connect disconnect downloadprgm reloadprgm killprgm about output outputscroll status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer lastip
     
     onDestroy mainwindow         $ putMVar lastaction CloseAction >> mainQuit
     onActivateLeaf disconnect    $ tryPutMVar lastaction DisconnectAction >> return ()
     onActivateLeaf connect       $ readIORef lastip >>= entrySetText ipentry . fromMaybe "" >> windowPresent ipdialog
     onActivateLeaf downloadprgm  $ onOpenPrgm ui
     onActivateLeaf reloadprgm    $ tryPutMVar lastaction ReloadProgramAction >> return ()
+    onActivateLeaf killprgm      $ tryPutMVar lastaction KillProgramAction >> return ()
     onActivateLeaf about         $ dialogRun aboutdialog >> widgetHide aboutdialog >> return ()
     onKeyPress output            $ onTypeOutput ui
     

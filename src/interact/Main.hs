@@ -44,6 +44,8 @@ main = do
 				case mdir of
 					Just dir -> downloadProgram state dir
 					Nothing -> uiPutSysStrLn ui "\nMust download program first!"
+			KillProgramAction -> do
+				killProgram state
 				
 handleOutput state msg = uiPutStr (getUI state) msg	
 handleError state = do 
@@ -89,3 +91,18 @@ downloadProgram state dir = do
 	when (isNothing mip) $ uiPutSysStrLn ui "\nCan't download while not connected!"
 	return ()
 
+killProgram state = do
+	let ui = getUI state
+	mip <- readIORef (getCurIPRef state)
+	when (isJust mip) $ do
+		let ip = fromJust mip
+		uiPutSysStrLn ui "\nKilling..."
+		forkIO $ do
+			let command = "ssh root@" ++ ip ++ " \"killall lua\""
+			(_, _, _, handle) <- runInteractiveCommand command 
+			waitForProcess handle
+			uiPutSysStr ui "Done!"
+			startRemoteInteraction state ip
+		return ()
+	when (isNothing mip) $ uiPutSysStrLn ui "\nCan't kill program while not connected!"
+	return ()

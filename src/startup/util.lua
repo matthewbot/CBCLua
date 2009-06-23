@@ -55,15 +55,26 @@ end
 -- shutdown hooks
 
 local shutdown_hooks = { }
+local hooks_run = false
 
 function add_shutdown_hook(hook)
 	table.insert(shutdown_hooks, hook)
 end
 
 function run_shutdown_hooks()
+	if hooks_run then -- prevent loop
+		return
+	end
+	hooks_run = true
+	
 	for i=#shutdown_hooks,1,-1 do
 		local hook = shutdown_hooks[i]
 		pcall(hook)
 	end
 end
-		
+
+local realexit = os.exit
+function os.exit(val)
+	run_shutdown_hooks()
+	return realexit(val)
+end

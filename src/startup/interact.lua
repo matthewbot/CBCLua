@@ -10,5 +10,5 @@ an interaction command.
 ----------]]
 end
 		
-task.start(interact.run, "interaction", false, true)
+interact.start()
 print("Interact started")

@@ -35,7 +35,8 @@ static int lua_raw_sleep(lua_State *L) {
 	
 	for (int i=0; i < fdcount; i++) {
 		FILE **file = (FILE **)lua_touserdata(L, i+2);
-		fds.push_back(fileno(*file));
+		if (file != NULL && *file != NULL)
+			fds.push_back(fileno(*file));
 	}
 	
 	vector<bool> results = raw_sleep(timeout, fds);
@@ -51,6 +52,9 @@ static int lua_raw_sleep(lua_State *L) {
 
 static int lua_getio(lua_State *L) {
 	FILE **file = (FILE **)lua_touserdata(L, 1);
+	if (file == NULL || *file == NULL) 
+		return 0;
+	
 	fflush(*file);
 	int fd = fileno(*file);
 	

@@ -33,4 +33,8 @@ else
 	LUA_BIN="lua"
 fi
 
+if [ "$2" == "gdb" ]; then
+	LUA_BIN="gdb --args $LUA_BIN"
+fi
+
 exec $LUA_BIN startup/start.lua $HOST $MODE # start cbclua

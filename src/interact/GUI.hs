@@ -7,6 +7,7 @@ import Graphics.UI.Gtk
 import Graphics.UI.Gtk.Glade
 import Graphics.UI.Gtk.Gdk.Events
 import Data.IORef
+import Data.Maybe
 
 data UI = UI {
     mainwindow :: Window,
@@ -27,7 +28,8 @@ data UI = UI {
     aboutdialog :: AboutDialog,
     
     lastaction :: MVar GUIAction,
-    keybuffer :: IORef String
+    keybuffer :: IORef String,
+    lastip :: IORef (Maybe String)
 }
 
 data GUIAction = ConnectIPAction String | 
@@ -65,12 +67,13 @@ makeUI = do
     aboutdialog <- xmlGetWidget xml castToAboutDialog "aboutdialog"
     
     keybuffer <- newIORef ""
+    lastip <- newIORef Nothing
     
-    let ui = UI mainwindow connect disconnect downloadprgm reloadprgm about output outputscroll status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer
+    let ui = UI mainwindow connect disconnect downloadprgm reloadprgm about output outputscroll status ipdialog connectbtn cancelbtn ipentry aboutdialog lastaction keybuffer lastip
     
     onDestroy mainwindow         $ putMVar lastaction CloseAction >> mainQuit
     onActivateLeaf disconnect    $ tryPutMVar lastaction DisconnectAction >> return ()
-    onActivateLeaf connect       $ entrySetText ipentry "" >> windowPresent ipdialog
+    onActivateLeaf connect       $ readIORef lastip >>= entrySetText ipentry . fromMaybe "" >> windowPresent ipdialog
     onActivateLeaf downloadprgm  $ onOpenPrgm ui
     onActivateLeaf reloadprgm    $ tryPutMVar lastaction ReloadProgramAction >> return ()
     onActivateLeaf about         $ dialogRun aboutdialog >> widgetHide aboutdialog >> return ()
@@ -86,7 +89,11 @@ makeUI = do
     
     onDelete ipdialog         $ const $ widgetHide ipdialog >> return True
     onClicked cancelbtn       $ widgetHide ipdialog
-    onClicked connectbtn      $ entryGetText ipentry >>= tryPutMVar lastaction . ConnectIPAction >> widgetHide ipdialog
+    onClicked connectbtn      $ do 
+    	ip <- entryGetText ipentry 
+    	tryPutMVar lastaction $ ConnectIPAction ip
+    	writeIORef lastip $ Just ip
+    	widgetHide ipdialog
     
     windowPresent mainwindow
     

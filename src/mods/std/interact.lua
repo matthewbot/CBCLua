@@ -5,6 +5,7 @@ module(...)
 local util = require "std.util"
 local task = require "std.task"
 local io = require "io"
+local rawio = require "raw.io"
 local debug = require "debug"
 local table = require "table"
 local string = require "string"
@@ -218,15 +219,19 @@ end
 	
 
 function print_results(results)
+	local buf = ""
+
 	for num,v in ipairs(results) do
 		if num > 1 then
-			io.write(", ")
+			buf = buf .. ", "
 		end
 	
-		io.write(tostring(v))
+		buf = buf .. tostring(v)
 	end
 
-	io.write("\n")
+	if buf ~= "" then
+		print("= " .. buf)
+	end
 end
 
 function print_errors(trace)
@@ -238,4 +243,8 @@ function print_errors(trace)
 	for i=1,#lines-3 do
 		io.writeln(lines[i])
 	end
+end
+
+function start()
+	task.start(run, "interaction", false, true)
 end

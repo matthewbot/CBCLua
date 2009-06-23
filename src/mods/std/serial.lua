@@ -7,6 +7,7 @@ local timer = require 'std.timer'
 local util = require 'std.util'
 local string = require 'string'
 local io = require 'io'
+local rawio = require 'raw.io'
 
 import("std.log")
 
@@ -108,7 +109,7 @@ end
 function SerialPort:read_task()
 	while true do
 		task.sleep_io(self.rx)
-		self.readbuf = self.readbuf .. timer.raw_getio(self.rx)
+		self.readbuf = self.readbuf .. rawio.read(self.rx)
 		self.readsig:notify()
 	end
 end

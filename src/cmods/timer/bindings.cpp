@@ -4,13 +4,10 @@
 #include <lua.hpp>
 #include <lbind.h>
 #include <vector>
-#include <cstdio>
-#include <unistd.h>
 
 using namespace std;
 
 static int lua_raw_sleep(lua_State *L);
-static int lua_getio(lua_State *L);
 
 const luaL_Reg luafuncs[] = {
 	{"raw_seconds", lbind<raw_seconds>},
@@ -21,7 +18,6 @@ const luaL_Reg luafuncs[] = {
 	{"raw_yield", lbind<raw_yield>},
 	{"watchdog", lbind<watchdog>},
 	{"watchdog_term", lbind<watchdog_term>},
-	{"raw_getio", lua_getio},
 	
 	{NULL, NULL}
 };
@@ -46,21 +42,4 @@ static int lua_raw_sleep(lua_State *L) {
 	}
 	
 	return fdcount;
-}
-
-// -- NOTE: If this sprouts any more IO functions, make a new module
-
-static int lua_getio(lua_State *L) {
-	FILE **file = (FILE **)lua_touserdata(L, 1);
-	if (file == NULL || *file == NULL) 
-		return 0;
-	
-	fflush(*file);
-	int fd = fileno(*file);
-	
-	static char buf[100];
-	int got = read(fd, buf, sizeof(buf));
-	
-	lua_pushlstring(L, buf, got);
-	return 1;
 }

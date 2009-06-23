@@ -51,11 +51,14 @@ const vector<bool> raw_sleep(double seconds, const vector<int> &fds) {
 	else
 		highestfd = 0;
 		
-	fd_set fdset;
-	FD_ZERO(&fdset);
+	fd_set fdset_read;
+	fd_set fdset_exc;
+	FD_ZERO(&fdset_read);
+	FD_ZERO(&fdset_exc);
 	
 	for (vector<int>::const_iterator i = fds.begin(); i != fds.end(); ++i) {
-		FD_SET(*i, &fdset);
+		FD_SET(*i, &fdset_read);
+		FD_SET(*i, &fdset_exc);
 	}
 	
 	if (seconds >= 0) {
@@ -63,16 +66,16 @@ const vector<bool> raw_sleep(double seconds, const vector<int> &fds) {
 		timeout.tv_sec = (long)seconds;
 		timeout.tv_usec = (long)((seconds - timeout.tv_sec) * 1000000);
 		
-		select(highestfd + 1, &fdset, NULL, NULL, &timeout);
+		select(highestfd + 1, &fdset_read, NULL, &fdset_exc, &timeout);
 	} else {
-		select(highestfd + 1, &fdset, NULL, NULL, NULL);
+		select(highestfd + 1, &fdset_read, NULL, &fdset_exc, NULL);
 	}
 	
 	vector<bool> setvecs;
 	setvecs.reserve(fds.size());
 	
 	for (vector<int>::const_iterator i = fds.begin(); i != fds.end(); ++i) {
-		setvecs.push_back(FD_ISSET(*i, &fdset) != 0);
+		setvecs.push_back(FD_ISSET(*i, &fdset_read) != 0 || FD_ISSET(*i, &fdset_exc) != 0);
 	}
 		
     watchdog();

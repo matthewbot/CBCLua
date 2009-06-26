@@ -4,6 +4,7 @@
 module(...)
 
 local sched = require "std.task.sched"
+local list = require "std.task.list"
 local timer = require "std.timer"
 local coroutine = require "coroutine"
 local math = require "math"
@@ -45,12 +46,12 @@ end
 -- Wait functions (all use predicates)
 
 -- waits until pred is true, or time to pass
-function wait(pred, time, tdelta) 
+function wait(pred, timeout, tdelta) 
 	if type(pred) == "table" and pred.wait then -- if its a table/object with a wait method
 		return pred:wait(time, tdelta) -- call the wait method instead (this lets it be used with signals for instance)
 	end
 	
-	return wait_any({ [true] = pred }, time, tdelta) -- otherwise, this is just wait_any with a single predicate
+	return wait_any{ [true] = pred, timeout = timeout, tdelta = tdelta } -- otherwise, this is just wait_any with a single predicate
 end
 
 function wait_any(preds)
@@ -83,6 +84,24 @@ function wait_any(preds)
 		else
 			sleep(tdelta)
 		end
+	end
+end
+	
+function timeout(timeout, func)
+	local func_ended = false
+	local func_results
+	local taskid = list.async(function ()
+		func_results = { func() }
+		func_ended = true
+	end)
+	
+	wait(function () return func_ended end, timeout)
+	
+	if not func_ended then
+		list.stop(taskid)
+		return false
+	else
+		return true, unpack(func_results)
 	end
 end
 	

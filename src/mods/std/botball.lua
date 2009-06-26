@@ -5,13 +5,14 @@ local cbc = require "std.cbc"
 local timer = require "std.timer"
 local task = require "std.task"
 local io = require "io"
+local os = require "os"
 
 import "std.log"
 
 -- Private state
 
 local start_time
-local match_time
+local match_length
 
 -- Predeclares
 
@@ -30,27 +31,26 @@ end
 function get_game_time_remaining()
 	assert_match_start()
 
-	return match_time - game_game_time()
+	return match_length - game_game_time()
 end
 
-function wait_for_start(light_sensor, time)
-	if time == nil then
-		time = 120
-	end
+function start(light_sensor, time)
+	match_length = time or 120
 
-	match_time = time
-
-	io.writeln("Press A to calibrate starting light\npress Left to skip and run program")
-	local option = util.wait_any{
-		light = cbc.a_button,
-		skip = cbc.left_button
+	local option = util.menu{
+		["Use starting light"] = "light",
+		["Run immediately"] = "run"
 	}
 	
 	if option == "light" then
 		wait_for_light(light_sensor)
 	else
-		print("Starting light skipped, starting in 3 seconds")
-		task.sleep(3)
+		if util.on_cbc_console() then
+			print("Starting light skipped, starting in 3 seconds")
+			task.sleep(3)
+		else
+			util.prompt("Starting signal")
+		end
 	end
 	
 	print("Match started")
@@ -77,17 +77,15 @@ function wait_for_light(light)
 	local mid = (on + off) / 2
 	print("Middle: " .. mid)
 	
-	io.writeln("Turn light off")
-	util.wait_less(light, mid)
-	
 	print("Waiting for game start")
-	util.wait_greater(light, mid)
+	task.wait(function () return light:read() < mid end)
 end
 
 function shutdown_task()
-	task.sleep(match_time - 0.5) -- safety
+	task.sleep(match_length - 0.5) -- safety
 	
-	task.terminate("Game Over")
+	print("Game Over")
+	os.exit()
 end
 
 function assert_match_start()

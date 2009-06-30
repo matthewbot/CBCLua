@@ -3,6 +3,10 @@
 io.stdout:setvbuf("no") -- turn off standard output buffering
 io.stdin:setvbuf("no")
 
+-- set mode and host from arg list
+host = arg[1]
+mode = arg[2]
+
 -- load the other startup files
 
 local startupdir = arg[0]:match("(.*)\/") .. "/"
@@ -21,10 +25,6 @@ local sched = require "std.task.sched"
 local log = require "std.log" -- This replaces global print with something that logs
 
 -- Then do mode and host specific setup
-
-host = arg[1]
-mode = arg[2]
-
 if mode == "interact" then
 	dostartup("interact.lua")
 else

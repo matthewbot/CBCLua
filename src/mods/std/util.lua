@@ -138,7 +138,6 @@ else
 	
 end
 
-
 --[[ Other functions ]]--
 
 function bind(obj, methname)

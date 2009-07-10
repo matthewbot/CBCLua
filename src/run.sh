@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "CBCLua v0.8 loading..."
+echo "CBCLua v1 loading..."
 echo "Developed at Nease High School, FL"
 
 cd `dirname $0`

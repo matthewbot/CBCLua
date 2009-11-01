@@ -39,5 +39,6 @@ cbc-lua-binary:
 .PHONY: cbc-luasocket-binary
 cbc-luasocket-binary:
 	$(MAKE) -C src/luasocket-2.0.2-arm
+	mkdir -p cbclua/cmods/socket cbclua/cmods/mime
 	cp src/luasocket-2.0.2-arm/src/socket.so.* cbclua/cmods/socket/core.so
 	cp src/luasocket-2.0.2-arm/src/mime.so.* cbclua/cmods/mime/core.so

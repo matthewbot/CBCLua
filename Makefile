@@ -3,7 +3,7 @@ luadir := lua-5.1.4
 modules := $(filter-out %shared, $(wildcard src/cmods/*))
 cbc-modules := $(addprefix cbc-, $(modules))
 
-all: $(modules) interact
+all: $(modules)
 
 .PHONY: local
 local: $(modules)
@@ -31,10 +31,6 @@ usbinstall: cbc
 .PHONY: wifiinstall
 wifiinstall: cbc
 	./wifiinstall.sh
-
-.PHONY: interact
-interact:
-	$(MAKE) -C src/interact
 	
 .PHONY: cbc-lua-binary
 cbc-lua-binary:

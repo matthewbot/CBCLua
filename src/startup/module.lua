@@ -37,14 +37,6 @@ function autorequire(arg, mod)
 	end
 end
 
--- Module modifier that puts the module in KISS-C compat mode
-
-function kissc_compat(mod) 
-	cbcluamodule(mod)
-	table.insert(mod._IMPORTS, require("std.kissc"))
-	table.insert(mod._IMPORTS, require("raw.cbc"))
-end
-
 -- This function loads a module, then makes it visible in the current module
 -- from the outside however, the imported module is not visible
 

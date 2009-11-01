@@ -9,7 +9,7 @@ all: $(modules) interact
 local: $(modules)
 
 .PHONY: cbc
-cbc: $(cbc-modules) cbc-lua-binary
+cbc: $(cbc-modules) cbc-lua-binary cbc-luasocket-binary
 
 .PHONY: $(modules)
 $(modules):
@@ -37,7 +37,7 @@ interact:
 	$(MAKE) -C src/interact
 	
 .PHONY: cbc-lua-binary
-cbc-lua-binary: 
+cbc-lua-binary:
 	$(MAKE) -C src/lua-5.1.4-arm
 	
 .PHONY: cbc-luasocket-binary

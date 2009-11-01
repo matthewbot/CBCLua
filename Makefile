@@ -40,3 +40,8 @@ interact:
 cbc-lua-binary: 
 	$(MAKE) -C src/lua-5.1.4-arm
 	
+.PHONY: cbc-luasocket-binary
+cbc-luasocket-binary:
+	$(MAKE) -C src/luasocket-2.0.2-arm
+	cp src/luasocket-2.0.2-arm/src/socket.so.* cbclua/cmods/socket/core.so
+	cp src/luasocket-2.0.2-arm/src/mime.so.* cbclua/cmods/mime/core.so

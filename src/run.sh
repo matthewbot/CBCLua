@@ -15,26 +15,18 @@ else
 	HOST="pc"
 fi
 
-if [ "$1" == "interact" ]; then
-	MODE="interact"
-else
-	MODE="console"
-fi
-
-if [ "$HOST" == "chumby" ] && [ "$MODE" == "console" ]; then # if we're being run from the console
+if [ "$HOST" == "chumby" ]; then # if we're on a chumby
 	if [ `iwconfig 2>&1 | grep WLAN | wc -l` == "0" ]; then # if theres no wifi plugged in
 		./loadusb.sh # do USB loading stuffs
 	fi
-fi
-
-if [ "$HOST" == "chumby" ]; then
+	
 	LUA_BIN="./lua"
 else
 	LUA_BIN="lua"
 fi
 
-if [ "$2" == "gdb" ]; then
+if [ "$1" == "gdb" ]; then
 	LUA_BIN="gdb --args $LUA_BIN"
 fi
 
-exec $LUA_BIN startup/start.lua $HOST $MODE # start cbclua
+exec $LUA_BIN startup/start.lua $HOST # start cbclua

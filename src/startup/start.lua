@@ -3,9 +3,8 @@
 io.stdout:setvbuf("no") -- turn off standard output buffering
 io.stdin:setvbuf("no")
 
--- set mode and host from arg list
+-- get host from arg list
 host = arg[1]
-mode = arg[2]
 
 -- load the other startup files
 

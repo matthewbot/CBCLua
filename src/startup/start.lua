@@ -16,34 +16,19 @@ end
 
 dostartup("class.lua")
 dostartup("module.lua")
-dostartup("util.lua")
 
--- Load system modules
-
-local task = require "std.task"
-local sched = require "std.task.sched"
-local log = require "std.log" -- This replaces global print with something that logs
-
--- Then do mode and host specific setup
-if mode == "interact" then
-	dostartup("interact.lua")
-else
-	if host == "chumby" then
-		debug.traceback = cbctraceback
-	end
-	
-	dostartup("runmain.lua")
-end
+-- Start system tasks
+--TODO
 
 -- Finally, enter the task schedular!
-
+local sched = require "std.task.sched"
 local ok, msg = sched.run()
-run_shutdown_hooks()
 
 if ok then
-	print("Program finished")
+	print("CBCLua exiting")
 else
 	print(msg)
-	print("Program terminated due to errors")
+	print("CBCLua terminated due to errors")
 	os.exit(1)
 end
+

@@ -9,18 +9,10 @@ function cbcluamodule(mod)
 	
 	mod._M = nil
 	mod._IMPORTS = { }
-	mod._SUBMODS = { }
-	mod._GLOBALS = { }
+	mod._EXPORTS = { }
 	mod._AUTOREQS = { }
 	mod._CBCLUAMODULE = true
 	setmetatable(mod, mod_mt)
-end
-
--- Module modifier that automatically declares globals on assignment
-
-function autoglobals(mod)
-	cbcluamodule(mod)
-	rawset(mod, "_AUTOGLOBALS", true)
 end
 
 -- Automatically require packages beginning with the prefix (defaults to std)
@@ -47,52 +39,18 @@ function import(name, mod)
 	table.insert(outermod._IMPORTS, require(name))
 end
 
--- This function loads a module, then makes it visible in the current module
--- the module is also visible from the outside
+-- This function makes a module part of the current module's public interface
 
-function submodule(name, mod)
+function export(name, mod)
 	local outermod = mod or getfenv(2)
-	assert(outermod._NAME, "submodule may only be called from within a module!")
+	assert(outermod._NAME, "export may only be called from within a module!")
 	
-	table.insert(outermod._SUBMODS, require(name))
-end
-
--- This function declares a global
----- Usage: global("ultimate_answer", 42)
----- Or: global{ ultimate_answer = 42, ultimate_question = "Cannot be known in this universe" }
-
-function global(name, val)
-	local outermod = getfenv(2)
-	assert(outermod._NAME, "global may only be called from within a module!")
-	
-	local tname = type(name)
-	
-	if tname == "string" then
-		outermod._GLOBALS[name] = true
-		if val ~= nil then
-			rawset(outermod, name, val)
-		end
-	elseif tname == "table" then
-		for k,v in pairs(name) do
-			local t = type(k)
-			
-			if t == "number" then
-				outermod._GLOBALS[v] = true
-			elseif t == "string" then
-				outermod._GLOBALS[k] = true
-				rawset(outermod, k, v)
-			else
-				error("Bad key in global declaration table (type " .. t .. ")")
-			end
-		end
-	else
-		error("Expected string or table for argument #1 to global", 2)
-	end
+	table.insert(outermod._EXPORTS, require(name))
 end
 
 -- This function replaces module() and makes it so that leaving off any module modifiers automatically
--- adds the cbcluamodule modifier. This simplifies cbclua code and does little to break compatibility
--- with other lua code because htey almost always either have their own modifier or use module.seeall
+-- adds the cbcluamodule modifier. Our changes shouldn't break any code operating under the expectations
+-- of the real module function, since everything we don't alter any behavior, just add new ones
 
 local realmodule = module
 function module(name, ...)
@@ -108,8 +66,8 @@ end
 -- This function is a metatable function that allows modules to view global functions and imported modules
 
 function mod_mt.__index(mod, key)
-	for _,submod in ipairs(mod._SUBMODS) do -- look in sub modules
-		local val = submod[key]
+	for _,exportmod in ipairs(mod._EXPORTS) do -- look in export modules
+		local val = exportmod[key]
 		if val then
 			return val
 		end
@@ -131,10 +89,6 @@ function mod_mt.__index(mod, key)
 		return super
 	end
 	
-	if mod._GLOBALS[key] then -- the global is defined, but it doesn't exist
-		return nil -- return nil
-	end
-	
 	local val = _G[key] -- otherwise, go through global functions
 	if type(val) == "function" then
 		return val
@@ -154,44 +108,33 @@ function mod_mt.__index(mod, key)
 			return automod
 		end
 	end
-	
-	error("Undefined global '" .. key .. "'", 2)
 end
 
--- This function catches assignment to undefined globals
+-- This allows assignments into exported modules and imports
+-- it also hacks around lua's module system's behavior of adding tables for submodules in a module table
 
--- You don't need to declare
----- Capitalized globals (should be class names, usually only assigned to once)
----- Globals that will contain functions (again, usually only assinged once)
-
-function mod_mt.__newindex(mod, key, value)
-	local firstbyte = key:byte(1)
-
-	if (firstbyte >= 65 and firstbyte <= 90) or mod._AUTOGLOBALS or type(value) == "function" or mod._GLOBALS[key] then
-		rawset(mod, key, value)
-		return
-	end
-	
-	-- hackish thing below
+function mod_mt.__newindex(mod, key, value)	
 	if type(value) == "table" and getfenv(2) == _G then -- if its a table being assigned in, and the caller's environment is global
 		return -- ignore it, lua's module system is creating globals inside our tables
 	end
 
-	for _,submod in ipairs(mod._SUBMODS) do -- look in sub modules
-		if submod._GLOBALS[key] then
-			rawset(submod, key, value)
+	for _,exportmod in ipairs(mod._EXPORTS) do -- look in exported modules
+		if exportmod[key] then -- if it exists in the exported module (this will not allow assignment to nil variables!)
+			rawset(exportmod, key, value) -- set it
 			return
 		end
 	end
 	
-	for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value
-		if importmod._GLOBALS[key] then
-			rawset(importmod, key, value)
-			return
+	if getfenv(2) ~= mod then -- if the caller was declared inside the module
+		for _,importmod in ipairs(mod._IMPORTS) do -- look through its imports to find the value
+			if importmod[key] then
+				rawset(importmod, key, value)
+				return
+			end
 		end
 	end
-
-	error("Undefined global '" .. key .. "'", 2)
+	
+	rawset(mod, key, value)
 end
 
 -- This function is used to do delayed module loading

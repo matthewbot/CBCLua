@@ -1,15 +1,12 @@
 module(...)
 
-local task = require "std.task"
-local util = require "std.util"
+local task = require "cbclua.task"
+local util = require "cbclua.util"
 local raw = require "raw.cbc"
 local math = require "math"
 local os = require "os"
 
-global{
-	image_width = 160,
-	image_height = 120
-}
+image_width, image_height = 160, 120
 
 -- Public Functions
 
@@ -170,7 +167,7 @@ end
 
 -- CBC performance tweak
 
-local util = require "std.util"
+local util = require "cbclua.util"
 
 util.set_cbc_proc("/sys/class/video4linux/video0/auto_exposure", 0)
 util.set_cbc_proc("/sys/class/video4linux/video0/exposure", 1)

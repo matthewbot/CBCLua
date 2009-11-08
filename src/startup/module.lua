@@ -2,7 +2,7 @@
 
 local mod_mt = { }
 
--- Module modifier that allows import() to work and requires declaration of global variables through the global() function
+-- Module modifier that allows import() / export() to work. Also allows access to global functions
 
 function cbcluamodule(mod)
 	if mod._CBCLUAMODULE then return end

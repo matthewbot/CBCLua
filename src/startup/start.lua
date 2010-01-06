@@ -17,10 +17,13 @@ dostartup("class.lua")
 dostartup("module.lua")
 
 -- Start system tasks
---TODO
+local list = require "cbclua.task.list"
+local main = require "main"
+
+list.start(main.main, "main", false)
 
 -- Finally, enter the task schedular!
-local sched = require "std.task.sched"
+local sched = require "cbclua.task.sched"
 local ok, msg = sched.run()
 
 if ok then

@@ -2,7 +2,7 @@ module(...)
 
 local coroutine = require "coroutine"
 
-import "std.task.task"
+import "cbclua.task.task"
 
 -- Private State
 
@@ -13,7 +13,7 @@ local task_count = 0
 -- Public functions
 
 function start(...) -- args are func, name, daemon, cstack
-	local task = pass_errors(Task, ...)
+	local task = Task(...)
 	tasks_tostart[task] = true
 	task_count = task_count + 1
 	return task

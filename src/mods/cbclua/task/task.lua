@@ -1,6 +1,6 @@
 module(...)
 
-local timer = require "std.timer"
+local timer = require "cbclua.timer"
 local coroutine = require "coroutine"
 local debug = require "debug"
 

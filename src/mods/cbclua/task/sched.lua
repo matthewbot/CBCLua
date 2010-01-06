@@ -1,12 +1,12 @@
 module(...)
 
-local timer = require "std.timer"
-local util = require "std.util"
+local timer = require "cbclua.timer"
+local util = require "cbclua.util"
 local os = require "os"
 local math = require "math"
 local table = require "table"
 
-import "std.task.list"
+import "cbclua.task.list"
 
 -- Private state
 

@@ -8,10 +8,10 @@
 
 module(...)
 
-local sched = require "std.task.sched"
-local timer = require "std.timer"
+local sched = require "cbclua.task.sched"
+local timer = require "cbclua.timer"
 
-import "std.task.control"
+import "cbclua.task.control"
 
 --
 

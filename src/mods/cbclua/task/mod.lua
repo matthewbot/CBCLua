@@ -1,9 +1,9 @@
 module(...)
 
-local task = require "std.task.task"
+local task = require "cbclua.task.task"
 
-submodule("std.task.control")
-submodule("std.task.list")
-submodule("std.task.signal")
+export("cbclua.task.control")
+export("cbclua.task.list")
+export("cbclua.task.signal")
 get_current = task.get_current -- export one function from task
 

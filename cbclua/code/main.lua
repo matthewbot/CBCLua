@@ -1,11 +1,11 @@
-module("main")
+module(...)
 
 -- This tiny program is packaged with cbclua
 -- and is automatically overwritten when new code 
 -- is loaded from a thumb drive
 
-local cbc = require "std.cbc"
-local task = require "std.task"
+local cbc = require "cbclua.cbc"
+local task = require "cbclua.task"
 
 function main()
 	print("Push black button")

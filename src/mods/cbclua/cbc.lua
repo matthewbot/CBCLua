@@ -5,10 +5,8 @@ module(...)
 --[[ Requires and globals ]]--
 
 import "raw.cbc"
-local task = require "std.task"
-local util = require "std.util"
-
-global{"sensors", "motors", "servos"}
+local task = require "cbclua.task"
+local util = require "cbclua.util"
 
 --[[ SensorBase ]]--
 -- Base class for any kind of sensor-looking thing
@@ -143,12 +141,3 @@ function off_screen()
 	util.set_cbc_proc(dimlevel_proc, 2)
 end
 
--- [[ Shutdown hook ]]--
-
-add_shutdown_hook(function ()
-	disable_servos()
-
-	for _, mot in pairs(motors) do
-		mot:off()
-	end
-end)

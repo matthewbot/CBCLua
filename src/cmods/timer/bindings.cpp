@@ -22,6 +22,8 @@ const luaL_Reg luafuncs[] = {
 	{NULL, NULL}
 };
 
+static int get_fd(lua_State *L, int i);
+
 static int lua_raw_sleep(lua_State *L) {
 	double timeout = checknumber(L, 1);
 	
@@ -30,9 +32,16 @@ static int lua_raw_sleep(lua_State *L) {
 	fds.reserve(fdcount);
 	
 	for (int i=0; i < fdcount; i++) {
-		FILE **file = (FILE **)lua_touserdata(L, i+2);
-		if (file != NULL && *file != NULL)
-			fds.push_back(fileno(*file));
+		int fd = get_fd(L, i+2);
+	
+		if (fd == -1) {
+			FILE **file = (FILE **)lua_touserdata(L, i+2);
+			if (file != NULL && *file != NULL)
+				fd = fileno(*file);
+		}
+		
+		if (fd != -1)
+			fds.push_back(fd);
 	}
 	
 	vector<bool> results = raw_sleep(timeout, fds);
@@ -42,4 +51,18 @@ static int lua_raw_sleep(lua_State *L) {
 	}
 	
 	return fdcount;
+}
+
+static int get_fd(lua_State *L, int i) {
+	int fd=-1;
+    lua_pushstring(L, "getfd");
+    lua_gettable(L, i);
+    if (!lua_isnil(L, -1)) {
+        lua_pushvalue(L, i);
+        lua_call(L, 1, 1);
+        if (lua_isnumber(L, -1)) 
+            fd = lua_tonumber(L, -1); 
+    } 
+    lua_pop(L, 1);
+    return fd;
 }

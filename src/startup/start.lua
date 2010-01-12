@@ -22,6 +22,10 @@ local main = require "main"
 
 list.start(main.main, "main", false)
 
+-- Start interaction tasks
+local interact = require "cbclua.interact"
+interact.start_tasks()
+
 -- Finally, enter the task schedular!
 local sched = require "cbclua.task.sched"
 local ok, msg = sched.run()

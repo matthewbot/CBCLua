@@ -53,14 +53,15 @@ end
 -- of the real module function, since everything we don't alter any behavior, just add new ones
 
 local realmodule = module
+local _G = _G
 function module(name, ...)
-	if select("#", ...) == 0 then 
-		realmodule(name, cbcluamodule)
+	if select("#", ...) == 0 and not name:find("^socket") then 
+		realmodule(name, _G.cbcluamodule)
 	else
 		realmodule(name, ...)
 	end
 	
-	setfenv(2, getfenv(1)) -- propogate environment set by realmodule to caller
+	_G.setfenv(2, _G.getfenv(1)) -- propogate environment set by realmodule to caller
 end
 
 -- This function is a metatable function that allows modules to view global functions and imported modules

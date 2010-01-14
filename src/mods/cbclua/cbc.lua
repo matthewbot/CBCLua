@@ -130,14 +130,24 @@ end
 local dimlevel_proc = "/proc/sys/sense1/dimlevel"
 
 function dim_screen()
-	util.set_cbc_proc(dimlevel_proc, 1)
+	set_proc(dimlevel_proc, 1)
 end
 
 function bright_screen()
-	util.set_cbc_proc(dimlevel_proc, 0)
+	set_proc(dimlevel_proc, 0)
 end
 
 function off_screen()
-	util.set_cbc_proc(dimlevel_proc, 2)
+	set_proc(dimlevel_proc, 2)
+end
+
+function set_proc(file, val)
+	if get_host() ~= "chumby" then
+		return
+	end
+	
+	local file = io.open(file, "w")
+	file:write(val, "\n")
+	file:close()
 end
 

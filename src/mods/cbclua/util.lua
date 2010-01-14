@@ -1,7 +1,7 @@
 module("cbclua.util")
 
 local task = require "cbclua.task"
-local cbc = require_later "cbclua.cbc"
+local cbc = require "cbclua.cbc"
 local table = require "table"
 local io = require "io"
 
@@ -102,12 +102,3 @@ function after_do(func, endfunc)
 	return unpack(returns)
 end
 
-function set_cbc_proc(file, val)
-	if get_host() ~= "chumby" then
-		return
-	end
-	
-	local file = io.open(file, "w")
-	file:write(val, "\n")
-	file:close()
-end

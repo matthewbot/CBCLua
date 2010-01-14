@@ -112,7 +112,7 @@ function mod_mt.__index(mod, key)
 end
 
 local CBCLUA_CODEPATH = os.getenv("CBCLUA_CODEPATH")
-local CBCLUA_MODPATH = os.getenv("CBCLUA_MODPATH")
+local CBCLUA_MODSPATH = os.getenv("CBCLUA_MODSPATH")
 	
 local function tryload(fname)
 	local f = io.open(fname)
@@ -123,14 +123,19 @@ local function tryload(fname)
 end
 	
 local function loader(name)
-	local pathname = name:gsub("%.", "/")
-	filename = pathname .. ".lua"
-	modfilename = pathname .. "/mod.lua"
+	local basename
+	if name:match("^cbclua%.") then
+		basename = CBCLUA_MODSPATH .. name:gsub("^cbclua%.", ""):gsub("%.", "/")
+	else
+		basename = CBCLUA_CODEPATH .. name:gsub("%.", "/")
+	end
 	
-	local modfunc = tryload(CBCLUA_CODEPATH .. filename) or 
-	                tryload(CBCLUA_CODEPATH .. modfilename) or
-	                tryload(CBCLUA_MODPATH .. filename) or
-	                tryload(CBCLUA_MODPATH .. modfilename)
+	local filename = basename .. ".lua"
+	local modfilename = basename .. "/mod.lua"
+	
+	local modfunc = tryload(filename) or 
+	                tryload(modfilename) 
+	                
 	if modfunc == nil then
 		return nil
 	end

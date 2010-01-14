@@ -5,10 +5,10 @@ echo "Developed at Nease High School, FL"
 
 cd `dirname $0`
 
-export LUA_PATH="mods/?.lua;;"
-export LUA_CPATH="code/?.so;cmods/?.so;;"
+export LUA_PATH="stdmods/?.lua;;"
+export LUA_CPATH="cmods/?.so;;"
 export CBCLUA_CODEPATH="code/"
-export CBCLUA_MODPATH="mods/"
+export CBCLUA_MODSPATH="mods/"
 export LD_LIBRARY_PATH="." # Doesn't work without this for some reason
 
 if [ `uname -r` == "2.6.16-csb" ]; then

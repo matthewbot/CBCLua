@@ -55,7 +55,7 @@ end
 local realmodule = module
 local _G = _G
 function module(name, ...)
-	if select("#", ...) == 0 and not name:find("^socket") then 
+	if _G.select("#", ...) == 0 and not name:find("^socket") then 
 		realmodule(name, _G.cbcluamodule)
 	else
 		realmodule(name, ...)

@@ -62,15 +62,11 @@ function Motor:wait()
 	end
 end
 
-local function make_motor_wrapper(rawfuncname, realfuncname)
-	if realfuncname == nil then
-		realfuncname = rawfuncname
-	end
-	
-	local func = _M[rawfuncname] -- this will still search our imports
+local function make_motor_wrapper(funcname)
+	local func = _M[funcname] -- this will still search our imports
 
 	return function(self, ...)
-		return __errwrap(2, realfuncname, func, self.num, ...) -- errwrap makes error messages come out correctly since some functions are renamed
+		return func(self.num, ...)
 	end
 end
 
@@ -79,9 +75,9 @@ for _,funcname in ipairs(motorfuncnames) do
 	Motor[funcname] = make_motor_wrapper(funcname)
 end
 
-Motor.getpos = make_motor_wrapper("get_motor_position_counter", "getpos")
-Motor.clearpos = make_motor_wrapper("clear_motor_position_counter", "clearpos")
-Motor.getdone = make_motor_wrapper("get_motor_done", "getdone")
+Motor.getpos = make_motor_wrapper("get_motor_position_counter")
+Motor.clearpos = make_motor_wrapper("clear_motor_position_counter")
+Motor.getdone = make_motor_wrapper("get_motor_done")
 
 motors = { }
 for i=0,3 do

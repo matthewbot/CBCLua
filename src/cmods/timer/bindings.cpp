@@ -25,7 +25,7 @@ const luaL_Reg luafuncs[] = {
 static int get_fd(lua_State *L, int i);
 
 static int lua_raw_sleep(lua_State *L) {
-	double timeout = checknumber(L, 1);
+	double timeout = luaL_checknumber(L, 1);
 	
 	int fdcount = lua_gettop(L)-1;
 	vector<int> fds;

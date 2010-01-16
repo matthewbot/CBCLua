@@ -12,11 +12,12 @@ class CBCConnection(threading.Thread):
 		self.sockbuf = ""
 		self.callbacks = callbacks
 		self.ip = ip
+		self.closed = False
 		self.start()
 	
 	def close(self):
-		self.sock.close()
-		self.stop()
+		self.closed = True
+		self.sock.shutdown(socket.SHUT_RDWR)
 		
 	def send_expr(self, expr):
 		self.write_line("EXPR")
@@ -39,7 +40,8 @@ class CBCConnection(threading.Thread):
 			elif line == None:
 				break
 				
-		self.callbacks.on_net_connerror()
+		if not self.closed:
+			self.callbacks.on_net_connerror()
 		self.sock.close()
 				
 	def recv_line(self):

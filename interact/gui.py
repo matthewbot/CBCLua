@@ -5,13 +5,14 @@ class ShellFrame(wx.Frame):
 	def __init__(self, parent, callbacks):
 		wx.Frame.__init__(self, parent, title='Interact', size=wx.Size(500, 400))
 		self.callbacks = callbacks
-		self.sendenabled = True
+		self.sendenabled = False
 		
 		splitter = wx.SplitterWindow(self)
 		bottom_panel = wx.Panel(splitter, style=wx.SP_3D)
 		
 		self.sendbutton = wx.Button(bottom_panel, label="Send")
 		self.sendbutton.SetDefault()
+		self.sendbutton.Disable()
 		self.output = wx.TextCtrl(splitter, style=wx.TE_MULTILINE|wx.TE_RICH)
 		self.input = wx.TextCtrl(bottom_panel, style=wx.TE_MULTILINE|wx.TE_RICH)
 		self.input.SetFont(wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -26,6 +27,17 @@ class ShellFrame(wx.Frame):
 		
 		self.input.Bind(wx.EVT_CHAR, self.evt_char)
 		self.sendbutton.Bind(wx.EVT_BUTTON, self.evt_sendbutton)
+		
+		cbc_menu = wx.Menu()
+		cbc_menu_connect = cbc_menu.Append(wx.ID_ANY, "&Connect")
+		cbc_menu_disconnect = cbc_menu.Append(wx.ID_ANY, "&Disconnect")
+		
+		menubar = wx.MenuBar()
+		menubar.Append(cbc_menu, "&CBC")
+		self.SetMenuBar(menubar)
+		
+		self.Bind(wx.EVT_MENU, self.evt_menu_connect, cbc_menu_connect)
+		self.Bind(wx.EVT_MENU, self.evt_menu_disconnect, cbc_menu_disconnect)
 		
 		self.stylemap = dict(
 			user=wx.TextAttr(
@@ -48,7 +60,7 @@ class ShellFrame(wx.Frame):
 				font=wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD),
 				colText="RED"
 			)
-		)	
+		)
 		
 	def enable_send(self):
 		self.sendenabled = True
@@ -69,13 +81,20 @@ class ShellFrame(wx.Frame):
 		self.output.AppendText(text + "\n")
 		
 	def evt_char(self, keyevent):
-		if self.sendenabled and keyevent.GetKeyCode() == wx.WXK_RETURN and not keyevent.ControlDown():
-			self.do_send()
+		if keyevent.GetKeyCode() == wx.WXK_RETURN and not keyevent.ControlDown():
+			if self.sendenabled:
+				self.do_send()
 		else:
 			keyevent.Skip()
 			
 	def evt_sendbutton(self, buttonevent):
 		self.do_send()
+		
+	def evt_menu_connect(self, menuevent):
+		self.callbacks.on_shell_connect()
+		
+	def evt_menu_disconnect(self, menuevent):
+		self.callbacks.on_shell_disconnect()
 
 class ConnectDialog(wx.Dialog):
 	def __init__(self, parent, callbacks):

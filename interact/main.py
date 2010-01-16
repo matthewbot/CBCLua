@@ -22,13 +22,27 @@ class InteractApp(wx.App):
 		self.connectdialog.clear_cbcs()
 		self.cbcfinder.send_request()
 		
+	def disconnect(self):
+		if self.cbcconn is not None:
+			self.cbcconn.close()
+			self.cbcconn = None
+			wx.CallAfter(self.shellframe.disable_send)
+		
 	def on_shell_send(self, expr):
 		self.shellframe.disable_send()
 		self.shellframe.write_line()
 		self.shellframe.write_line(expr)
 		self.cbcconn.send_expr(expr)
 		
+	def on_shell_connect(self):
+		self.show_connect_dialog()
+		
+	def on_shell_disconnect(self):
+		self.disconnect()
+		self.shellframe.write_line("Disconnected", "system")
+		
 	def on_cbclist_connect(self, ip):
+		self.disconnect()
 		self.cbcconn = net.CBCConnection(self, ip)
 		self.connectdialog.Hide()
 		
@@ -45,7 +59,10 @@ class InteractApp(wx.App):
 		wx.CallAfter(self.connectdialog.add_cbc, name, ip, conns)
 		
 	def on_net_version(self, name, version):
-		wx.CallAfter(self.shellframe.write_line, "Connected to " + name + " (" + version + ")", style="system")
+		def callback():
+			self.shellframe.write_line("Connected to " + name + " (" + version + ")", "system")
+			self.shellframe.enable_send()
+		wx.CallAfter(callback)
 		
 	def on_net_result(self, result):
 		self.write_shellframe_and_enable_send(result, "result")
@@ -62,7 +79,7 @@ class InteractApp(wx.App):
 		
 	def on_net_connerror(self):
 		self.cbcconn = None
-		wx.CallAfter(self.shellframe.write_line, "Connection Error", style="systemerror")
+		wx.CallAfter(self.shellframe.write_line, "Connection Error", "systemerror")
 		
 def main():
 	app = InteractApp()

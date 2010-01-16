@@ -9,7 +9,7 @@ local get_system_table
 
 function autorequire(name, mod)
 	mod = mod or getfenv(2)	
-	assert(getmetatable(mod) == mod_mt, "import may only be called from within a module!")
+	assert(getmetatable(mod) == mod_mt, "autorequire may only be called from within a module!")
 
 	local autoreqs = get_system_table(mod, "_AUTOREQS")
 	table.insert(autoreqs, name)
@@ -34,6 +34,10 @@ function export(name, mod)
 	
 	local exports = get_system_table(mod, "_EXPORTS")
 	table.insert(exports, require(name))
+end
+
+function make_cbclua_module(table)
+	setmetatable(table, mod_mt)
 end
 	
 -- Internals
@@ -105,6 +109,7 @@ function mod_mt.__index(mod, key)
 			local modname = autoreqprefix .. key
 			local ok, automod = pcall(require, modname)
 			if ok then
+				mod[key] = automod
 				return automod
 			end
 		end

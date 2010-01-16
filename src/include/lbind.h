@@ -87,4 +87,9 @@ template <void (* func)(double)> static int lbind(lua_State *L) {
 	return 0;
 }
 
+template <float (* func)()> static int lbind(lua_State *L) {
+	lua_pushnumber(L, func());
+	return 1;
+}
+
 #endif

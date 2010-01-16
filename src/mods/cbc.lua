@@ -121,6 +121,9 @@ for _,button in ipairs(buttons) do
 	_M[btnfunc] = _M[btnfunc] -- looks weird, but on the right we're going to find it in our import, and then on the left we're going to make it a module variable
 end
 
+--[[ Misc ]]--
+power_level = power_level
+
 --[[ Control functions ]]--
 
 local dimlevel_proc = "/proc/sys/sense1/dimlevel"

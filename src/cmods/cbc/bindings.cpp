@@ -61,6 +61,8 @@ const luaL_Reg luafuncs[] = {
 	{"a_button", lbind_bool<a_button>},
 	{"b_button", lbind_bool<b_button>},
 	
+	{"power_level", lbind<power_level>},
+	
 	{NULL, NULL}
 };
 

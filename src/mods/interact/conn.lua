@@ -24,7 +24,7 @@ function InteractConnection:run()
 			break
 		elseif command == "EXPR" then
 			local expr = self:readData()
-			task.async(function ()
+			task.start(function ()
 				local ok, result = self.env:run(expr)
 				if ok then
 					self:writeLn("RESULT")
@@ -32,7 +32,7 @@ function InteractConnection:run()
 					self:writeLn("ERROR")
 				end
 				self:writeData(tostring(result))
-			end)
+			end, "interact eval", true, true)
 		end	
 	end
 	

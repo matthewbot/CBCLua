@@ -3,6 +3,7 @@ local evalenv = require "cbclua.interact.evalenv"
 import "cbclua.interact.config"
 
 InteractConnection = create_class "InteractConnection"
+local conncount = 0
 
 function InteractConnection:construct(sock)
 	self.sock = sock
@@ -11,9 +12,10 @@ function InteractConnection:construct(sock)
 end
 
 function InteractConnection:run()
+	conncount = conncount + 1
 	self.sock:settimeout(0)
-	self:writeLn(CBCLUA_NAME)
-	self:writeLn(CBCLUA_INTERACT_VERSION)
+	self:writeLn(_G.CBCLUA_NAME)
+	self:writeLn(_G.CBCLUA_VERSION)
 	
 	while true do
 		local command = self:readLn()
@@ -35,6 +37,7 @@ function InteractConnection:run()
 	end
 	
 	self.sock:close()
+	conncount = conncount - 1
 end
 
 function InteractConnection:writeLn(line)
@@ -98,5 +101,9 @@ function InteractConnection:readData()
 	end
 	
 	return buf
+end
+
+function get_conn_count()
+	return conncount
 end
 		

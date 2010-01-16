@@ -10,15 +10,23 @@ function EvalEnvironment:construct()
 end
 
 function EvalEnvironment:run(expr)
-	local printnil = true
-	local chunk, err = loadstring("return " .. expr, "=expr")
+	-- compile as both a bare chunk and as an expression to be returned
+	local chunk, err = loadstring(expr, "=chunk") 
+	local exprchunk = loadstring("return " .. expr, "=expr")
 	
-	if chunk == nil then
-		chunk, err = loadstring(expr, "=chunk")
-		printnil = false
-		if chunk == nil then
-			return false, err
-		end
+	local printnil -- whether to print a nil value
+	if chunk then -- if we compiled as a chunk
+		printnil = false -- don't print a nil
+	else
+		printnil = true
+	end
+	
+	if exprchunk then -- if we're able to compile as an expression
+		chunk = exprchunk -- evaluate the expression version to get a return value
+	end
+	
+	if chunk == nil then -- if we've got no chunk to execute
+		return false, err -- fail
 	end
 	
 	setfenv(chunk, self.mod)

@@ -13,6 +13,7 @@ local function dostartup(file)
 	dofile(startupdir .. file)
 end
 
+dostartup("config.lua")
 dostartup("class.lua")
 dostartup("module.lua")
 

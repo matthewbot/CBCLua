@@ -14,11 +14,11 @@ function get(x, p)
 end 
 
 function set(x, p) 
-	return hasbit(x, p) and x or x + p 
+	return get(x, p) and x or x + p 
 end 
 
 function clear(x, p) 
-	return hasbit(x, p) and x - p or x 
+	return get(x, p) and x - p or x 
 end 
 
 -- Utility functions for big-endian 16 bit words (create)

@@ -1,20 +1,16 @@
-module(...)
-
 local socket = require "socket"
 local task = require "cbclua.task"
+local conn = require "cbclua.interact.conn"
 import "cbclua.interact.config"
 
 function listen()
-	print("entering listen")
 	local ss = assert(socket.bind("*", CBCLUA_INTERACT_PORT))
 	
 	while true do
-		print("calling sleep_io")
 		task.sleep_io(ss)
 		
 		local sock = ss:accept()
-		
-		print("Got socket!")
+		conn.InteractConnection(sock)
 	end
 end
 
@@ -29,7 +25,7 @@ function respond()
 		local msg, ip, port = udp:receivefrom()
 
 		if msg == "interact" then
-			local response = "Unnamed CBC,0"
+			local response = CBCLUA_NAME .. ",0"
 			udp:sendto(response, ip, port)
 		end
 	end

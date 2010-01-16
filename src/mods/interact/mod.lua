@@ -1,5 +1,3 @@
-module(...)
-
 local task = require "cbclua.task"
 local tasks = require "cbclua.interact.tasks"
 

@@ -13,7 +13,7 @@ export LD_LIBRARY_PATH="." # Doesn't work without this for some reason
 
 if [ `uname -r` == "2.6.16-csb" ]; then
 	HOST="chumby"
-	export CBCLUA_NAME="/mnt/config/cbclua_name"
+	export CBCLUA_NAME="/mnt/user/config/cbclua_name"
 else
 	HOST="pc"
 	export CBCLUA_NAME="cbclua_name"

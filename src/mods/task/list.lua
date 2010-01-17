@@ -81,6 +81,14 @@ function dump_list()
 	end
 end
 
+function stop_all_user_tasks()
+	for task, _ in pairs(tasks) do
+		if not task:is_system() then
+			stop(task)
+		end
+	end
+end
+
 function start_new_tasks()
 	local started = false
 
@@ -96,3 +104,4 @@ function start_new_tasks()
 	tasks_tostart = { }
 	return true
 end
+

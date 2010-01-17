@@ -9,6 +9,7 @@ class CBCConnection(threading.Thread):
 		threading.Thread.__init__(self, name="CBCConnection")
 		self.daemon = True
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 		self.sockbuf = ""
 		self.callbacks = callbacks
 		self.ip = ip
@@ -22,6 +23,9 @@ class CBCConnection(threading.Thread):
 	def send_expr(self, expr):
 		self.write_line("EXPR")
 		self.write_data(expr)
+		
+	def send_stop(self):
+		self.write_line("STOPTASKS")
 		
 	def run(self):
 		self.sock.connect((self.ip, INTERACT_PORT))

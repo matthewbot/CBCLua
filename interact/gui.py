@@ -13,6 +13,8 @@ class ShellFrame(wx.Frame):
 		self.sendbutton = wx.Button(bottom_panel, label="Send")
 		self.sendbutton.SetDefault()
 		self.sendbutton.Disable()
+		self.stopbutton = wx.Button(bottom_panel, label="Stop")
+		self.stopbutton.Disable()
 		self.output = wx.TextCtrl(splitter, style=wx.TE_MULTILINE|wx.TE_RICH)
 		self.input = wx.TextCtrl(bottom_panel, style=wx.TE_MULTILINE|wx.TE_RICH)
 		self.input.SetFont(wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
@@ -24,9 +26,11 @@ class ShellFrame(wx.Frame):
 		bottom_panel.SetSizer(bottom_panel_box)
 		bottom_panel_box.Add(self.input, 1, wx.EXPAND)
 		bottom_panel_box.Add(self.sendbutton, 0, wx.ALIGN_CENTER)
+		bottom_panel_box.Add(self.stopbutton, 0, wx.ALIGN_CENTER)
 		
 		self.input.Bind(wx.EVT_CHAR, self.evt_char)
 		self.sendbutton.Bind(wx.EVT_BUTTON, self.evt_sendbutton)
+		self.stopbutton.Bind(wx.EVT_BUTTON, self.evt_stopbutton)
 		
 		cbc_menu = wx.Menu()
 		cbc_menu_connect = cbc_menu.Append(wx.ID_ANY, "&Connect")
@@ -70,6 +74,12 @@ class ShellFrame(wx.Frame):
 		self.sendenabled = False
 		self.sendbutton.Disable()
 		
+	def enable_stop(self):
+		self.stopbutton.Enable()
+		
+	def disable_stop(self):
+		self.stopbutton.Disable()
+		
 	def do_send(self):
 		text = self.input.GetValue()
 		if len(text) > 0:
@@ -89,6 +99,9 @@ class ShellFrame(wx.Frame):
 			
 	def evt_sendbutton(self, buttonevent):
 		self.do_send()
+		
+	def evt_stopbutton(self, buttonevent):
+		self.callbacks.on_shell_stop()
 		
 	def evt_menu_connect(self, menuevent):
 		self.callbacks.on_shell_connect()

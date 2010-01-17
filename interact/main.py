@@ -26,13 +26,20 @@ class InteractApp(wx.App):
 		if self.cbcconn is not None:
 			self.cbcconn.close()
 			self.cbcconn = None
-			wx.CallAfter(self.shellframe.disable_send)
+			
+			def callback():
+				self.shellframe.disable_send()
+				self.shellframe.disable_stop()
+			wx.CallAfter(callback)
 		
 	def on_shell_send(self, expr):
 		self.shellframe.disable_send()
 		self.shellframe.write_line()
 		self.shellframe.write_line(expr)
 		self.cbcconn.send_expr(expr)
+		
+	def on_shell_stop(self):
+		self.cbcconn.send_stop()
 		
 	def on_shell_connect(self):
 		self.show_connect_dialog()
@@ -62,6 +69,7 @@ class InteractApp(wx.App):
 		def callback():
 			self.shellframe.write_line("Connected to " + name + " (" + version + ")", "system")
 			self.shellframe.enable_send()
+			self.shellframe.enable_stop()
 		wx.CallAfter(callback)
 		
 	def on_net_result(self, result):

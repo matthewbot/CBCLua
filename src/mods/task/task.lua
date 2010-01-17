@@ -12,10 +12,11 @@ local current_task
 
 Task = create_class "Task"
 
-function Task:construct(func, name, daemon, cstack)
+function Task:construct(func, name, daemon, cstack, system)
 	self.co = coroutine.create(func, cstack and 0 or -1)
 	self.name = assert(name, "missing name for task creation")
 	self.daemon = daemon
+	self.system = system
 end
 
 function Task:get_name()
@@ -24,6 +25,10 @@ end
 
 function Task:is_daemon()
 	return self.daemon == true
+end
+
+function Task:is_system()
+	return self.system == true
 end
 
 function Task:running()

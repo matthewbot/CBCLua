@@ -8,7 +8,7 @@ local conncount = 0
 function InteractConnection:construct(sock)
 	self.sock = sock
 	self.env = evalenv.EvalEnvironment()
-	self.task = task.start(function () return self:run() end, "interact conn", true)
+	self.task = task.start(function () return self:run() end, "interact conn", true, false, true)
 end
 
 function InteractConnection:run()
@@ -33,7 +33,9 @@ function InteractConnection:run()
 				end
 				self:writeData(tostring(result))
 			end, "interact eval", true, true)
-		end	
+		elseif command == "STOPTASKS" then
+			task.stop_all_user_tasks()
+		end
 	end
 	
 	self.sock:close()

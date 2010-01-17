@@ -36,12 +36,18 @@ class ShellFrame(wx.Frame):
 		cbc_menu_connect = cbc_menu.Append(wx.ID_ANY, "&Connect")
 		cbc_menu_disconnect = cbc_menu.Append(wx.ID_ANY, "&Disconnect")
 		
+		program_menu = wx.Menu()
+		program_menu_download = program_menu.Append(wx.ID_ANY, "&Download")
+		program_menu_reload = program_menu.Append(wx.ID_ANY, "&Reload")
+		
 		menubar = wx.MenuBar()
 		menubar.Append(cbc_menu, "&CBC")
+		menubar.Append(program_menu, "&Program")
 		self.SetMenuBar(menubar)
 		
 		self.Bind(wx.EVT_MENU, self.evt_menu_connect, cbc_menu_connect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_disconnect, cbc_menu_disconnect)
+		self.Bind(wx.EVT_MENU, self.evt_menu_download, program_menu_download)
 		
 		self.stylemap = dict(
 			user=wx.TextAttr(
@@ -108,6 +114,11 @@ class ShellFrame(wx.Frame):
 		
 	def evt_menu_disconnect(self, menuevent):
 		self.callbacks.on_shell_disconnect()
+		
+	def evt_menu_download(self, menuevent):
+		dirdialog = wx.DirDialog(self, "Download folder", style=wx.DD_DIR_MUST_EXIST)
+		if dirdialog.ShowModal() == wx.ID_OK:
+			self.callbacks.on_shell_download(dirdialog.GetPath())
 
 class ConnectDialog(wx.Dialog):
 	def __init__(self, parent, callbacks):

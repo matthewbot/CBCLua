@@ -1,5 +1,8 @@
 local task = require "cbclua.task"
 local evalenv = require "cbclua.interact.evalenv"
+local rawio = require "raw.io"
+local os = require "os"
+local io = require "io"
 import "cbclua.interact.config"
 
 InteractConnection = create_class "InteractConnection"
@@ -10,6 +13,8 @@ function InteractConnection:construct(sock)
 	self.env = evalenv.EvalEnvironment()
 	self.task = task.start(function () return self:run() end, "interact conn", true, false, true)
 end
+
+local CODEPATH = _G.CBCLUA_CODEPATH
 
 function InteractConnection:run()
 	conncount = conncount + 1
@@ -35,6 +40,20 @@ function InteractConnection:run()
 			end, "interact eval", true, true)
 		elseif command == "STOPTASKS" then
 			task.stop_all_user_tasks()
+		elseif command == "CLEARCODE" then
+			os.execute("rm -rf " .. CODEPATH .. "/*")
+		elseif command == "MKCODEDIR" then
+			local dir = self:readLn()
+			rawio.mkdir(CODEPATH .. "/" .. dir)
+		elseif command == "PUTCODE" then
+			local filename = self:readLn()
+			local filedata = self:readData()
+			
+			local file = io.open(CODEPATH .. "/" .. filename, "w")
+			if file then
+				file:write(filedata)
+				file:close()
+			end
 		end
 	end
 	

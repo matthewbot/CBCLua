@@ -17,11 +17,13 @@ dostartup("config.lua")
 dostartup("class.lua")
 dostartup("module.lua")
 
+--[[
 -- Start system tasks
 local list = require "cbclua.task.list"
 local main = require "main"
 
 list.start(main.main, "main", false)
+]]
 
 -- Start interaction tasks
 local interact = require "cbclua.interact"

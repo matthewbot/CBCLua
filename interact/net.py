@@ -1,5 +1,6 @@
 import socket
 import threading
+import os
 
 INTERACT_PORT = 6754
 MULTICAST_ADDR = ("239.2.1.1", 13590)
@@ -26,6 +27,41 @@ class CBCConnection(threading.Thread):
 		
 	def send_stop(self):
 		self.write_line("STOPTASKS")
+		
+	def send_clear_code(self):
+		self.write_line("CLEARCODE")
+		
+	def send_download(self, rootpath):
+		self.send_stop()
+		self.send_clear_code()
+	
+		for curpath, subdirs, filenames in os.walk(rootpath):
+			if curpath == rootpath:
+				cbccurpath = ""
+			else:
+				cbccurpath = curpath[len(rootpath)+1:] + "/" # cbc-relative path is the current path sans the root path
+			curpath += "/"
+			
+			for subdir in subdirs:
+				cbcdir = cbccurpath + subdir
+				self.make_code_dir(cbcdir)
+				
+			for filename in filenames:
+				cbcfilepath = cbccurpath + filename
+				localfilepath = curpath + filename
+				self.put_file(cbcfilepath, localfilepath)	
+	
+	def make_code_dir(self, codedir):		
+		self.write_line("MKCODEDIR")
+		self.write_line(codedir)
+		
+	def put_file(self, cbcfilepath, localfilepath):
+		self.write_line("PUTCODE")
+		self.write_line(cbcfilepath)
+		
+		f = open(localfilepath, "r")
+		self.write_data(f.read())
+		f.close()
 		
 	def run(self):
 		self.sock.connect((self.ip, INTERACT_PORT))

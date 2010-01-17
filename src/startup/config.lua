@@ -1,7 +1,9 @@
 CBCLUA_VERSION = "CBCLua v2.0.1 Alpha"
+CBCLUA_CODEPATH = os.getenv("CBCLUA_CODEPATH")
+CBCLUA_MODSPATH = os.getenv("CBCLUA_MODSPATH")
+CBCLUA_NAME_FILE = os.getenv("CBCLUA_NAME_FILE")
 
-local CBCLUA_NAME_FILENAME = os.getenv("CBCLUA_NAME")
-local file = io.open(CBCLUA_NAME_FILENAME, "r")
+local file = io.open(CBCLUA_NAME_FILE, "r")
 if file then
 	CBCLUA_NAME=file:read()
 	file:close()

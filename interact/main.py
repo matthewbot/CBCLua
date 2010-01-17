@@ -48,6 +48,9 @@ class InteractApp(wx.App):
 		self.disconnect()
 		self.shellframe.write_line("Disconnected", "system")
 		
+	def on_shell_download(self, path):
+		self.cbcconn.send_download(path)
+		
 	def on_cbclist_connect(self, ip):
 		self.disconnect()
 		self.cbcconn = net.CBCConnection(self, ip)

@@ -3,6 +3,7 @@
 -- Public API for CBCLua Modules --
 
 local mod_mt = { }
+local all_codemod_names = { }
 local get_system_table
 
 -- Automatically require packages beginning with the prefix
@@ -38,6 +39,12 @@ end
 
 function make_cbclua_module(table)
 	setmetatable(table, mod_mt)
+end
+
+function unload_all_codemods()
+	for _, modname in pairs(all_codemod_names) do
+		package.loaded[modname] = nil
+	end
 end
 	
 -- Internals
@@ -115,9 +122,6 @@ function mod_mt.__index(mod, key)
 		end
 	end
 end
-
-local CBCLUA_CODEPATH = os.getenv("CBCLUA_CODEPATH")
-local CBCLUA_MODSPATH = os.getenv("CBCLUA_MODSPATH")
 	
 local function tryload(fname)
 	local f = io.open(fname)
@@ -128,11 +132,15 @@ local function tryload(fname)
 end
 	
 local function loader(name)
+	local iscodemod = not name:match("^cbclua%.")
+	
 	local basename
-	if name:match("^cbclua%.") then
-		basename = CBCLUA_MODSPATH .. name:gsub("^cbclua%.", ""):gsub("%.", "/")
-	else
+	if iscodemod then
 		basename = CBCLUA_CODEPATH .. name:gsub("%.", "/")
+		iscodemod = true
+	else
+		basename = CBCLUA_MODSPATH .. name:gsub("^cbclua%.", ""):gsub("%.", "/")
+		iscodemod = false
 	end
 	
 	local filename = basename .. ".lua"
@@ -149,6 +157,10 @@ local function loader(name)
 	
 	setmetatable(mod, mod_mt)
 	setfenv(modfunc, mod)
+	
+	if iscodemod then
+		table.insert(all_codemod_names, name)
+	end
 	
 	return function ()
 		package.loaded[name] = mod -- this, for some reason, must happen inside the module function

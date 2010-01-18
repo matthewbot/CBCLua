@@ -1,7 +1,6 @@
 #!/bin/bash
 
 echo "CBCLua 2 loading..."
-echo "Developed at Nease High School, FL"
 
 cd `dirname $0`
 
@@ -34,3 +33,4 @@ if [ "$1" == "gdb" ]; then
 fi
 
 exec $LUA_BIN startup/start.lua $HOST # start cbclua
+

@@ -123,11 +123,11 @@ function mod_mt.__index(mod, key)
 	end
 end
 	
-local function tryload(fname)
+local function tryopen(fname)
 	local f = io.open(fname)
 	if f then
 		f:close()
-		return loadfile(fname)
+		return true
 	end
 end
 	
@@ -137,32 +137,38 @@ local function loader(name)
 	local basename
 	if iscodemod then
 		basename = CBCLUA_CODEPATH .. name:gsub("%.", "/")
-		iscodemod = true
 	else
 		basename = CBCLUA_MODSPATH .. name:gsub("^cbclua%.", ""):gsub("%.", "/")
-		iscodemod = false
 	end
 	
-	local filename = basename .. ".lua"
+	local standardfilename = basename .. ".lua"
 	local modfilename = basename .. "/mod.lua"
 	
-	local modfunc = tryload(filename) or 
-	                tryload(modfilename) 
-	                
-	if modfunc == nil then
-		return nil
-	end
-	
-	local mod = { _NAME = name }
-	
-	setmetatable(mod, mod_mt)
-	setfenv(modfunc, mod)
-	
-	if iscodemod then
-		table.insert(all_codemod_names, name)
+	local filename
+	if tryopen(standardfilename) then
+		filename = standardfilename
+	elseif tryopen(modfilename) then
+		filename = modfilename
+	else
+		return "\n\tno CBCLua module '" .. name .. "'"
 	end
 	
 	return function ()
+		local modfunc, err = loadfile(filename)
+		
+		if modfunc == nil then
+			error("error loading module '" .. name .. "' from file " .. filename .. ":\n" .. err, 0)
+		end
+		
+		local mod = { _NAME = name }
+	
+		setmetatable(mod, mod_mt)
+		setfenv(modfunc, mod)
+	
+		if iscodemod then
+			table.insert(all_codemod_names, name)
+		end
+	
 		package.loaded[name] = mod -- this, for some reason, must happen inside the module function
 		return modfunc() -- so we make a thunk wrapper around it
 	end

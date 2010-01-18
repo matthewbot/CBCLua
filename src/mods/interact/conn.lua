@@ -1,6 +1,6 @@
 local task = require "cbclua.task"
 local evalenv = require "cbclua.interact.evalenv"
-local rawio = require "raw.io"
+local rawio = require "cbclua.rawio"
 local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"

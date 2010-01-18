@@ -4,7 +4,7 @@ module(...)
 
 --[[ Requires and globals ]]--
 
-import "raw.cbc"
+import "cbclua.rawcbc"
 local task = require "cbclua.task"
 local util = require "cbclua.util"
 

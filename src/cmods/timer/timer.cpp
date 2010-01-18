@@ -12,37 +12,25 @@
 
 using namespace std;
 
-// raw functions just return values since the epoch
+// high-precision timing functions
 
-unsigned long raw_mseconds() {
+unsigned long mseconds() {
 	struct timeval time;
 	gettimeofday(&time, NULL);
 	
 	return (unsigned long)time.tv_sec*1000 + (unsigned long)time.tv_usec/1000;
 }
 
-double raw_seconds() {
+double seconds() {
 	struct timeval time;
 	gettimeofday(&time, NULL);
 	
 	return (double)time.tv_sec + (double)time.tv_usec/1000000.0;
 }
 
-// the "real" functions return time since last reset
-
-static long mseconds_start;
-static double seconds_start;
-
-unsigned long mseconds() { return raw_mseconds() - mseconds_start; }
-double seconds() { return raw_seconds() - seconds_start; }
-void start_timers() {
-	mseconds_start = raw_mseconds();
-	seconds_start = raw_seconds();
-}
-
 // The raw timing functions put the entire process to sleep
 
-const vector<bool> raw_sleep(double seconds, const vector<int> &fds) {
+const vector<bool> sleep_select(double seconds, const vector<int> &fds) {
 	watchdog_disable();
 	
 	int highestfd;
@@ -81,11 +69,5 @@ const vector<bool> raw_sleep(double seconds, const vector<int> &fds) {
     watchdog();
     
     return setvecs;
-}
-
-void raw_yield() {
-	watchdog_disable();
-	sched_yield();
-	watchdog();
 }
 

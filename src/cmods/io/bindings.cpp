@@ -10,7 +10,6 @@ static int lua_mkdir(lua_State *L);
 
 const luaL_Reg luafuncs[] = {
 	{"read", lua_read},
-	{"eof", lua_eof},
 	{"mkdir", lua_mkdir},
 	
 	{NULL, NULL}

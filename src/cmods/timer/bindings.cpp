@@ -7,24 +7,21 @@
 
 using namespace std;
 
-static int lua_raw_sleep(lua_State *L);
+static int lua_sleep_select(lua_State *L);
 
 const luaL_Reg luafuncs[] = {
-	{"raw_seconds", lbind<raw_seconds>},
-	{"raw_mseconds", lbind<raw_mseconds>},
 	{"mseconds", lbind<mseconds>},
 	{"seconds", lbind<seconds>},
-	{"raw_sleep", lua_raw_sleep},
-	{"raw_yield", lbind<raw_yield>},
+	{"sleep_select", lua_sleep_select},
 	{"watchdog", lbind<watchdog>},
-	{"watchdog_term", lbind<watchdog_term>},
+	{"watchdog_yield", lbind<watchdog_yield>},
 	
 	{NULL, NULL}
 };
 
 static int get_fd(lua_State *L, int i);
 
-static int lua_raw_sleep(lua_State *L) {
+static int lua_sleep_select(lua_State *L) {
 	double timeout = luaL_checknumber(L, 1);
 	
 	int fdcount = lua_gettop(L)-1;
@@ -44,7 +41,7 @@ static int lua_raw_sleep(lua_State *L) {
 			fds.push_back(fd);
 	}
 	
-	vector<bool> results = raw_sleep(timeout, fds);
+	vector<bool> results = sleep_select(timeout, fds);
 	
 	for (vector<bool>::iterator i = results.begin(); i != results.end(); ++i) {
 		lua_pushboolean(L, *i);

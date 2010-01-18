@@ -14,7 +14,7 @@ static volatile bool watchdog_started=false;
 
 extern "C" void *watchdog_func(void *unused) {
 	while (true) {
-		if (watchdog_enabled && raw_mseconds() - watchdog_lasttime > 500) {
+		if (watchdog_enabled && mseconds() - watchdog_lasttime > 500) {
 			cerr << "watchdog: timer passed. program is likely stalled" << endl;
 			watchdog_enabled = false;
 		}	
@@ -33,18 +33,21 @@ static void watchdog_start() {
 	watchdog_started = true;
 }
 
-void watchdog_term() {
-	// So far it seems like the thread dies on its own
-}
-
 void watchdog() {
 	if (watchdog_started == false)
 		watchdog_start();
 	
-	watchdog_lasttime = raw_mseconds();
+	watchdog_lasttime = mseconds();
 	watchdog_enabled = true;
 }
 
 void watchdog_disable() {
     watchdog_enabled = false;
 }
+
+void watchdog_yield() {
+	watchdog_disable();
+	sched_yield();
+	watchdog();
+}
+

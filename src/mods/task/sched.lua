@@ -118,7 +118,7 @@ function run_sleep(endtime, files)
 		os.exit(1)
 	end
 	
-	local bools = { timer.raw_sleep(sleepamt, unpack(files)) }
+	local bools = { timer.sleep_select(sleepamt, unpack(files)) }
 	local file_set = { }
 	
 	for num,file in ipairs(files) do

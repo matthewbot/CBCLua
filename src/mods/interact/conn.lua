@@ -42,6 +42,8 @@ function InteractConnection:run()
 			task.stop_all_user_tasks()
 		elseif command == "CLEARCODE" then
 			os.execute("rm -rf " .. CODEPATH .. "/*")
+			unload_all_codemods()
+			self.env = evalenv.EvalEnvironment() -- start new execution environment
 		elseif command == "MKCODEDIR" then
 			local dir = self:readLn()
 			rawio.mkdir(CODEPATH .. "/" .. dir)

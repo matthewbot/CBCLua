@@ -1,23 +1,25 @@
 local task = require "cbclua.task"
 local evalenv = require "cbclua.interact.evalenv"
 local rawio = require "cbclua.rawio"
+local cbc = require "cbclua.cbc"
 local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"
 
-InteractConnection = create_class "InteractConnection"
-local conncount = 0
+local maintask
+local globalenv = evalenv.EvalEnvironment()
 
-function InteractConnection:construct(sock)
+InteractConnection = create_class "InteractConnection"
+
+function InteractConnection:construct(sock, callback)
 	self.sock = sock
-	self.env = evalenv.EvalEnvironment()
+	self.callback = callback
 	self.task = task.start(function () return self:run() end, "interact conn", true, false, true)
 end
 
 local CODEPATH = _G.CBCLUA_CODEPATH
 
 function InteractConnection:run()
-	conncount = conncount + 1
 	self.sock:settimeout(0)
 	self:writeLn(_G.CBCLUA_NAME)
 	self:writeLn(_G.CBCLUA_VERSION)
@@ -30,7 +32,7 @@ function InteractConnection:run()
 		elseif command == "EXPR" then
 			local expr = self:readData()
 			task.start(function ()
-				local ok, result = self.env:run(expr)
+				local ok, result = globalenv:run(expr)
 				if ok then
 					self:writeLn("RESULT")
 				else
@@ -38,20 +40,42 @@ function InteractConnection:run()
 				end
 				self:writeData(tostring(result))
 			end, "interact eval", true, true)
+		elseif command == "RUNMAIN" then
+			if maintask and maintask:running() then
+				self:writeLn("ERROR")
+				self:writeData("Program already running")
+			else
+				local ok, err = pcall(function ()
+					local mainmod = require "main"
+					maintask = task.start(mainmod.main, "Main task")
+				end)
+			
+				if not ok then
+					self:writeLn("ERROR")
+					self:writeData("Error while running main:\n" .. err)
+				end
+			end
+		elseif command == "BUTTONDOWN" then
+			local buttonname = self:readLn()
+			cbc.buttons[buttonname]:press()
+		elseif command == "BUTTONUP" then
+			local buttonname = self:readLn()
+			cbc.buttons[buttonname]:release()
 		elseif command == "STOPTASKS" then
 			task.stop_all_user_tasks()
+			maintask = nil
 		elseif command == "CLEARCODE" then
-			os.execute("rm -rf " .. CODEPATH .. "/*")
+			os.execute("rm -rf " .. _G.CBCLUA_CODEPATH .. "/*")
 			unload_all_codemods()
-			self.env = evalenv.EvalEnvironment() -- start new execution environment
+			globalenv = evalenv.EvalEnvironment() -- start new execution environment
 		elseif command == "MKCODEDIR" then
 			local dir = self:readLn()
-			rawio.mkdir(CODEPATH .. "/" .. dir)
+			rawio.mkdir(_G.CBCLUA_CODEPATH .. "/" .. dir)
 		elseif command == "PUTCODE" then
 			local filename = self:readLn()
 			local filedata = self:readData()
 			
-			local file = io.open(CODEPATH .. "/" .. filename, "w")
+			local file = io.open(_G.CBCLUA_CODEPATH .. "/" .. filename, "w")
 			if file then
 				file:write(filedata)
 				file:close()
@@ -60,7 +84,12 @@ function InteractConnection:run()
 	end
 	
 	self.sock:close()
-	conncount = conncount - 1
+	self.callback.on_conn_close(self)
+end
+
+function InteractConnection:send_print(data)
+	self:writeLn("PRINT")
+	self:writeData(data)
 end
 
 function InteractConnection:writeLn(line)
@@ -124,9 +153,5 @@ function InteractConnection:readData()
 	end
 	
 	return buf
-end
-
-function get_conn_count()
-	return conncount
 end
 		

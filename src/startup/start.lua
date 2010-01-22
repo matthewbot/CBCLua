@@ -32,7 +32,7 @@ interact.start_tasks()
 -- Print welcome message
 print("This is '" .. CBCLUA_NAME .. "', running " .. CBCLUA_VERSION)
 
--- Finally, enter the task schedular!
+-- Finally, enter the task scheduler!
 local sched = require "cbclua.task.sched"
 local ok, msg = sched.run()
 

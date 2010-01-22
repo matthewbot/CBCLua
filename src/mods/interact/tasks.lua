@@ -1,6 +1,6 @@
 local socket = require "socket"
 local task = require "cbclua.task"
-local conn = require "cbclua.interact.conn"
+local connlist = require "cbclua.interact.connlist"
 import "cbclua.interact.config"
 
 function listen()
@@ -9,8 +9,7 @@ function listen()
 	while true do
 		task.sleep_io(ss)
 		
-		local sock = ss:accept()
-		conn.InteractConnection(sock)
+		connlist.new(ss:accept())
 	end
 end
 
@@ -25,7 +24,7 @@ function respond()
 		local msg, ip, port = udp:receivefrom()
 
 		if msg == "interact" then
-			local response = _G.CBCLUA_NAME .. "," .. conn.get_conn_count()
+			local response = _G.CBCLUA_NAME .. "," .. connlist.count()
 			udp:sendto(response, ip, port)
 		end
 	end

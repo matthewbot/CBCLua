@@ -29,7 +29,7 @@ function check_io_flag(file)
 end
 
 function run()
-	collectgarbage("count") -- do a full garbage collection since we accumulate stuff loading the program
+	collectgarbage("collect") -- do a full garbage collection since we accumulate stuff loading the program
 	collectgarbage("stop") -- than stop the automatic collector
 
 	while true do

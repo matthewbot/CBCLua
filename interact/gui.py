@@ -16,6 +16,7 @@ class ShellFrame(wx.Frame):
 		self.stopbutton = wx.Button(bottom_panel, label="Stop")
 		self.stopbutton.Disable()
 		self.output = wx.TextCtrl(splitter, style=wx.TE_MULTILINE|wx.TE_RICH)
+		self.output.SetEditable(False)
 		self.input = wx.TextCtrl(bottom_panel, style=wx.TE_MULTILINE|wx.TE_RICH)
 		self.input.SetFont(wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		
@@ -40,14 +41,19 @@ class ShellFrame(wx.Frame):
 		program_menu_download = program_menu.Append(wx.ID_ANY, "&Download")
 		program_menu_reload = program_menu.Append(wx.ID_ANY, "&Reload")
 		
+		window_menu = wx.Menu()
+		window_menu_console = window_menu.Append(wx.ID_ANY, "Console")
+		
 		menubar = wx.MenuBar()
 		menubar.Append(cbc_menu, "&CBC")
 		menubar.Append(program_menu, "&Program")
+		menubar.Append(window_menu, "&Windows")
 		self.SetMenuBar(menubar)
 		
 		self.Bind(wx.EVT_MENU, self.evt_menu_connect, cbc_menu_connect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_disconnect, cbc_menu_disconnect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_download, program_menu_download)
+		self.Bind(wx.EVT_MENU, self.evt_menu_console, window_menu_console)
 		
 		self.stylemap = dict(
 			user=wx.TextAttr(
@@ -119,6 +125,9 @@ class ShellFrame(wx.Frame):
 		dirdialog = wx.DirDialog(self, "Download folder", style=wx.DD_DIR_MUST_EXIST)
 		if dirdialog.ShowModal() == wx.ID_OK:
 			self.callbacks.on_shell_download(dirdialog.GetPath())
+			
+	def evt_menu_console(self, menuevent):
+		self.callbacks.on_shell_window_console()
 
 class ConnectDialog(wx.Dialog):
 	def __init__(self, parent, callbacks):
@@ -211,4 +220,92 @@ class CBCList(wx.ListCtrl, ListCtrlAutoWidthMixin):
 		self.InsertColumn(2, "Conns", width=50)
 		
 		self.setResizeColumn(0)
+		
+class ConsoleFrame(wx.Frame):
+	def __init__(self, parent, callbacks):
+		wx.Frame.__init__(self, parent, title='Console', size=wx.Size(320, 240))
+		self.callbacks = callbacks
+		
+		panel = wx.Panel(self)
+		toppanel = wx.Panel(panel)
+		buttonpanel = wx.Panel(panel)
+		abpanel = wx.Panel(buttonpanel)
+		dpadpanel = wx.Panel(buttonpanel)
 	
+		self.screen = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_RICH)
+		self.screen.SetEditable(False)
+		
+		buttonconfigs = [
+			("A", "a", abpanel),
+			("B", "b", abpanel),
+			("U", "up", dpadpanel),
+			("D", "down", dpadpanel),
+			("L", "left", dpadpanel),
+			("R", "right", dpadpanel)]
+			
+		buttons = { }
+			
+		for (label, name, parent) in buttonconfigs:
+			button = wx.Button(parent, label=label, size=(40, 30), name=name)
+			button.Bind(wx.EVT_LEFT_DOWN, self.evt_left_down)
+			button.Bind(wx.EVT_LEFT_UP, self.evt_left_up)
+			buttons[label] = button
+			
+		runmain = wx.Button(toppanel, label="Run Main")
+		runmain.Bind(wx.EVT_BUTTON, self.evt_runmain)
+		stop = wx.Button(toppanel, label="Stop")
+		stop.Bind(wx.EVT_BUTTON, self.evt_stop)
+		
+		panel_sizer = wx.BoxSizer(wx.VERTICAL)
+		panel.SetSizer(panel_sizer)
+		panel_sizer.Add(toppanel, 0, wx.EXPAND|wx.TOP|wx.BOTTOM, 2)
+		panel_sizer.Add(self.screen, 1, wx.EXPAND)
+		panel_sizer.Add(buttonpanel, 0, wx.EXPAND|wx.TOP|wx.BOTTOM, 2)
+		
+		toppanel_sizer = wx.GridSizer(1, 2)
+		toppanel.SetSizer(toppanel_sizer)
+		toppanel_sizer.Add(runmain, flag=wx.ALIGN_CENTER)
+		toppanel_sizer.Add(stop, flag=wx.ALIGN_CENTER)
+		
+		buttonpanel_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		buttonpanel.SetSizer(buttonpanel_sizer)
+		buttonpanel_sizer.Add(dpadpanel, flag=wx.LEFT, border=10)
+		buttonpanel_sizer.AddStretchSpacer()
+		buttonpanel_sizer.Add(abpanel, flag=wx.RIGHT|wx.EXPAND, border=30)
+		
+		dpadpanel_sizer = wx.GridBagSizer()
+		dpadpanel.SetSizer(dpadpanel_sizer)
+		dpadpanel_sizer.Add(buttons["L"], (0, 0), (2, 1), flag=wx.ALIGN_RIGHT|wx.ALIGN_CENTER_VERTICAL)
+		dpadpanel_sizer.Add(buttons["R"], (0, 2), (2, 1), flag=wx.ALIGN_LEFT|wx.ALIGN_CENTER_VERTICAL)
+		dpadpanel_sizer.Add(buttons["U"], (0, 1), flag=wx.ALIGN_BOTTOM)
+		dpadpanel_sizer.Add(buttons["D"], (1, 1), flag=wx.ALIGN_TOP)
+		
+		abpanel_sizer = wx.GridSizer(1, 2, hgap=30)
+		abpanel.SetSizer(abpanel_sizer)
+		abpanel_sizer.Add(buttons["A"], flag=wx.ALIGN_CENTER)
+		abpanel_sizer.Add(buttons["B"], flag=wx.ALIGN_CENTER)
+		
+		self.Bind(wx.EVT_CLOSE, self.evt_close)
+		
+	def write(self, msg):
+		self.screen.AppendText(msg)
+
+	def evt_left_down(self, buttonevent):
+		buttonevent.Skip()
+		buttonname = buttonevent.GetEventObject().GetName().lower()
+		self.callbacks.on_console_buttondown(buttonname)
+		
+	def evt_left_up(self, buttonevent):
+		buttonevent.Skip()
+		buttonname = buttonevent.GetEventObject().GetName().lower()
+		self.callbacks.on_console_buttonup(buttonname)
+		
+	def evt_runmain(self, buttonevent):
+		self.callbacks.on_console_runmain()
+		
+	def evt_stop(self, buttonevent):
+		self.callbacks.on_console_stop()
+		
+	def evt_close(self, closeevent):
+		self.callbacks.on_console_close()
+		

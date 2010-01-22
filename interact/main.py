@@ -8,9 +8,12 @@ class InteractApp(wx.App):
 	def OnInit(self):
 		self.cbcfinder = net.CBCFinder(self)
 		self.cbcconn = None
+		
 		self.shellframe = gui.ShellFrame(None, self)
-		self.shellframe.Show()
 		self.connectdialog = gui.ConnectDialog(self.shellframe, self)
+		self.consoleframe = gui.ConsoleFrame(self.shellframe, self)
+		
+		self.shellframe.Show()
 		self.show_connect_dialog()
 		return True
 		
@@ -51,6 +54,25 @@ class InteractApp(wx.App):
 	def on_shell_download(self, path):
 		self.cbcconn.send_download(path)
 		
+	def on_shell_window_console(self):
+		self.consoleframe.Show()
+		self.consoleframe.Raise()
+		
+	def on_console_buttondown(self, buttonname):
+		self.cbcconn.send_button_down(buttonname)
+		
+	def on_console_buttonup(self, buttonname):
+		self.cbcconn.send_button_up(buttonname)
+		
+	def on_console_runmain(self):
+		self.cbcconn.send_runmain()
+		
+	def on_console_stop(self):
+		self.cbcconn.send_stop()
+		
+	def on_console_close(self):
+		self.consoleframe.Hide()
+		
 	def on_cbclist_connect(self, ip):
 		self.disconnect()
 		self.cbcconn = net.CBCConnection(self, ip)
@@ -80,6 +102,9 @@ class InteractApp(wx.App):
 		
 	def on_net_error(self, error):
 		self.write_shellframe_and_enable_send(error, "error")
+		
+	def on_net_print(self, msg):
+		wx.CallAfter(self.consoleframe.write, msg)
 		
 	def write_shellframe_and_enable_send(self, msg, style):
 		def callback():

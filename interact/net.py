@@ -25,8 +25,19 @@ class CBCConnection(threading.Thread):
 		self.write_line("EXPR")
 		self.write_data(expr)
 		
+	def send_runmain(self):
+		self.write_line("RUNMAIN")
+		
 	def send_stop(self):
 		self.write_line("STOPTASKS")
+		
+	def send_button_down(self, button):
+		self.write_line("BUTTONDOWN")
+		self.write_line(button)
+		
+	def send_button_up(self, button):
+		self.write_line("BUTTONUP")
+		self.write_line(button)
 		
 	def send_clear_code(self):
 		self.write_line("CLEARCODE")
@@ -77,7 +88,10 @@ class CBCConnection(threading.Thread):
 			elif line == "ERROR":
 				error = self.recv_data()
 				self.callbacks.on_net_error(error)
-			elif line == None:
+			elif line == "PRINT":
+				msg = self.recv_data()
+				self.callbacks.on_net_print(msg)
+			elif line is None:
 				break
 				
 		if not self.closed:

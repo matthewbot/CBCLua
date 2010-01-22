@@ -53,6 +53,7 @@ class ShellFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.evt_menu_connect, cbc_menu_connect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_disconnect, cbc_menu_disconnect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_download, program_menu_download)
+		self.Bind(wx.EVT_MENU, self.evt_menu_reload, program_menu_reload)
 		self.Bind(wx.EVT_MENU, self.evt_menu_console, window_menu_console)
 		
 		self.stylemap = dict(
@@ -122,9 +123,15 @@ class ShellFrame(wx.Frame):
 		self.callbacks.on_shell_disconnect()
 		
 	def evt_menu_download(self, menuevent):
+		if not self.callbacks.on_shell_checkdownload():
+			return
+			
 		dirdialog = wx.DirDialog(self, "Download folder", style=wx.DD_DIR_MUST_EXIST)
 		if dirdialog.ShowModal() == wx.ID_OK:
 			self.callbacks.on_shell_download(dirdialog.GetPath())
+			
+	def evt_menu_reload(self, menuevent):
+		self.callbacks.on_shell_reload()
 			
 	def evt_menu_console(self, menuevent):
 		self.callbacks.on_shell_window_console()

@@ -3,11 +3,26 @@
 import wx
 import gui
 import net
+from functools import wraps
+
+def verify_connected(msg=None):
+	def decorator(f):
+		@wraps(f)
+		def wrapper(self, *args, **kwds):
+			if self.cbcconn is None:
+				if msg is not None:
+					self.shellframe.write_line(msg, "systemerror")
+				return
+		
+			f(self, *args, **kwds)
+		return wrapper
+	return decorator
 
 class InteractApp(wx.App):
 	def OnInit(self):
 		self.cbcfinder = net.CBCFinder(self)
 		self.cbcconn = None
+		self.lastdownload = None
 		
 		self.shellframe = gui.ShellFrame(None, self)
 		self.connectdialog = gui.ConnectDialog(self.shellframe, self)
@@ -41,32 +56,50 @@ class InteractApp(wx.App):
 		self.shellframe.write_line(expr)
 		self.cbcconn.send_expr(expr)
 		
+	@verify_connected()
 	def on_shell_stop(self):
 		self.cbcconn.send_stop()
 		
 	def on_shell_connect(self):
 		self.show_connect_dialog()
-		
+	
 	def on_shell_disconnect(self):
 		self.disconnect()
 		self.shellframe.write_line("Disconnected", "system")
 		
+	@verify_connected("Must be connected to download")
+	def on_shell_checkdownload(self):
+		return True
+		
 	def on_shell_download(self, path):
 		self.cbcconn.send_download(path)
+		self.shellframe.write_line("Download complete!", "system")
+		self.lastdownload = path
+		
+	@verify_connected("Must be connected to reload")
+	def on_shell_reload(self):
+		if self.lastdownload is None:
+			self.shellframe.write_line("Must download a program before reloading it!", "systemerror")
+		else:
+			self.on_shell_download(self.lastdownload)
 		
 	def on_shell_window_console(self):
 		self.consoleframe.Show()
 		self.consoleframe.Raise()
 		
+	@verify_connected()
 	def on_console_buttondown(self, buttonname):
 		self.cbcconn.send_button_down(buttonname)
 		
+	@verify_connected()
 	def on_console_buttonup(self, buttonname):
 		self.cbcconn.send_button_up(buttonname)
 		
+	@verify_connected("Must be connected to run main")
 	def on_console_runmain(self):
 		self.cbcconn.send_runmain()
 		
+	@verify_connected("Must be connected to stop")
 	def on_console_stop(self):
 		self.cbcconn.send_stop()
 		

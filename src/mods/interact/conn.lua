@@ -21,87 +21,111 @@ local CODEPATH = _G.CBCLUA_CODEPATH
 
 function InteractConnection:run()
 	self.sock:settimeout(0)
-	self:writeLn(_G.CBCLUA_NAME)
-	self:writeLn(_G.CBCLUA_VERSION)
+	self:write_line(_G.CBCLUA_NAME)
+	self:write_line(_G.CBCLUA_VERSION)
 	
 	while true do
-		local command = self:readLn()
+		local command = self:read_line()
 		
 		if command == nil then
 			break
-		elseif command == "EXPR" then
-			local expr = self:readData()
-			task.start(function ()
-				local ok, result = globalenv:run(expr)
-				if ok then
-					self:writeLn("RESULT")
-				else
-					self:writeLn("ERROR")
-				end
-				self:writeData(tostring(result))
-			end, "interact eval", true, true)
-		elseif command == "RUNMAIN" then
-			if maintask and maintask:running() then
-				self:writeLn("ERROR")
-				self:writeData("Program already running")
-			else
-				local ok, err = pcall(function ()
-					local mainmod = require "main"
-					maintask = task.start(mainmod.main, "Main task")
-				end)
-			
-				if not ok then
-					self:writeLn("ERROR")
-					self:writeData("Error while running main:\n" .. err)
-				end
-			end
-		elseif command == "BUTTONDOWN" then
-			local buttonname = self:readLn()
-			cbc.buttons[buttonname]:press()
-		elseif command == "BUTTONUP" then
-			local buttonname = self:readLn()
-			cbc.buttons[buttonname]:release()
-		elseif command == "STOPTASKS" then
-			task.stop_all_user_tasks()
-			maintask = nil
-		elseif command == "CLEARCODE" then
-			os.execute("rm -rf " .. _G.CBCLUA_CODEPATH .. "/*")
-			unload_all_codemods()
-			globalenv = evalenv.EvalEnvironment() -- start new execution environment
-		elseif command == "MKCODEDIR" then
-			local dir = self:readLn()
-			rawio.mkdir(_G.CBCLUA_CODEPATH .. "/" .. dir)
-		elseif command == "PUTCODE" then
-			local filename = self:readLn()
-			local filedata = self:readData()
-			
-			local file = io.open(_G.CBCLUA_CODEPATH .. "/" .. filename, "w")
-			if file then
-				file:write(filedata)
-				file:close()
-			end
+		end
+		
+		local meth = self["cmd_" .. command:lower()]
+		if meth then
+			meth(self)
+		else
+			self:write_line("ERROR")
+			self:write_data("Bad command " .. command)
 		end
 	end
-	
+		
 	self.sock:close()
 	self.callback.on_conn_close(self)
 end
 
+function InteractConnection:cmd_expr()
+	local expr = self:read_data()
+	task.start(function ()
+		local ok, result = globalenv:run(expr)
+		if ok then
+			self:write_line("RESULT")
+		else
+			self:write_line("ERROR")
+		end
+		self:write_data(tostring(result))
+	end, "interact eval", true, true)
+end
+
+function InteractConnection:cmd_runmain()
+	if maintask and maintask:running() then
+		self:write_line("ERROR")
+		self:write_data("Program already running")
+	else
+		local ok, err = pcall(function ()
+			local mainmod = require "main"
+			maintask = task.start(mainmod.main, "Main task")
+		end)
+	
+		if not ok then
+			self:write_line("ERROR")
+			self:write_data("Error while running main:\n" .. err)
+		end
+	end
+end
+
+function InteractConnection:cmd_buttondown()
+	local buttonname = self:read_line()
+	cbc.buttons[buttonname]:press()
+end
+
+function InteractConnection:cmd_buttonup()
+	local buttonname = self:read_line()
+	cbc.buttons[buttonname]:release()
+end
+
+function InteractConnection:cmd_stoptasks()
+	task.stop_all_user_tasks()
+	maintask = nil
+end
+
+function InteractConnection:cmd_clearcode()
+	os.execute("rm -rf " .. _G.CBCLUA_CODEPATH .. "/*")
+	unload_all_codemods()
+	globalenv = evalenv.EvalEnvironment() -- start new execution environment
+end	
+
+function InteractConnection:cmd_mkcodedir()
+	local dir = self:read_line()
+	rawio.mkdir(_G.CBCLUA_CODEPATH .. "/" .. dir)
+end
+
+function InteractConnection:cmd_putcode()		
+	local filename = self:read_line()
+	local filedata = self:read_data()
+	
+	local file = io.open(_G.CBCLUA_CODEPATH .. "/" .. filename, "w")
+	if file then
+		file:write(filedata)
+		file:close()
+	end
+end
+
 function InteractConnection:send_print(data)
-	self:writeLn("PRINT")
-	self:writeData(data)
+	self:write_line("PRINT")
+	self:write_data(data)
 end
 
-function InteractConnection:writeLn(line)
-	self:sendAll(line .. "\n")
+function InteractConnection:write_line(line)
+	self:send_all(line .. "\n")
 end
 
-function InteractConnection:writeData(data)
-	self:writeLn(data:len())
-	self:sendAll(data)
+function InteractConnection:write_data(data)
+	self:write_line(data:len())
+	self:send_all(data)
 end
 	
-function InteractConnection:sendAll(data)
+function InteractConnection:send_all(data)
 	local sock = self.sock
 	local pos = 0
 	while pos ~= data:len() do
@@ -113,7 +137,7 @@ function InteractConnection:sendAll(data)
 	end
 end
 	
-function InteractConnection:readLn()
+function InteractConnection:read_line()
 	local sock = self.sock
 	local buf = ""
 	
@@ -132,9 +156,9 @@ function InteractConnection:readLn()
 	end
 end
 
-function InteractConnection:readData()
+function InteractConnection:read_data()
 	local sock = self.sock
-	local amt = tonumber(self:readLn())
+	local amt = tonumber(self:read_line())
 	local buf = ""
 	
 	while buf:len() < amt do

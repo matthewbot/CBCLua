@@ -8,7 +8,7 @@ local cbc = require "cbclua.cbc"
 local task = require "cbclua.task"
 
 function main()
-	print("Push black button")
-	task.wait(cbc.black_button)
+	print("Push A button")
+	task.wait(cbc.a_button)
 	print("Hello World! From lua!")
 end

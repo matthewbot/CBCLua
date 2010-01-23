@@ -5,16 +5,15 @@ class ShellFrame(wx.Frame):
 	def __init__(self, parent, callbacks):
 		wx.Frame.__init__(self, parent, title='Interact', size=wx.Size(500, 400))
 		self.callbacks = callbacks
-		self.sendenabled = False
+		self.history = [ ]
+		self.history_pos = 0
 		
 		splitter = wx.SplitterWindow(self)
 		bottom_panel = wx.Panel(splitter, style=wx.SP_3D)
 		
 		self.sendbutton = wx.Button(bottom_panel, label="Send")
 		self.sendbutton.SetDefault()
-		self.sendbutton.Disable()
 		self.stopbutton = wx.Button(bottom_panel, label="Stop")
-		self.stopbutton.Disable()
 		self.output = wx.TextCtrl(splitter, style=wx.TE_MULTILINE|wx.TE_RICH)
 		self.output.SetEditable(False)
 		self.input = wx.TextCtrl(bottom_panel, style=wx.TE_MULTILINE|wx.TE_RICH)
@@ -79,36 +78,47 @@ class ShellFrame(wx.Frame):
 			)
 		)
 		
-	def enable_send(self):
-		self.sendenabled = True
-		self.sendbutton.Enable()
-		
-	def disable_send(self):
-		self.sendenabled = False
-		self.sendbutton.Disable()
-		
-	def enable_stop(self):
-		self.stopbutton.Enable()
-		
-	def disable_stop(self):
-		self.stopbutton.Disable()
-		
 	def do_send(self):
 		text = self.input.GetValue()
-		if len(text) > 0:
-			self.callbacks.on_shell_send(text)
-			self.input.ChangeValue("")
+		if text == "":
+			return
+			
+		self.callbacks.on_shell_send(text)
+		self.input.ChangeValue("")
+		self.history.append(text)
+		self.history_pos = len(self.history)
 		
 	def write_line(self, text="", style="user"):
 		self.output.SetDefaultStyle(self.stylemap[style])
 		self.output.AppendText(text + "\n")
 		
 	def evt_char(self, keyevent):
-		if keyevent.GetKeyCode() == wx.WXK_RETURN and not keyevent.ControlDown():
-			if self.sendenabled:
+		if not keyevent.ControlDown():
+			keycode = keyevent.GetKeyCode()
+			if keycode == wx.WXK_RETURN:
 				self.do_send()
-		else:
-			keyevent.Skip()
+				return
+			elif keycode == wx.WXK_UP:
+				if self.history_pos == 0:
+					return
+					
+				self.history_pos -= 1
+				self.input.ChangeValue(self.history[self.history_pos])
+				self.input.SetInsertionPointEnd()
+				return
+			elif keycode == wx.WXK_DOWN:
+				if self.history_pos == len(self.history):
+					return
+					
+				self.history_pos += 1
+				if self.history_pos == len(self.history):
+					self.input.ChangeValue("")
+				else:
+					self.input.ChangeValue(self.history[self.history_pos])
+				self.input.SetInsertionPointEnd()
+				return
+				
+		keyevent.Skip()
 			
 	def evt_sendbutton(self, buttonevent):
 		self.do_send()

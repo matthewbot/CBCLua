@@ -44,19 +44,16 @@ class InteractApp(wx.App):
 		if self.cbcconn is not None:
 			self.cbcconn.close()
 			self.cbcconn = None
-			
-			def callback():
-				self.shellframe.disable_send()
-				self.shellframe.disable_stop()
-			wx.CallAfter(callback)
-		
+	
 	def on_shell_send(self, expr):
-		self.shellframe.disable_send()
 		self.shellframe.write_line()
 		self.shellframe.write_line(expr)
-		self.cbcconn.send_expr(expr)
+		if self.cbcconn:
+			self.cbcconn.send_expr(expr)
+		else:
+			self.shellframe.write_line("Not connected", "systemerror")
 		
-	@verify_connected()
+	@verify_connected("Must be connected to stop")
 	def on_shell_stop(self):
 		self.cbcconn.send_stop()
 		
@@ -124,27 +121,16 @@ class InteractApp(wx.App):
 		wx.CallAfter(self.connectdialog.add_cbc, name, ip, conns)
 		
 	def on_net_version(self, name, version):
-		def callback():
-			self.shellframe.write_line("Connected to " + name + " (" + version + ")", "system")
-			self.shellframe.enable_send()
-			self.shellframe.enable_stop()
-		wx.CallAfter(callback)
+		wx.CallAfter(self.shellframe.write_line, "Connected to " + name + " (" + version + ")", "system")
 		
 	def on_net_result(self, result):
-		self.write_shellframe_and_enable_send(result, "result")
+		wx.CallAfter(self.shellframe.write_line, result, "result")
 		
 	def on_net_error(self, error):
-		self.write_shellframe_and_enable_send(error, "error")
+		wx.CallAfter(self.shellframe.write_line, error, "error")
 		
 	def on_net_print(self, msg):
 		wx.CallAfter(self.consoleframe.write, msg)
-		
-	def write_shellframe_and_enable_send(self, msg, style):
-		def callback():
-			if msg:
-				self.shellframe.write_line(msg, style)
-			self.shellframe.enable_send()
-		wx.CallAfter(callback)
 		
 	def on_net_connerror(self):
 		self.cbcconn = None

@@ -1,20 +1,44 @@
-CBCLUA_VERSION = "CBCLua v2.0 Alpha"
-CBCLUA_CODEPATH = os.getenv("CBCLUA_CODEPATH")
-CBCLUA_MODSPATH = os.getenv("CBCLUA_MODSPATH")
-CBCLUA_NAME_FILE = os.getenv("CBCLUA_NAME_FILE")
+local version = "CBCLua v2.0 Alpha"
+local codepath = os.getenv("CBCLUA_CODEPATH")
+local modpath = os.getenv("CBCLUA_MODSPATH")
+local name_filename = os.getenv("CBCLUA_NAME_FILE")
+local host = arg[1]
+local name
 
-local file = io.open(CBCLUA_NAME_FILE, "r")
+local file = io.open(name_filename, "r")
 if file then
-	CBCLUA_NAME=file:read()
+	name=file:read()
 	file:close()
 else
-	CBCLUA_NAME="Unnamed"
+	name="Unnamed"
 end
 
-function change_cbclua_name(newname)
-	CBCLUA_NAME = newname
-	local file = io.open(CBCLUA_NAME_FILENAME, "w")
+--[[ System info functions ]]--
+
+function cbclua_get_version()
+	return version
+end
+
+function cbclua_get_name()
+	return name
+end
+
+function cbclua_set_name(newname)
+	name = newname
+	
+	local file = io.open(name_filename, "w")
 	file:write(newname)
 	file:close()
 end
 
+function cbclua_get_host() -- pc or chumby
+	return host
+end
+
+function cbclua_get_codepath()
+	return codepath
+end
+
+function cbclua_get_modpath()
+	return modpath
+end

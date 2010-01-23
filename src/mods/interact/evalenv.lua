@@ -3,7 +3,7 @@ EvalEnvironment = create_class "EvalEnvironment"
 function EvalEnvironment:construct()
 	local mod = { }
 	self.mod = mod
-	make_cbclua_module(mod)
+	cbclua_make_module(mod)
 	
 	autorequire("", mod) -- autorequire top level modules
 	autorequire("cbclua.", mod) -- and cbclua modules

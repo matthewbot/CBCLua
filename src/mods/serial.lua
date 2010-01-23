@@ -1,15 +1,9 @@
-module(...)
-
--- Requires and misc starting stuff --
-
-local task = require 'std.task'
-local timer = require 'std.timer'
-local util = require 'std.util'
+local task = require 'cbclua.task'
+local timer = require 'cbclua.timer'
+local util = require 'cbclua.util'
+local rawio = require 'cbclua.rawio'
 local string = require 'string'
 local io = require 'io'
-local rawio = require 'raw.io'
-
-import("std.log")
 
 -- Define SerialPort class
 
@@ -31,8 +25,6 @@ function SerialPort:construct()
 	self.readtask = task.start(util.bind(self, "read_task"), "serial read", true)
 	
 	serial_instance = self
-	
-	log("serial port opened")
 end
 
 function SerialPort:close()
@@ -40,8 +32,6 @@ function SerialPort:close()
 	self.tx:close()
 	self.rx:close()
 	serial_instance = nil -- clear the singleton holder so we can be recreated
-	
-	log("serial port closed")
 end
 
 function SerialPort:get_avail()

@@ -1,5 +1,3 @@
-module(...)
-
 local util = require "std.util"
 local cbc = require "std.cbc"
 local timer = require "std.timer"

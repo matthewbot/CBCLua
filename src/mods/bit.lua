@@ -1,5 +1,3 @@
-module(...)
-
 local string = require "string"
 local math = require "math"
 

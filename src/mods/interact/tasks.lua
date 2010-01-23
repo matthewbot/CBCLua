@@ -24,7 +24,7 @@ function respond()
 		local msg, ip, port = udp:receivefrom()
 
 		if msg == "interact" then
-			local response = _G.CBCLUA_NAME .. "," .. connlist.count()
+			local response = cbclua_get_name() .. "," .. connlist.count()
 			udp:sendto(response, ip, port)
 		end
 	end

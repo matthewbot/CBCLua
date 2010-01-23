@@ -1,12 +1,11 @@
-module(...)
-
 local task = require "cbclua.task"
 local util = require "cbclua.util"
-local raw = require "raw.cbc"
+local raw = require "cbclua.rawcbc"
 local math = require "math"
 local os = require "os"
 
 image_width, image_height = 160, 120
+channels = { }
 
 -- Public Functions
 
@@ -21,7 +20,6 @@ function run(func)
 	local result
 
 	repeat
-		task.yield()
 		update()
 		result = func()
 	until result ~= nil
@@ -159,15 +157,13 @@ function Blob:vert_dist_to(other)
 	end
 end
 
-global("channels", { })
-
 for i=0,3 do 
 	channels[i] = Channel(i)
 end
 
 -- CBC performance tweak
 
-local util = require "cbclua.util"
+local cbc = require "cbclua.cbc"
 
-util.set_cbc_proc("/sys/class/video4linux/video0/auto_exposure", 0)
-util.set_cbc_proc("/sys/class/video4linux/video0/exposure", 1)
+cbc.set_proc("/sys/class/video4linux/video0/auto_exposure", 0)
+cbc.set_proc("/sys/class/video4linux/video0/exposure", 1)

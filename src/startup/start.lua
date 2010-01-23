@@ -3,9 +3,6 @@
 io.stdout:setvbuf("no") -- turn off standard output buffering
 io.stdin:setvbuf("no")
 
--- get host from arg list
-host = arg[1]
-
 -- load the other startup files
 
 local startupdir = arg[0]:match("(.*)\/") .. "/"
@@ -16,31 +13,16 @@ end
 dostartup("config.lua")
 dostartup("class.lua")
 dostartup("module.lua")
-
---[[
--- Start system tasks
-local list = require "cbclua.task.list"
-local main = require "main"
-
-list.start(main.main, "main", false)
-]]
+dostartup("maintask.lua")
 
 -- Start interaction tasks
 local interact = require "cbclua.interact"
 interact.start_tasks()
 
 -- Print welcome message
-print("This is '" .. CBCLUA_NAME .. "', running " .. CBCLUA_VERSION)
+print("This is '" .. cbclua_get_name() .. "', running " .. cbclua_get_version())
 
 -- Finally, enter the task scheduler!
 local sched = require "cbclua.task.sched"
-local ok, msg = sched.run()
-
-if ok then
-	print("CBCLua exiting")
-else
-	print(msg)
-	print("CBCLua terminated due to errors")
-	os.exit(1)
-end
+return sched.run() -- tail call
 

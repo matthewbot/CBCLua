@@ -6,14 +6,10 @@
 -- This entire module is built using the public interface to the scheduler and the normal
 -- task control methods
 
-module(...)
-
 local sched = require "cbclua.task.sched"
 local timer = require "cbclua.timer"
 
 import "cbclua.task.control"
-
---
 
 Signal = create_class "Signal"
 

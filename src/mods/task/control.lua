@@ -1,13 +1,9 @@
 -- This module holds functions that are used by a task to control
 -- its execution
 
-module(...)
-
 local sched = require "cbclua.task.sched"
-local list = require "cbclua.task.list"
 local timer = require "cbclua.timer"
 local coroutine = require "coroutine"
-local math = require "math"
 
 -- Primitive sleep functions
 
@@ -32,7 +28,7 @@ function sleep_io(file) -- sleeps until file has data to read
 end
 
 function sleep_cycle() -- sleeps for one "task cycle", waking up when another process needs to be run
-	return coroutine.yield{}
+	return coroutine.yield({})
 end
 
 function sleep_cycle_till(endtime) -- sleeps for one "task cycle" or until endtime, whichever comes first
@@ -43,65 +39,3 @@ function yield() -- allows other tasks to run but resumes this one ASAP
 	return coroutine.yield{ endtime = 0 }
 end
 
--- Wait functions (all use predicates)
-
--- waits until pred is true, or time to pass
-function wait(pred, timeout, tdelta) 
-	if type(pred) == "table" and pred.wait then -- if its a table/object with a wait method
-		return pred:wait(time, tdelta) -- call the wait method instead (this lets it be used with signals for instance)
-	end
-	
-	return wait_any{ [true] = pred, timeout = timeout, tdelta = tdelta } -- otherwise, this is just wait_any with a single predicate
-end
-
-function wait_any(preds)
-	local tdelta=0.05
-	if preds.tdelta then
-		tdelta = preds.tdelta
-		preds.tdelta = nil
-	end
-	
-	local endtime 
-	if preds.timeout then 
-		endtime = timer.seconds() + preds.timeout
-		preds.timeout = nil
-	end
-	
-	while true do
-		for name,pred in pairs(preds) do
-			if pred() then
-				return name
-			end
-		end
-		
-		if endtime ~= nil then 
-			local remaining = endtime - timer.seconds()
-			if remaining < 0 then
-				return false
-			end
-			
-			sleep(math.min(remaining, tdelta))
-		else
-			sleep(tdelta)
-		end
-	end
-end
-	
-function timeout(timeout, func)
-	local func_ended = false
-	local func_results
-	local taskid = list.async(function ()
-		func_results = { func() }
-		func_ended = true
-	end)
-	
-	wait(function () return func_ended end, timeout)
-	
-	if not func_ended then
-		list.stop(taskid)
-		return false
-	else
-		return true, unpack(func_results)
-	end
-end
-	

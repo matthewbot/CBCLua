@@ -1,8 +1,5 @@
-module(...)
-
 local raw = require "cbclua.rawcbc"
 local task = require "cbclua.task"
-local util = require "cbclua.util"
 
 --[[ Globals ]]--
 
@@ -164,7 +161,7 @@ function off_screen()
 end
 
 function set_proc(file, val)
-	if get_host() ~= "chumby" then
+	if cbclua_get_host() ~= "chumby" then
 		return
 	end
 	

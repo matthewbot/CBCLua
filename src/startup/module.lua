@@ -37,11 +37,19 @@ function export(name, mod)
 	table.insert(exports, require(name))
 end
 
-function make_cbclua_module(table)
+function cbclua_make_module(table)
 	setmetatable(table, mod_mt)
 end
 
-function unload_all_codemods()
+function cbclua_is_module(table)
+	return getmetatable(table) == mod_mt
+end
+
+function cbclua_is_codemod(table)
+	return cbclua_is_module(table) and table._CODEMOD
+end
+
+function cbclua_unload_all_codemods()
 	for _, modname in pairs(all_codemod_names) do
 		package.loaded[modname] = nil
 	end
@@ -114,10 +122,13 @@ function mod_mt.__index(mod, key)
 	if autoreqs then
 		for _,autoreqprefix in ipairs(autoreqs) do -- figure out if we can autorequire it
 			local modname = autoreqprefix .. key
-			local ok, automod = pcall(require, modname)
+			local ok, result = pcall(require, modname)
+			
 			if ok then
-				mod[key] = automod
-				return automod
+				mod[key] = result
+				return result
+			elseif not result:match("module '" .. modname .. "' not found:") then
+				error(result, 2)
 			end
 		end
 	end
@@ -136,9 +147,9 @@ local function loader(name)
 	
 	local basename
 	if iscodemod then
-		basename = CBCLUA_CODEPATH .. name:gsub("%.", "/")
+		basename = cbclua_get_codepath() .. name:gsub("%.", "/")
 	else
-		basename = CBCLUA_MODSPATH .. name:gsub("^cbclua%.", ""):gsub("%.", "/")
+		basename = cbclua_get_modpath() .. name:gsub("^cbclua%.", ""):gsub("%.", "/")
 	end
 	
 	local standardfilename = basename .. ".lua"
@@ -160,17 +171,18 @@ local function loader(name)
 			error("error loading module '" .. name .. "' from file " .. filename .. ":\n" .. err, 0)
 		end
 		
-		local mod = { _NAME = name }
+		local mod = { _NAME = name, _CODEMOD = codemod }
 	
 		setmetatable(mod, mod_mt)
 		setfenv(modfunc, mod)
 	
+		modfunc()
+			
 		if iscodemod then
 			table.insert(all_codemod_names, name)
 		end
-	
+		
 		package.loaded[name] = mod -- this, for some reason, must happen inside the module function
-		return modfunc() -- so we make a thunk wrapper around it
 	end
 end
 

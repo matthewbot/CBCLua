@@ -1,30 +1,19 @@
-module(...)
-
 local timer = require "cbclua.timer"
 local coroutine = require "coroutine"
 local debug = require "debug"
-
--- Private State --
-
-local current_task
 
 -- Task class
 
 Task = create_class "Task"
 
-function Task:construct(func, name, daemon, cstack, system)
+function Task:construct(func, name, cstack, system)
 	self.co = coroutine.create(func, cstack and 0 or -1)
-	self.name = assert(name, "missing name for task creation")
-	self.daemon = daemon
+	self.name = name
 	self.system = system
 end
 
 function Task:get_name()
 	return self.name
-end
-
-function Task:is_daemon()
-	return self.daemon == true
 end
 
 function Task:is_system()
@@ -49,15 +38,14 @@ function Task:resume()
 
 	local co = self.co
 	
-	current_task = self
 	local ok,result = coroutine.resume(co)
-	current_task = nil
 	
 	if ok then
-		if self:running() then
+		if self:running() then	
+			assert(result ~= nil, "Task can't yield nil!")
 			return true, result
 		else
-			return true, nil -- must return nil if we ended, we don't care what the task returned with
+			return true, nil -- must return nil if we ended, we don't care what the task function returned as a value
 		end
 	else
 		local msg = debug.traceback(co, "error in task '" .. self.name .. "':\n" .. result)
@@ -68,11 +56,5 @@ end
 -- Do not call this! Call task.stop() instead.
 function Task:kill()
 	self.co = nil
-end
-
--- Public functions
-
-function get_current()
-	return current_task
 end
 

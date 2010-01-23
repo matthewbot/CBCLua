@@ -1,17 +1,8 @@
-module("cbclua.util")
-
 local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
 local table = require "table"
 local io = require "io"
 
---[[ System functions ]]--
-
-function get_host() -- pc or chumby
-	return _G.host
-end
-
-	
 --[[ Table functions ]]--
 
 function findvalue(table, val)
@@ -51,18 +42,11 @@ end
 
 --[[ User interaction functions ]]--
 
-function prompt(msg)
-	io.write(msg)
-	io.writeln(" (press A)")
-	task.wait(cbc.a_button)
-	task.wait(function () return not cbc.a_button() end)
-end
-
 function wait_continue(msg)
 	io.writeln(msg)
 	io.writeln("Press A to continue")
 	task.wait(cbc.a_button)
-	task.wait(function () return not cbc.a_button() end)
+	task.wait_while(cbc.a_button)
 end
 
 --[[ Menu ]]--

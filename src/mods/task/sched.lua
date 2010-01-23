@@ -1,12 +1,10 @@
 module(...)
 
+local list = require "cbclua.task.list"
 local timer = require "cbclua.timer"
-local util = require "cbclua.util"
 local os = require "os"
 local math = require "math"
 local table = require "table"
-
-import "cbclua.task.list"
 
 -- Private state
 
@@ -19,6 +17,10 @@ local run_cycle
 local run_sleep
 
 -- Public functions
+
+function get_current()
+	return current_task
+end
 
 function wake_all()
 	wake_all_flag = true
@@ -33,15 +35,7 @@ function run()
 	collectgarbage("stop") -- than stop the automatic collector
 
 	while true do
-		local ok, msg, endtime, files = run_cycle()
-	
-		if ok == false then
-			return false, msg
-		end
-	
-		if real_count() == 0 then
-			return true
-		end
+		local endtime, files = run_cycle()
 	
 		if wake_all_flag then
 			endtime = 0
@@ -59,34 +53,37 @@ function run_cycle()
 	local files = { }
 	local files_set = { }
 
-	for task in running_tasks() do
+	for task in list.running_tasks() do
+		list.set_current_task(task)
 		local ok, result = task:resume()
+		list.set_current_task(nil)
 		
-		if not ok then
-			return false, result
-		end
+		if ok then
+			if result then
+				local endtime = result.endtime
+				if endtime and endtime < minendtime then
+					minendtime = endtime
+				end
 		
-		if result then
-			local endtime = result.endtime
-			if endtime and endtime < minendtime then
-				minendtime = endtime
+				local file = result.file
+				if file and not files_set[file] then
+					files_set[file] = true
+					table.insert(files, file)
+				end
+			else
+				list.stop(task)
 			end
-			
-			local file = result.file
-			if file and not files_set[file] then
-				files_set[file] = true
-				table.insert(files, file)
-			end
-		else
-			stop(task)
+		else -- not ok
+			print(result) -- error message
+			list.stop(task)
 		end
 	end
 	
-	if start_new_tasks() then -- if any new tasks were started
+	if list.start_new_tasks() then -- if any new tasks were started
 		wake_all() -- we need to wake up all tasks again so that they get started and sleep information gets recomputed
 	end
 	
-	return true, "", minendtime, files
+	return minendtime, files
 end
 
 function run_sleep(endtime, files) 

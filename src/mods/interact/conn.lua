@@ -2,6 +2,7 @@ local task = require "cbclua.task"
 local evalenv = require "cbclua.interact.evalenv"
 local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"
+local util = require "cbclua.util"
 local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"
@@ -14,15 +15,13 @@ InteractConnection = create_class "InteractConnection"
 function InteractConnection:construct(sock, callback)
 	self.sock = sock
 	self.callback = callback
-	self.task = task.start(function () return self:run() end, "interact conn", true, false, true)
+	self.task = task.start(function () return self:run() end, "interact conn", false, true)
 end
-
-local CODEPATH = _G.CBCLUA_CODEPATH
 
 function InteractConnection:run()
 	self.sock:settimeout(0)
-	self:write_line(_G.CBCLUA_NAME)
-	self:write_line(_G.CBCLUA_VERSION)
+	self:write_line(cbclua_get_name())
+	self:write_line(cbclua_get_version())
 	
 	while true do
 		local command = self:read_line()
@@ -58,14 +57,11 @@ function InteractConnection:cmd_expr()
 end
 
 function InteractConnection:cmd_runmain()
-	if maintask and maintask:running() then
+	if cbclua_is_main_running() then
 		self:write_line("ERROR")
 		self:write_data("Program already running")
 	else
-		local ok, err = pcall(function ()
-			local mainmod = require "main"
-			maintask = task.start(mainmod.main, "Main task")
-		end)
+		local ok, err = cbclua_run_main()
 	
 		if not ok then
 			self:write_line("ERROR")
@@ -90,21 +86,21 @@ function InteractConnection:cmd_stoptasks()
 end
 
 function InteractConnection:cmd_clearcode()
-	os.execute("rm -rf " .. _G.CBCLUA_CODEPATH .. "/*")
+	os.execute("rm -rf " .. util.get_cbclua_codepath() .. "/*")
 	unload_all_codemods()
 	globalenv = evalenv.EvalEnvironment() -- start new execution environment
 end	
 
 function InteractConnection:cmd_mkcodedir()
 	local dir = self:read_line()
-	rawio.mkdir(_G.CBCLUA_CODEPATH .. "/" .. dir)
+	rawio.mkdir(util.get_cbclua_codepath() .. "/" .. dir)
 end
 
 function InteractConnection:cmd_putcode()		
 	local filename = self:read_line()
 	local filedata = self:read_data()
 	
-	local file = io.open(_G.CBCLUA_CODEPATH .. "/" .. filename, "w")
+	local file = io.open(util.get_cbclua_codepath() .. "/" .. filename, "w")
 	if file then
 		file:write(filedata)
 		file:close()

@@ -9,8 +9,13 @@ import "cbclua.task.task"
 local tasks = { } -- set of all tasks (keys are tasks, value is always true)
 local tasks_tostart = { } -- set of all tasks waiting to be started
 local task_count = 0
+local current_task
 
 -- Public functions
+
+function get_current()
+	return current_task
+end
 
 function start(...) -- args are func, name, daemon, cstack
 	local task = Task(...)
@@ -19,41 +24,25 @@ function start(...) -- args are func, name, daemon, cstack
 	return task
 end
 
-function async(func, ...)
-	local args = {...}
-	return start(function () return func(unpack(args)) end, "async task", true)
-end
-
 function stop(task)
 	task:kill()
+	if task == current_task then -- special case, stop on the current task
+		-- calling kill has already caused the task to "stop", now we just yield to the scheduler
+		-- which will see that the task has ended and call stop() again, removing it from the task list
+		coroutine.yield()
+	end
 	
 	if tasks_tostart[task] then
 		tasks_tostart[task] = nil
+		task_count = task_count - 1
 	elseif tasks[task] then
 		tasks[task] = nil
 		task_count = task_count - 1
 	end
 end
 
-function exit()
-	stop(get_current())
-	coroutine.yield()
-end
-
 function count()
 	return task_count
-end
-
-function real_count()
-	local ctr=0
-	
-	for task in running_tasks() do
-		if not task:is_daemon() then
-			ctr = ctr + 1
-		end
-	end
-	
-	return ctr
 end
 
 function running_tasks()
@@ -64,8 +53,8 @@ function dump_list()
 	for task in running_tasks() do
 		local buf = ""
 				
-		if task:is_daemon() then
-			buf = buf .. "D"
+		if task:is_system() then
+			buf = buf .. "S"
 		else
 			buf = buf .. "T"
 		end
@@ -105,3 +94,8 @@ function start_new_tasks()
 	return true
 end
 
+-- for sched
+
+function set_current_task(task)
+	current_task = task
+end

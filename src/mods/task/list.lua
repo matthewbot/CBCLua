@@ -1,6 +1,7 @@
 module(...)
 
 local coroutine = require "coroutine"
+local os = require "os"
 
 import "cbclua.task.task"
 
@@ -72,10 +73,19 @@ end
 
 function stop_all_user_tasks()
 	for task, _ in pairs(tasks) do
-		if not task:is_system() then
+		if not task:is_system() and not task == current_task then
 			stop(task)
 		end
 	end
+	
+	if not current_task:is_system() then
+		stop(current_task)
+	end
+end
+
+function os.exit()
+	print("<<< Program exited >>>")
+	stop_all_user_tasks()
 end
 
 function start_new_tasks()

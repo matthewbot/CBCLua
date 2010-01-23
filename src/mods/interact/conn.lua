@@ -2,7 +2,7 @@ local task = require "cbclua.task"
 local evalenv = require "cbclua.interact.evalenv"
 local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"
-local util = require "cbclua.util"
+local maintask = require "cbclua.maintask"
 local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"
@@ -57,11 +57,11 @@ function InteractConnection:cmd_expr()
 end
 
 function InteractConnection:cmd_runmain()
-	if cbclua_is_main_running() then
+	if maintask.is_running() then
 		self:write_line("ERROR")
 		self:write_data("Program already running")
 	else
-		local ok, err = cbclua_run_main()
+		local ok, err = maintask.run()
 	
 		if not ok then
 			self:write_line("ERROR")
@@ -86,21 +86,21 @@ function InteractConnection:cmd_stoptasks()
 end
 
 function InteractConnection:cmd_clearcode()
-	os.execute("rm -rf " .. util.get_cbclua_codepath() .. "/*")
+	os.execute("rm -rf " .. cbclua_get_codepath() .. "/*")
 	unload_all_codemods()
 	globalenv = evalenv.EvalEnvironment() -- start new execution environment
 end	
 
 function InteractConnection:cmd_mkcodedir()
 	local dir = self:read_line()
-	rawio.mkdir(util.get_cbclua_codepath() .. "/" .. dir)
+	rawio.mkdir(cbclua_get_codepath() .. "/" .. dir)
 end
 
 function InteractConnection:cmd_putcode()		
 	local filename = self:read_line()
 	local filedata = self:read_data()
 	
-	local file = io.open(util.get_cbclua_codepath() .. "/" .. filename, "w")
+	local file = io.open(cbclua_get_codepath() .. "/" .. filename, "w")
 	if file then
 		file:write(filedata)
 		file:close()

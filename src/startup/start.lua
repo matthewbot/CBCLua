@@ -13,7 +13,10 @@ end
 dostartup("config.lua")
 dostartup("class.lua")
 dostartup("module.lua")
-dostartup("maintask.lua")
+
+-- Start console task
+local console = require "cbclua.console"
+console.start_task()
 
 -- Start interaction tasks
 local interact = require "cbclua.interact"

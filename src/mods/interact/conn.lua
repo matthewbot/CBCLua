@@ -7,7 +7,6 @@ local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"
 
-local maintask
 local globalenv = evalenv.EvalEnvironment()
 
 InteractConnection = create_class "InteractConnection"
@@ -82,7 +81,6 @@ end
 
 function InteractConnection:cmd_stoptasks()
 	task.stop_all_user_tasks()
-	maintask = nil
 end
 
 function InteractConnection:cmd_clearcode()

@@ -133,6 +133,10 @@ function Button:__call()
 	return self.pressed > 0 or self.btnfunc()
 end
 
+function Button:wait()
+	return task.wait_toggle(self)
+end
+
 local buttonnames = { "black", "up", "down", "left", "right", "a", "b" }
 
 for _,name in pairs(buttonnames) do

@@ -20,6 +20,12 @@ function wait_while(pred, timeout, tdelta)
 	return wait(function () return not pred() end, timeout, tdelta)
 end
 
+-- waits for pred to become true then false
+function wait_toggle(pred, timeout, tdelta)
+	wait(pred, timeout, tdelta)
+	wait_while(pred, timeout, tdelta)
+end
+
 function wait_any(preds)
 	local tdelta=0.05
 	if preds.tdelta then

@@ -4,8 +4,7 @@ local maintask = require "cbclua.maintask"
 
 local function console_task()
 	while true do
-		task.wait(cbc.black_button)
-		task.wait_while(cbc.black_button)
+		cbc.black_button:wait()
 		
 		if not maintask.is_running() then
 			maintask.run()

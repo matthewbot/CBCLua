@@ -135,6 +135,7 @@ class CBCFinder(threading.Thread):
 		threading.Thread.__init__(self, name="CBCFinder")
 		self.daemon = True
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.sock.bind(("", 0))
 		self.callbacks = callbacks
 		
 		self.start()

@@ -153,19 +153,18 @@ class ConnectDialog(wx.Dialog):
 		self.cbcs = { }
 		self.next_cbc_id = 1
 		
-		panel = wx.Panel(self)
-		button_panel = wx.Panel(panel)
-		self.cbclist = CBCList(panel)
+		button_panel = wx.Panel(self)
+		self.cbclist = CBCList(self)
 		cancel = wx.Button(button_panel, label="Cancel")
 		refresh = wx.Button(button_panel, label="&Refresh")
 		self.connect = wx.Button(button_panel, label="&Connect")
 		self.connect.SetDefault()
 		self.connect.Disable()
 		
-		panel_box = wx.BoxSizer(wx.VERTICAL)
-		panel.SetSizer(panel_box)
-		panel_box.Add(self.cbclist, 1, wx.EXPAND)
-		panel_box.Add(button_panel, 0, wx.EXPAND)
+		self_box = wx.BoxSizer(wx.VERTICAL)
+		self.SetSizer(self_box)
+		self_box.Add(self.cbclist, 1, wx.EXPAND)
+		self_box.Add(button_panel, 0, wx.EXPAND)
 		
 		button_panel_box = wx.BoxSizer(wx.HORIZONTAL)
 		button_panel.SetSizer(button_panel_box)

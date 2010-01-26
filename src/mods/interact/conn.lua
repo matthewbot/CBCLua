@@ -85,7 +85,7 @@ end
 
 function InteractConnection:cmd_clearcode()
 	os.execute("rm -rf " .. cbclua_get_codepath() .. "/*")
-	unload_all_codemods()
+	cbclua_unload_all_codemods()
 	globalenv = evalenv.EvalEnvironment() -- start new execution environment
 end	
 

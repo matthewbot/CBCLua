@@ -14,7 +14,7 @@ def verify_connected(msg=None):
 					self.shellframe.write_line(msg, "systemerror")
 				return
 		
-			f(self, *args, **kwds)
+			return f(self, *args, **kwds)
 		return wrapper
 	return decorator
 

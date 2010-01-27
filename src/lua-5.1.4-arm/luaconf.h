@@ -261,7 +261,7 @@
 ** without modifying the main part of the file.
 */
 
-
+#define __JMP_BUF_SP 8 // fixes CoCo on EABI
 
 #endif
 

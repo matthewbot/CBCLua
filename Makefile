@@ -21,7 +21,7 @@ $(cbc-modules):
 
 .PHONY: clean	
 clean:
-	rm -rf build usbdrive/userhook0_data.tgz local/Interact local/ui.glade local/cmods/* cbclua/cmods/* cbclua/lua src/interact/*.hi src/interact/*.o src/interact/Interact src/lua-5.1.4-arm/*.o
+	rm -rf build local/cmods/* cbclua/cmods/* cbclua/lua src/lua-5.1.4-arm/*.o src/luasocket-2.0.2-arm/src/*.o
 	
 .PHONY: usbinstall
 usbinstall: cbc

@@ -82,7 +82,14 @@ function InteractConnection:cmd_buttonup()
 end
 
 function InteractConnection:cmd_stoptasks()
-	task.stop_all_user_tasks()
+	if maintask.is_running() then
+		maintask.stop("interact") -- go through the maintask mechanism when possible to print status messages
+	else
+		-- if the main task isn't technically running, kill all user tasks anyway, 
+		-- might've made one using interaction
+		task.stop_all_user_tasks()
+		cbc.stop()
+	end
 end
 
 function InteractConnection:cmd_clearcode()

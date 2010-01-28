@@ -9,7 +9,7 @@ local function console_task()
 		if not maintask.is_running() then
 			maintask.run()
 		else
-			task.stop_all_user_tasks()
+			maintask.stop("console")
 		end
 	end
 end

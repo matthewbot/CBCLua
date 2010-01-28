@@ -73,7 +73,7 @@ end
 
 function stop_all_user_tasks()
 	for task, _ in pairs(tasks) do
-		if not task:is_system() and not task == current_task then
+		if not task:is_system() and task ~= current_task then
 			stop(task)
 		end
 	end

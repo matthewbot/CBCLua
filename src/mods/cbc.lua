@@ -56,7 +56,7 @@ function Motor:construct(num)
 end
 
 function Motor:wait()
-	while not(get_motor_done(self.num)) do
+	while not(raw.get_motor_done(self.num)) do
 		task.sleep(0.020)
 	end
 end
@@ -96,21 +96,21 @@ function Servo:setpos(pos)
 		error("Attempt to set servo position out of range (must be 0-2047)", 2)
 	end
 
-	set_servo_position(self.num, pos)
+	raw.set_servo_position(self.num, pos)
 end
 
 Servo.__call = Servo.setpos -- possible shorthand, not sure if I like it yet
 
 function Servo:getpos()
-	return get_servo_position(self.num)
+	return raw.get_servo_position(self.num)
 end
 
-for i=1,4 do
+for i=0,3 do
 	servos[i] = Servo(i)
 end
 
-enable_servos = enable_servos
-disable_servos = disable_servos
+enable_servos = raw.enable_servos
+disable_servos = raw.disable_servos
 
 --[[ Buttons ]]--
 
@@ -147,6 +147,14 @@ end
 
 --[[ Misc ]]--
 power_level = power_level
+
+function stop()
+	for i=0,3 do
+		motors[i]:off()
+	end
+	
+	disable_servos()
+end
 
 --[[ Control functions ]]--
 

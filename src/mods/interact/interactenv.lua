@@ -1,15 +1,29 @@
-EvalEnvironment = create_class "EvalEnvironment"
+InteractEnvironment = create_class "InteractEnvironment"
 
-function EvalEnvironment:construct()
+function InteractEnvironment:construct()
 	local mod = { }
 	self.mod = mod
 	cbclua_make_module(mod)
 	
 	autorequire("", mod) -- autorequire top level modules
 	autorequire("cbclua.", mod) -- and cbclua modules
+	
+	local ok, msg = pcall(function ()
+		import("interact", mod)
+	end)
+	
+	self.interact_loaded = ok
+	
+	if not ok and not msg:match("module 'interact' not found:") then
+		self.interact_errmsg = msg
+	end
 end
 
-function EvalEnvironment:run(expr)
+function InteractEnvironment:is_module_loaded()
+	return self.interact_loaded, self.interact_errmsg
+end
+
+function InteractEnvironment:run(expr)
 	-- compile as both a bare chunk and as an expression to be returned
 	local chunk, err = loadstring(expr, "=chunk") 
 	local exprchunk = loadstring("return " .. expr, "=expr")

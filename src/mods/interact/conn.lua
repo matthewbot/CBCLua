@@ -1,5 +1,5 @@
 local task = require "cbclua.task"
-local evalenv = require "cbclua.interact.evalenv"
+local interactenv = require "cbclua.interact.interactenv"
 local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"
 local maintask = require "cbclua.maintask"
@@ -7,7 +7,7 @@ local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"
 
-local globalenv = evalenv.EvalEnvironment()
+local globalenv
 
 InteractConnection = create_class "InteractConnection"
 
@@ -21,6 +21,10 @@ function InteractConnection:run()
 	self.sock:settimeout(0)
 	self:write_line(cbclua_get_name())
 	self:write_line(cbclua_get_version())
+	
+	if globalenv == nil then
+		self:make_globalenv()
+	end
 	
 	while true do
 		local command = self:read_line()
@@ -51,20 +55,18 @@ function InteractConnection:cmd_expr()
 		else
 			self:write_line("ERROR")
 		end
-		self:write_data(tostring(result))
+		self:write_data(result)
 	end, "interact eval", true, true)
 end
 
 function InteractConnection:cmd_runmain()
 	if maintask.is_running() then
-		self:write_line("ERROR")
-		self:write_data("Program already running")
+		self:send_error("Program already running")
 	else
 		local ok, err = maintask.run()
 	
 		if not ok then
-			self:write_line("ERROR")
-			self:write_data("Error while running main:\n" .. err)
+			self:send_error("Error while running main:\n" .. err)
 		end
 	end
 end
@@ -86,7 +88,6 @@ end
 function InteractConnection:cmd_clearcode()
 	os.execute("rm -rf " .. cbclua_get_codepath() .. "/*")
 	cbclua_unload_all_codemods()
-	globalenv = evalenv.EvalEnvironment() -- start new execution environment
 end	
 
 function InteractConnection:cmd_mkcodedir()
@@ -105,9 +106,27 @@ function InteractConnection:cmd_putcode()
 	end
 end
 
+function InteractConnection:cmd_resetenv()
+	self:make_globalenv()
+end
+
+function InteractConnection:make_globalenv()
+	globalenv = interactenv.InteractEnvironment()
+	
+	local loaded, msg = globalenv:is_module_loaded()
+	if not loaded and msg then
+		self:send_error("Interact module not loaded:\n" .. msg)
+	end
+end
+
 function InteractConnection:send_print(data)
 	self:write_line("PRINT")
 	self:write_data(data)
+end
+
+function InteractConnection:send_error(err)
+	self:write_line("ERROR")
+	self:write_data(err)
 end
 
 function InteractConnection:write_line(line)

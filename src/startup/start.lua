@@ -18,9 +18,13 @@ dostartup("module.lua")
 local console = require "cbclua.console"
 console.start_task()
 
--- Start interaction tasks
-local interact = require "cbclua.interact"
-interact.start_tasks()
+if arg[2] ~= "nointeract" then
+	-- Start interaction tasks
+	local interact = require "cbclua.interact"
+	interact.start_tasks()
+else
+	print("Interaction disabled")
+end
 
 -- Print welcome message
 print("This is '" .. cbclua_get_name() .. "', running " .. cbclua_get_version())

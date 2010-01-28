@@ -1,5 +1,6 @@
 local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
+local os = require "os"
 
 local main_task
 

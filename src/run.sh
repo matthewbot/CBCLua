@@ -19,10 +19,6 @@ else
 fi
 
 if [ "$HOST" == "chumby" ]; then # if we're on a chumby
-	if [ `iwconfig 2>&1 | grep WLAN | wc -l` == "0" ]; then # if theres no wifi plugged in
-		./loadusb.sh # do USB loading stuffs
-	fi
-	
 	LUA_BIN="./lua"
 else
 	LUA_BIN="lua"

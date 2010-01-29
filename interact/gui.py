@@ -148,7 +148,7 @@ class ShellFrame(wx.Frame):
 
 class ConnectDialog(wx.Dialog):
 	def __init__(self, parent, callbacks):
-		wx.Dialog.__init__(self, parent, title='Connect to CBC', size=wx.Size(300, 200))
+		wx.Dialog.__init__(self, parent, title='Connect to CBC', size=wx.Size(350, 250))
 		self.callbacks = callbacks
 		self.cbcs = { }
 		self.next_cbc_id = 1
@@ -156,6 +156,7 @@ class ConnectDialog(wx.Dialog):
 		button_panel = wx.Panel(self)
 		self.cbclist = CBCList(self)
 		cancel = wx.Button(button_panel, label="Cancel")
+		manual = wx.Button(button_panel, label="Manual...")
 		refresh = wx.Button(button_panel, label="&Refresh")
 		self.connect = wx.Button(button_panel, label="&Connect")
 		self.connect.SetDefault()
@@ -170,6 +171,7 @@ class ConnectDialog(wx.Dialog):
 		button_panel.SetSizer(button_panel_box)
 		button_panel_box.AddStretchSpacer()
 		button_panel_box.Add(cancel)
+		button_panel_box.Add(manual)
 		button_panel_box.Add(refresh)
 		button_panel_box.Add(self.connect)
 		
@@ -179,6 +181,7 @@ class ConnectDialog(wx.Dialog):
 		
 		cancel.Bind(wx.EVT_BUTTON, self.evt_cancelbutton)
 		refresh.Bind(wx.EVT_BUTTON, self.evt_refreshbutton)
+		manual.Bind(wx.EVT_BUTTON, self.evt_manualbutton)
 		self.connect.Bind(wx.EVT_BUTTON, self.evt_connectbutton)
 		
 		self.Bind(wx.EVT_CLOSE, self.evt_close)
@@ -210,7 +213,12 @@ class ConnectDialog(wx.Dialog):
 		self.callbacks.on_cbclist_connect(cbc['ip'])
 		
 	def evt_cancelbutton(self, buttonevent):
-		self.callbacks.on_cbclist_cancel()	
+		self.callbacks.on_cbclist_cancel()
+	
+	def evt_manualbutton(self, buttonevent):
+		textdialog = wx.TextEntryDialog(self, "IP Address", "Manual Connection")
+		if textdialog.ShowModal() == wx.ID_OK:
+			self.callbacks.on_cbclist_connect(textdialog.GetValue())	
 	
 	def evt_refreshbutton(self, buttonevent):
 		self.callbacks.on_cbclist_refresh()

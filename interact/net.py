@@ -80,25 +80,28 @@ class CBCConnection(threading.Thread):
 		f.close()
 		
 	def run(self):
-		self.sock.connect((self.ip, INTERACT_PORT))
-		name = self.recv_line()
-		version = self.recv_line()
-		self.callbacks.on_net_version(name, version)
+		try:
+			self.sock.connect((self.ip, INTERACT_PORT))
+			name = self.recv_line()
+			version = self.recv_line()
+			self.callbacks.on_net_version(name, version)
 		
-		while True:
-			line = self.recv_line()
-			if line == "RESULT":
-				result = self.recv_data()
-				self.callbacks.on_net_result(result)
-			elif line == "ERROR":
-				error = self.recv_data()
-				self.callbacks.on_net_error(error)
-			elif line == "PRINT":
-				msg = self.recv_data()
-				self.callbacks.on_net_print(msg)
-			elif line is None:
-				break
-				
+			while True:
+				line = self.recv_line()
+				if line == "RESULT":
+					result = self.recv_data()
+					self.callbacks.on_net_result(result)
+				elif line == "ERROR":
+					error = self.recv_data()
+					self.callbacks.on_net_error(error)
+				elif line == "PRINT":
+					msg = self.recv_data()
+					self.callbacks.on_net_print(msg)
+				elif line is None:
+					break
+		except IOError:
+			pass
+			
 		if not self.closed:
 			self.callbacks.on_net_connerror()
 		self.sock.close()

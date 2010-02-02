@@ -29,7 +29,6 @@ function class_mt.__call(class, ...)
 	
 	local construct = inst.construct
 	if construct then
-		--pass_errors(construct, inst, ...)
 		construct(inst, ...)
 	end
 	
@@ -40,7 +39,7 @@ function class_mt.__newindex(class, key, value)
 	if type(value) == "function" then
 		class.methods[key] = value
 	else
-		error("Trying to add something other than a function to a class", 2)
+		error("Trying to add a non-function type " .. type(value) .. " to a class", 2)
 	end
 end
 
@@ -121,10 +120,9 @@ function super_mt.__index(super, methname)
 		error("Cannot refer to super outside of a method!", 2)
 	end
 	
-	local class = self.class
-	local meth = find_method_mixins(class, methname)
+	local meth = find_method_mixins(self.class, methname)
 	if meth == nil then
-		error("No superclass of class " .. class.name .. " contains a method named " .. methname)
+		error("No superclass of class " .. self.class.name .. " contains a method named " .. methname)
 	end
 	
 	return function (super, ...) -- return a thunk closure

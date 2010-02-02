@@ -83,11 +83,6 @@ function stop_all_user_tasks()
 	end
 end
 
-function os.exit()
-	print("<<< Program exited >>>")
-	stop_all_user_tasks()
-end
-
 function start_new_tasks()
 	local started = false
 

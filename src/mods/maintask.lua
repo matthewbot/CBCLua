@@ -37,4 +37,10 @@ function stop(who)
 	return true
 end
 
+function os.exit()
+	task.stop_all_user_tasks()
+	cbc.stop()
+	print("<<< Program exited >>>")
+end
+
 

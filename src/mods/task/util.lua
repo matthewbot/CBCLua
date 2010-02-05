@@ -42,7 +42,7 @@ function wait_any(preds)
 	while true do
 		for name,pred in pairs(preds) do
 			if pred() then
-				return name
+				return name, pred
 			end
 		end
 		

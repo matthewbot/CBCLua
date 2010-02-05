@@ -17,39 +17,43 @@ function SensorBase:__call()
 	return self:read()
 end
 
+function SensorBase:read()
+	error("Abstract")
+end
+
 --[[ CBCSensor ]]--
 -- Private class representing raw CBC sensors
 
-local CBCDigitalSensor = create_class("CBCDigitalSensor", SensorBase)
+DigitalSensor = create_class("DigitalSensor", SensorBase)
 
-function CBCDigitalSensor:construct(num)
+function DigitalSensor:construct(num)
 	self.num = num
 end
 
-function CBCDigitalSensor:read()
+function DigitalSensor:read()
 	return raw.digital(self.num)
 end
 
-local CBCAnalogSensor = create_class("CBCAnalogSensor", SensorBase)
+AnalogSensor = create_class("AnalogSensor", SensorBase)
 
-function CBCAnalogSensor:construct(num)
+function AnalogSensor:construct(num)
 	self.num = num
 end
 
-function CBCAnalogSensor:read()
+function AnalogSensor:read()
 	return raw.analog10(self.num)
 end
 
 for i=0,7 do
-	sensors[i] = CBCDigitalSensor(i)
+	sensors[i] = DigitalSensor(i)
 end
 for i=8,15 do
-	sensors[i] = CBCAnalogSensor(i)
+	sensors[i] = AnalogSensor(i)
 end
 
 --[[ Motors ]]--
 
-local Motor = create_class "Motor"
+Motor = create_class "Motor"
 
 function Motor:construct(num)
 	self.num = num
@@ -61,16 +65,16 @@ function Motor:wait()
 	end
 end
 
+-- Produces a wrapper method that substitutes the motor object first argument for the motor number
 local function make_motor_wrapper(funcname)
 	local func = raw[funcname]
-	return function(self, ...) -- thunk replaces motor object with motor number
+	return function(self, ...) 
 		return func(self.num, ...)
 	end
 end
 
 -- these map directly
-local motorfuncnames = { "fd", "bk", "off", "mav", "mtp", "mrp", "getpwm", "setpwm", "set_pid_gains" }
-for _,funcname in ipairs(motorfuncnames) do
+for _,funcname in ipairs{"fd", "bk", "off", "mav", "mtp", "mrp", "getpwm", "setpwm", "set_pid_gains"} do
 	Motor[funcname] = make_motor_wrapper(funcname)
 end
 
@@ -85,7 +89,7 @@ end
 
 --[[ Servos ]]--
 
-local Servo = create_class "Servo"
+Servo = create_class "Servo"
 
 function Servo:construct(num)
 	self.num = num
@@ -99,7 +103,9 @@ function Servo:setpos(pos)
 	raw.set_servo_position(self.num, pos)
 end
 
-Servo.__call = Servo.setpos -- possible shorthand, not sure if I like it yet
+function Servo:__call(pos) 
+	self:setpos(pos) -- possible shorthand, not sure if I like it yet
+end
 
 function Servo:getpos()
 	return raw.get_servo_position(self.num)
@@ -114,13 +120,15 @@ disable_servos = raw.disable_servos
 
 --[[ Buttons ]]--
 
-local Button = create_class "Button"
+Button = create_class "Button"
 
 function Button:construct(name)
+	self.name = name
 	self.btnfunc = raw[name .. "_button"]
 	self.pressed = 0
 end
 
+-- used by interact to remotely simulate a button press
 function Button:press()
 	self.pressed = self.pressed + 1
 end
@@ -129,24 +137,30 @@ function Button:release()
 	self.pressed = self.pressed - 1
 end
 
-function Button:__call()
+function Button:getPressed()
 	return self.pressed > 0 or self.btnfunc()
+end
+
+function Button:__call()
+	return self:getPressed()	
 end
 
 function Button:wait()
 	return task.wait_toggle(self)
 end
 
-local buttonnames = { "black", "up", "down", "left", "right", "a", "b" }
+function Button:getLetter()
+	return self.name:sub(1,1):upper()
+end
 
-for _,name in pairs(buttonnames) do
+for _,name in pairs{"black", "up", "down", "left", "right", "a", "b"} do
 	local button = Button(name)
 	_M[name .. "_button"] = button
 	buttons[name] = button
 end
 
 --[[ Misc ]]--
-power_level = power_level
+power_level = raw.power_level
 
 function stop()
 	for i=0,3 do

@@ -43,31 +43,30 @@ end
 --[[ User interaction functions ]]--
 
 function wait_continue(msg)
-	io.writeln(msg)
-	io.writeln("Press A to continue")
-	task.wait(cbc.a_button)
-	task.wait_while(cbc.a_button)
+	print(msg)
+	print("Press A to continue")
+	cbc.a_button:wait()
 end
 
 --[[ Menu ]]--
 
-local button_names = { "U", "D", "L", "R", "A", "B" }
-local button_funcs = { cbc.up_button, cbc.down_button, cbc.left_button, cbc.right_button, cbc.a_button, cbc.b_button }
+local menu_buttons = { cbc.up_button, cbc.down_button, cbc.left_button, cbc.right_button, cbc.a_button, cbc.b_button }
 
 function menu(opts)
 	local ctr=1
 	local preds = { }
 	
 	for label,val in pairs(opts) do
-		preds[val] = button_funcs[ctr]
-		io.writeln(button_names[ctr] .. " " .. label)
+		local button = menu_buttons[ctr]
+		preds[val] = button
+		print(button:getLetter() .. " " .. label)
 		ctr = ctr + 1
 	end
 	
-	io.writeln("Press a button")
+	print("Press a button")
+	local val, button = task.wait_any(preds)
+	task.wait_while(button) -- wait until button is released
 	
-	local val = task.wait_any(preds)
-	task.wait(function () return not preds[val]() end)
 	return val
 end
 

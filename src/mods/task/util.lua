@@ -1,11 +1,17 @@
-local list = require "cbclua.task.list"
+local taskmod = require "cbclua.task.task"
 local timer = require "cbclua.timer"
 local math = require "math"
 import "cbclua.task.control"
 
 function async(func, ...)
 	local args = {...}
-	return list.start(function () return func(unpack(args)) end, "async task", true)
+	local function asyncfunc()
+		return func(unpack(args))
+	end
+	
+	local task = taskmod.Task(asyncfunc, "async task", "daemon")
+	task:start()
+	return task
 end
 
 -- Wait functions (all use predicates)
@@ -60,6 +66,7 @@ function wait_any(preds)
 end
 
 -- Run func for a maximum amount of time
+
 function timeout(timeout, func)
 	local func_ended = false
 	local func_results
@@ -75,6 +82,12 @@ function timeout(timeout, func)
 		return false
 	else
 		return true, unpack(func_results)
+	end
+end
+
+function stop_all_user_tasks()
+	for task in taskmod.user_tasks() do
+		task:stop()
 	end
 end
 

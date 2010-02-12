@@ -1,8 +1,8 @@
 #!/usr/bin/python
-
 import wx
 import gui
 import net
+import netstub
 from functools import wraps
 
 def verify_connected(msg=None):
@@ -27,6 +27,7 @@ class InteractApp(wx.App):
 		self.shellframe = gui.ShellFrame(None, self)
 		self.connectdialog = gui.ConnectDialog(self.shellframe, self)
 		self.consoleframe = gui.ConsoleFrame(self.shellframe, self)
+		self.tasklistframe = gui.TaskListFrame(self.shellframe, self)
 		
 		self.shellframe.Show()
 		self.show_connect_dialog()
@@ -84,6 +85,10 @@ class InteractApp(wx.App):
 		self.consoleframe.Show()
 		self.consoleframe.Raise()
 		
+	def on_shell_window_tasklist(self):
+		self.tasklistframe.Show()
+		self.tasklistframe.Raise()
+		
 	@verify_connected()
 	def on_console_buttondown(self, buttonname):
 		self.cbcconn.send_button_down(buttonname)
@@ -105,7 +110,10 @@ class InteractApp(wx.App):
 		
 	def on_cbclist_connect(self, ip):
 		self.disconnect()
-		self.cbcconn = net.CBCConnection(self, ip)
+		if ip == "stub":
+			self.cbcconn = netstub.StubConnection(self)
+		else:
+			self.cbcconn = net.CBCConnection(self, ip)
 		self.connectdialog.Hide()
 		
 	def on_cbclist_refresh(self):
@@ -116,6 +124,13 @@ class InteractApp(wx.App):
 		
 	def on_cbclist_close(self):
 		self.connectdialog.Hide()
+	
+	@verify_connected("Must be connected to stop a task")
+	def on_tasklist_stop(self, taskid):
+		self.cbcconn.send_stop_task(taskid)
+	
+	def on_tasklist_close(self):
+		self.tasklistframe.Hide()
 		
 	def on_net_cbcresponse(self, name, ip, conns):
 		wx.CallAfter(self.connectdialog.add_cbc, name, ip, conns)
@@ -131,6 +146,9 @@ class InteractApp(wx.App):
 		
 	def on_net_print(self, msg):
 		wx.CallAfter(self.consoleframe.write, msg)
+		
+	def on_net_tasklist(self, tasks):
+		wx.CallAfter(self.tasklistframe.update_tasks, tasks)
 		
 	def on_net_connerror(self):
 		self.cbcconn = None

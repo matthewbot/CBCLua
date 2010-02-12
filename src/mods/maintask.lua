@@ -5,7 +5,7 @@ local os = require "os"
 local main_task
 
 function is_running()
-	return main_task and main_task:running()
+	return main_task and main_task:get_state() == "active"
 end
 
 function run()

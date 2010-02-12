@@ -31,6 +31,10 @@ class CBCConnection(threading.Thread):
 	def send_stop(self):
 		self.write_line("STOPTASKS")
 		
+	def send_stop_task(self, taskid):
+		self.write_line("STOPTASK")
+		self.write_line(str(taskid))
+		
 	def send_button_down(self, button):
 		self.write_line("BUTTONDOWN")
 		self.write_line(button)
@@ -97,6 +101,9 @@ class CBCConnection(threading.Thread):
 				elif line == "PRINT":
 					msg = self.recv_data()
 					self.callbacks.on_net_print(msg)
+				elif line == "TASKLIST":
+					tasklist = self.recv_tasklist()
+					self.callbacks.on_net_tasklist(tasklist)
 				elif line is None:
 					break
 		except IOError:
@@ -106,11 +113,25 @@ class CBCConnection(threading.Thread):
 			self.callbacks.on_net_connerror()
 		self.sock.close()
 				
+	def recv_tasklist(self):
+		tasklist = []
+	
+		while True:
+			taskid = self.recv_line()
+			if taskid == "":
+				break
+			taskid = int(taskid)
+			taskname = self.recv_line()
+			taskstate = self.recv_line()
+			tasktype = self.recv_line()
+			tasklist.append((taskid, taskname, taskstate, tasktype))
+		return tasklist
+				
 	def recv_line(self):
 		while True:
 			(line, newline, remaining) = self.sockbuf.partition("\n")
 			if newline == "\n":
-				break	
+				break
 			data = self.sock.recv(1024)
 			if data == "":
 				return None

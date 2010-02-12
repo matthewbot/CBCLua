@@ -3,6 +3,7 @@ local interactenv = require "cbclua.interact.interactenv"
 local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"
 local maintask = require "cbclua.maintask"
+local util = require "cbclua.util"
 local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"
@@ -14,14 +15,19 @@ InteractConnection = create_class "InteractConnection"
 function InteractConnection:construct(sock, callback)
 	self.sock = sock
 	self.callback = callback
-	self.task = task.start(function () return self:run() end, "interact conn", false, true)
+	self:init()
+	self.task = task.start(util.bind(self, "run"), "interact conn", "system")
 end
 
-function InteractConnection:run()
+function InteractConnection:init()
 	self.sock:settimeout(0)
 	self:write_line(cbclua_get_name())
 	self:write_line(cbclua_get_version())
-	
+end	
+
+function InteractConnection:run()
+	self:update_task_list()
+
 	if globalenv == nil then
 		self:make_globalenv()
 	end
@@ -56,7 +62,7 @@ function InteractConnection:cmd_expr()
 			self:write_line("ERROR")
 		end
 		self:write_data(result)
-	end, "interact eval", true, true)
+	end, "interact eval", "cstack")
 end
 
 function InteractConnection:cmd_runmain()
@@ -92,6 +98,17 @@ function InteractConnection:cmd_stoptasks()
 	end
 end
 
+function InteractConnection:cmd_stoptask()
+	local taskid = tonumber(self:read_line())
+	
+	for t in task.all_tasks() do
+		if t:get_id() == taskid then
+			t:stop()
+			break
+		end
+	end
+end
+
 function InteractConnection:cmd_clearcode()
 	os.execute("rm -rf " .. cbclua_get_codepath() .. "/*")
 	cbclua_unload_all_codemods()
@@ -124,6 +141,17 @@ function InteractConnection:make_globalenv()
 	if not loaded and msg then
 		self:send_error("Interact module not loaded:\n" .. msg)
 	end
+end
+
+function InteractConnection:update_task_list()
+	self:write_line("TASKLIST")
+	for t in task.all_tasks() do
+		self:write_line(t:get_id())
+		self:write_line(t:get_name())
+		self:write_line(t:get_state())
+		self:write_line(t:is_system() and "system" or "normal")
+	end
+	self:write_line("")
 end
 
 function InteractConnection:send_print(data)

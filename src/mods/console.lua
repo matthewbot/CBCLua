@@ -15,6 +15,6 @@ local function console_task()
 end
 
 function start_task()
-	task.start(console_task, "console", false, true)
+	task.start(console_task, "console", "system")
 end
 

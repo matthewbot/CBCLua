@@ -12,11 +12,9 @@ class ShellFrame(wx.Frame):
 		bottom_panel = wx.Panel(splitter, style=wx.SP_3D)
 		
 		self.sendbutton = wx.Button(bottom_panel, label="Send")
-		self.sendbutton.SetDefault()
 		self.stopbutton = wx.Button(bottom_panel, label="Stop")
-		self.output = wx.TextCtrl(splitter, style=wx.TE_MULTILINE|wx.TE_RICH)
-		self.output.SetEditable(False)
-		self.input = wx.TextCtrl(bottom_panel, style=wx.TE_MULTILINE|wx.TE_RICH)
+		self.output = wx.TextCtrl(splitter, style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
+		self.input = wx.TextCtrl(bottom_panel, style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_PROCESS_TAB)
 		self.input.SetFont(wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		
 		splitter.SplitHorizontally(self.output, bottom_panel, -35)
@@ -28,7 +26,7 @@ class ShellFrame(wx.Frame):
 		bottom_panel_box.Add(self.sendbutton, 0, wx.ALIGN_CENTER)
 		bottom_panel_box.Add(self.stopbutton, 0, wx.ALIGN_CENTER)
 		
-		self.input.Bind(wx.EVT_CHAR, self.evt_char)
+		self.input.Bind(wx.EVT_KEY_DOWN, self.evt_key_down)
 		self.sendbutton.Bind(wx.EVT_BUTTON, self.evt_sendbutton)
 		self.stopbutton.Bind(wx.EVT_BUTTON, self.evt_stopbutton)
 		
@@ -41,7 +39,8 @@ class ShellFrame(wx.Frame):
 		program_menu_reload = program_menu.Append(wx.ID_ANY, "&Reload")
 		
 		window_menu = wx.Menu()
-		window_menu_console = window_menu.Append(wx.ID_ANY, "Console")
+		window_menu_console = window_menu.Append(wx.ID_ANY, "&Console")
+		window_menu_tasklist = window_menu.Append(wx.ID_ANY, "&Task list")
 		
 		menubar = wx.MenuBar()
 		menubar.Append(cbc_menu, "&CBC")
@@ -54,6 +53,7 @@ class ShellFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.evt_menu_download, program_menu_download)
 		self.Bind(wx.EVT_MENU, self.evt_menu_reload, program_menu_reload)
 		self.Bind(wx.EVT_MENU, self.evt_menu_console, window_menu_console)
+		self.Bind(wx.EVT_MENU, self.evt_menu_tasklist, window_menu_tasklist)
 		
 		self.stylemap = dict(
 			user=wx.TextAttr(
@@ -91,32 +91,31 @@ class ShellFrame(wx.Frame):
 	def write_line(self, text="", style="user"):
 		self.output.SetDefaultStyle(self.stylemap[style])
 		self.output.AppendText(text + "\n")
+		self.output.ScrollLines(-1)
 		
-	def evt_char(self, keyevent):
-		if not keyevent.ControlDown():
-			keycode = keyevent.GetKeyCode()
-			if keycode == wx.WXK_RETURN:
-				self.do_send()
+	def evt_key_down(self, keyevent):
+		keycode = keyevent.GetKeyCode()
+	
+		if keycode == wx.WXK_RETURN and not keyevent.ShiftDown():
+			self.do_send()
+			return
+		elif keycode == wx.WXK_UP:
+			if self.history_pos == 0:
 				return
-			elif keycode == wx.WXK_UP:
-				if self.history_pos == 0:
-					return
-					
-				self.history_pos -= 1
+			self.history_pos -= 1
+			self.input.ChangeValue(self.history[self.history_pos])
+			self.input.SetInsertionPointEnd()
+			return		
+		elif keycode == wx.WXK_DOWN:
+			if self.history_pos == len(self.history):
+				return
+			self.history_pos += 1
+			if self.history_pos == len(self.history):
+				self.input.ChangeValue("")
+			else:
 				self.input.ChangeValue(self.history[self.history_pos])
-				self.input.SetInsertionPointEnd()
-				return
-			elif keycode == wx.WXK_DOWN:
-				if self.history_pos == len(self.history):
-					return
-					
-				self.history_pos += 1
-				if self.history_pos == len(self.history):
-					self.input.ChangeValue("")
-				else:
-					self.input.ChangeValue(self.history[self.history_pos])
-				self.input.SetInsertionPointEnd()
-				return
+			self.input.SetInsertionPointEnd()
+			return
 				
 		keyevent.Skip()
 			
@@ -145,6 +144,9 @@ class ShellFrame(wx.Frame):
 			
 	def evt_menu_console(self, menuevent):
 		self.callbacks.on_shell_window_console()
+		
+	def evt_menu_tasklist(self, menuevent):
+		self.callbacks.on_shell_window_tasklist()
 
 class ConnectDialog(wx.Dialog):
 	def __init__(self, parent, callbacks):
@@ -332,4 +334,87 @@ class ConsoleFrame(wx.Frame):
 		
 	def evt_close(self, closeevent):
 		self.callbacks.on_console_close()
+		
+class TaskListFrame(wx.Frame):
+	def __init__(self, parent, callbacks):
+		wx.Frame.__init__(self, parent, title='Task list', size=wx.Size(400, 240))
+		self.callbacks = callbacks
+		self.tasks = None
+		self.selected_taskid = None
+		
+		panel = wx.Panel(self)
+		checkpanel = wx.Panel(panel)
+		
+		self.tasklist = TaskList(panel)
+		self.tasklist.Bind(wx.EVT_LIST_ITEM_SELECTED, self.evt_taskselected)
+		self.showsystem = wx.CheckBox(checkpanel, wx.ID_ANY, "System tasks")
+		self.showsystem.Bind(wx.EVT_CHECKBOX, self.evt_showsystem)
+		self.showstopped = wx.CheckBox(checkpanel, wx.ID_ANY, "Stopped tasks")
+		self.showstopped.Bind(wx.EVT_CHECKBOX, self.evt_showstopped)
+		stopbutton = wx.Button(checkpanel, wx.ID_ANY, "Stop Task")
+		stopbutton.Bind(wx.EVT_BUTTON, self.evt_stopbutton)
+		
+		panel_sizer = wx.BoxSizer(wx.VERTICAL)
+		panel.SetSizer(panel_sizer)
+		panel_sizer.Add(self.tasklist, 1, wx.EXPAND)
+		panel_sizer.Add(checkpanel, 0, wx.EXPAND)
+		
+		checkpanel_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		checkpanel.SetSizer(checkpanel_sizer)
+		checkpanel_sizer.Add(self.showsystem)
+		checkpanel_sizer.Add(self.showstopped)
+		checkpanel_sizer.AddStretchSpacer()
+		checkpanel_sizer.Add(stopbutton)
+		
+		self.Bind(wx.EVT_CLOSE, self.evt_close)
+		
+	def update_tasks(self, tasks):
+		self.tasks = tasks
+		
+		self.refresh()
+		
+	def refresh(self):			
+		self.tasklist.DeleteAllItems()
+		
+		for taskid, taskname, taskstate, tasktype in self.tasks:
+			if not self.showsystem.GetValue() and tasktype == "system":
+				continue
+				
+			if not self.showstopped.GetValue() and taskstate == "stopped":
+				continue
+		
+			index = self.tasklist.InsertStringItem(taskid, taskname)
+			self.tasklist.SetStringItem(index, 1, taskstate)
+			self.tasklist.SetStringItem(index, 2, tasktype)
+			self.tasklist.SetItemData(index, taskid)
+			
+			if taskid == self.selected_taskid:
+				self.tasklist.SetItemState(index, wx.LIST_STATE_SELECTED, wx.LIST_STATE_SELECTED)
+			
+	def evt_showsystem(self, checkevent):
+		self.refresh()
+		
+	def evt_showstopped(self, checkevent):
+		self.refresh()
+			
+	def evt_taskselected(self, listevent):
+		self.selected_taskid = listevent.GetData()
+			
+	def evt_stopbutton(self, buttonevent):
+		if self.selected_taskid is not None:
+			self.callbacks.on_tasklist_stop(self.selected_taskid)
+	
+	def evt_close(self, closeevent):
+		self.callbacks.on_tasklist_close()
+		
+class TaskList(wx.ListCtrl, ListCtrlAutoWidthMixin):
+	def __init__(self, parent):
+		wx.ListCtrl.__init__(self, parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+		ListCtrlAutoWidthMixin.__init__(self)
+		
+		self.InsertColumn(0, "Name")
+		self.InsertColumn(1, "State", width=100)
+		self.InsertColumn(2, "Type", width=100)
+		
+		self.setResizeColumn(0)
 		

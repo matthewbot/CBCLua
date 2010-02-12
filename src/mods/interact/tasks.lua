@@ -29,3 +29,12 @@ function respond()
 		end
 	end
 end
+
+function update_task_lists()
+	while true do
+		task.sleep(1)
+		
+		connlist.invoke_all("update_task_list")
+	end
+end
+

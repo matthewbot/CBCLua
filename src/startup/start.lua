@@ -15,8 +15,10 @@ dostartup("class.lua")
 dostartup("module.lua")
 
 -- Start console task
-local console = require "cbclua.console"
-console.start_task()
+if cbclua_get_host() == "chumby" then
+	local console = require "cbclua.console"
+	console.start_task()
+end
 
 if arg[2] ~= "nointeract" then
 	-- Start interaction tasks

@@ -95,6 +95,9 @@ function run()
 			sleepamt = 0
 		elseif #sleep_list > 0 then
 			sleepamt = sleep_list[1].waketime - timer.seconds()
+			if sleepamt < 0 then
+				sleepamt = 0
+			end
 		elseif #io_list > 0 then
 			sleepamt = -1 -- indefinite sleep
 		else

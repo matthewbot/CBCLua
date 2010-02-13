@@ -258,8 +258,10 @@ class ConsoleFrame(wx.Frame):
 		abpanel = wx.Panel(buttonpanel)
 		dpadpanel = wx.Panel(buttonpanel)
 	
-		self.screen = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_RICH)
+		self.screen = wx.TextCtrl(panel, style=wx.TE_MULTILINE|wx.TE_RICH2)
 		self.screen.SetEditable(False)
+		self.bellofftimer = wx.Timer()
+		self.bellofftimer.Bind(wx.EVT_TIMER, self.evt_bell_off)
 		
 		buttonconfigs = [
 			("A", "a", abpanel),
@@ -315,6 +317,18 @@ class ConsoleFrame(wx.Frame):
 		
 	def write(self, msg):
 		self.screen.AppendText(msg)
+		
+	def display_clear(self):
+		self.screen.ChangeValue("")
+		
+	def beep(self):
+		self.screen.SetStyle(0, self.screen.GetLastPosition(), wx.TextAttr("white", "black"))
+		self.screen.SetBackgroundColour("black")
+		self.bellofftimer.Start(200, True)
+		
+	def evt_bell_off(self, timerevent):
+		self.screen.SetBackgroundColour("white")
+		self.screen.SetStyle(0, self.screen.GetLastPosition(), wx.TextAttr("black", "white"))
 
 	def evt_left_down(self, buttonevent):
 		buttonevent.Skip()

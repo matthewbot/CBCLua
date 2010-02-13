@@ -154,6 +154,14 @@ function InteractConnection:update_task_list()
 	self:write_line("")
 end
 
+function InteractConnection:send_display_clear()
+	self:write_line("DISPLAYCLEAR")
+end
+
+function InteractConnection:send_beep()
+	self:write_line("BEEP")
+end
+
 function InteractConnection:send_print(data)
 	self:write_line("PRINT")
 	self:write_data(data)

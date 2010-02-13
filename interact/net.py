@@ -104,6 +104,10 @@ class CBCConnection(threading.Thread):
 				elif line == "TASKLIST":
 					tasklist = self.recv_tasklist()
 					self.callbacks.on_net_tasklist(tasklist)
+				elif line == "DISPLAYCLEAR":
+					self.callbacks.on_net_display_clear()
+				elif line == "BEEP":
+					self.callbacks.on_net_beep()
 				elif line is None:
 					break
 		except IOError:

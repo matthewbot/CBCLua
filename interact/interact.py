@@ -147,6 +147,12 @@ class InteractApp(wx.App):
 	def on_net_print(self, msg):
 		wx.CallAfter(self.consoleframe.write, msg)
 		
+	def on_net_display_clear(self):
+		wx.CallAfter(self.consoleframe.display_clear)
+		
+	def on_net_beep(self):
+		wx.CallAfter(self.consoleframe.beep)
+		
 	def on_net_tasklist(self, tasks):
 		wx.CallAfter(self.tasklistframe.update_tasks, tasks)
 		

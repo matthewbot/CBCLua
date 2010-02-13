@@ -161,6 +161,8 @@ end
 
 --[[ Misc ]]--
 power_level = raw.power_level
+display_clear = raw.display_clear
+beep = raw.beep
 
 function stop()
 	for i=0,3 do

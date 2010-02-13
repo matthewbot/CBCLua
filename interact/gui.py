@@ -325,6 +325,7 @@ class ConsoleFrame(wx.Frame):
 		
 	def write(self, msg):
 		self.screen.AppendText(msg)
+		self.screen.ScrollLines(-1)
 		
 	def display_clear(self):
 		self.screen.ChangeValue("")

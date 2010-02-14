@@ -1,5 +1,7 @@
 local raw = require "cbclua.rawcbc"
 local task = require "cbclua.task"
+local io = require "io"
+local math = require "math"
 
 --[[ Globals ]]--
 
@@ -174,18 +176,22 @@ end
 
 --[[ Control functions ]]--
 
-local dimlevel_proc = "/proc/sys/sense1/dimlevel"
+local brightness_proc = "/proc/sys/sense1/brightness"
 
 function dim_screen()
-	set_proc(dimlevel_proc, 1)
+	set_screen_brightness(.1)
 end
 
 function bright_screen()
-	set_proc(dimlevel_proc, 0)
+	set_screen_brightness(1)
 end
 
 function off_screen()
-	set_proc(dimlevel_proc, 2)
+	set_screen_brightness(0)
+end
+
+function set_screen_brightness(brightval)
+	set_proc(brightness_proc, math.floor(brightval * 65535 + .5))
 end
 
 function set_proc(file, val)

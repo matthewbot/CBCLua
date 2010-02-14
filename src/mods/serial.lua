@@ -8,30 +8,32 @@ local io = require 'io'
 -- Define SerialPort class
 
 SerialPort = create_class "SerialPort"
-local serial_instance = nil -- holds the singleton instance
+local weaktab = setmetatable({ }, { __mode = 'v' })
 
 function SerialPort:construct()
-	if serial_instance ~= nil then
-		error("Only one SerialPort can created at a time!")
+	if weaktab.serial_instance ~= nil then -- if the weak table still has a reference to us
+		collectgarbage("collect") -- do a full garbage collection to be sure
+		if weaktab.serial_instance ~= nil then 
+			error("Only one SerialPort can created at a time!")
+		end
 	end
 
 	self.readbuf = ""
-	self.rx = assert(io.open("/tmp/uart1rx", "rb"), "failed to open uart1rx") -- open read write so that we never get EOFS since we are a potential writer
-	self.rx_writer = assert(io.open("/tmp/uart1rx", "wb"), "failed to open uart1rx (2)")
-	self.tx = assert(io.open("/tmp/uart1tx", "wb"), "failed to open uart1tx")
+	self.rx = assert(io.open("/dev/uart1", "rb"), "failed to open uart1 for reading") -- open read write so that we never get EOFS since we 
+	self.tx = assert(io.open("/tmp/uart1", "wb"), "failed to open uart1 for writing")
 	self.rx:setvbuf("no")
 	self.tx:setvbuf("no")
 	self.readsig = task.Signal()
-	self.readtask = task.start(util.bind(self, "read_task"), "serial read", true)
+	self.readtask = task.start(util.bind(self, "read_task"), "serial read")
 	
-	serial_instance = self
+	weaktab.serial_instance = self
 end
 
 function SerialPort:close()
 	task.stop(self.readtask)
 	self.tx:close()
 	self.rx:close()
-	serial_instance = nil -- clear the singleton holder so we can be recreated
+	weaktab.serial_instance = nil -- clear the singleton holder so we can be recreated
 end
 
 function SerialPort:get_avail()

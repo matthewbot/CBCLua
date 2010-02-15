@@ -29,7 +29,7 @@ function Signal:notify_all()
 	self.wakelist = { }
 end
 
-function Signal:wait(time)
+function Signal:wait()
 	local curtask = sched.get_current_task()
 	table.insert(self.wakelist, curtask)
 	curtask:add_task_observer(self)

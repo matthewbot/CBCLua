@@ -30,7 +30,7 @@ function SerialPort:construct()
 end
 
 function SerialPort:close()
-	task.stop(self.readtask)
+	self.readtask:stop()
 	self.tx:close()
 	self.rx:close()
 	weaktab.serial_instance = nil -- clear the singleton holder so we can be recreated
@@ -48,23 +48,9 @@ function SerialPort:clear()
 	self.readbuf = ""
 end
 
-function SerialPort:wait(amt, timeout)
-	if timeout ~= nil then
-		local start = timer.seconds()
-
-		while #self.readbuf < amt do
-			local remaining = timeout - (timer.seconds() - start)
-
-			if remaining <= 0 then
-				return false
-			end
-	
-			self.readsig:wait(remaining)
-		end
-	else
-		while #self.readbuf < amt do
-			self.readsig:wait()
-		end
+function SerialPort:wait(amt)
+	while #self.readbuf < amt do
+		self.readsig:wait()
 	end
 		
 	return true

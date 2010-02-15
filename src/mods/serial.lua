@@ -20,7 +20,7 @@ function SerialPort:construct()
 
 	self.readbuf = ""
 	self.rx = assert(io.open("/dev/uart1", "rb"), "failed to open uart1 for reading") -- open read write so that we never get EOFS since we 
-	self.tx = assert(io.open("/tmp/uart1", "wb"), "failed to open uart1 for writing")
+	self.tx = assert(io.open("/dev/uart1", "wb"), "failed to open uart1 for writing")
 	self.rx:setvbuf("no")
 	self.tx:setvbuf("no")
 	self.readsig = task.Signal()

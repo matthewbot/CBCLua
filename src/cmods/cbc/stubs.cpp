@@ -70,6 +70,9 @@ extern "C" {
 	int a_button() { return 0; }
 	int b_button() { return 0; }
 	int black_button() { return 0; }
+	
+	void display_clear() { }
+	void libcbc_init() { }
 }
 
 #endif

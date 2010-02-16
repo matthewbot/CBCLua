@@ -26,7 +26,7 @@ function run()
 		
 		local function mainwrapper()
 			mainmod.main()
-			stop("main")
+			os.exit()
 		end
 		
 		main_task = task.start(mainwrapper, "main")
@@ -35,18 +35,19 @@ function run()
 end
 
 function stop(who)
-	if is_running() then
+	if who == "exit" then
+		print("<<< Program exited >>>")
+	elseif is_running() then
 		print("<<< Program stopped by " .. (who or "unknown") .. " >>>")
 	end
 
-	task.stop_all_user_tasks()
 	cbc.stop()
-	
 	for _, hook in ipairs(shutdown_hooks) do
 		pcall(hook)
 	end
 	shutdown_hooks = { }
 	
+	task.stop_all_user_tasks()
 	return true
 end
 
@@ -133,6 +134,6 @@ end
 -- 
 
 function os.exit()
-	stop("os.exit")
+	stop("exit")
 end
 

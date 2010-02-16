@@ -1,8 +1,7 @@
 local task = require "cbclua.task"
-local interactenv = require "cbclua.interact.interactenv"
 local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"
-local maintask = require "cbclua.maintask"
+local userprgm = require "cbclua.userprgm"
 local util = require "cbclua.util"
 local os = require "os"
 local io = require "io"
@@ -27,10 +26,6 @@ end
 
 function InteractConnection:run()
 	self:update_task_list()
-
-	if globalenv == nil then
-		self:make_globalenv()
-	end
 	
 	while true do
 		local command = self:read_line()
@@ -55,7 +50,7 @@ end
 function InteractConnection:cmd_expr()
 	local expr = self:read_data()
 	task.start(function ()
-		local ok, result = globalenv:run(expr)
+		local ok, result = userprgm.interact(expr)
 		if ok then
 			self:write_line("RESULT")
 		else
@@ -66,10 +61,10 @@ function InteractConnection:cmd_expr()
 end
 
 function InteractConnection:cmd_runmain()
-	if maintask.is_running() then
+	if userprgm.is_running() then
 		self:send_error("Program already running")
 	else
-		local ok, err = maintask.run()
+		local ok, err = userprgm.run()
 	
 		if not ok then
 			self:send_error("Error while running main:\n" .. err)
@@ -88,7 +83,7 @@ function InteractConnection:cmd_buttonup()
 end
 
 function InteractConnection:cmd_stoptasks()
-	maintask.stop("interact") -- go through the maintask mechanism when possible to print status messages
+	userprgm.stop("interact")
 end
 
 function InteractConnection:cmd_stoptask()
@@ -104,7 +99,7 @@ end
 
 function InteractConnection:cmd_clearcode()
 	os.execute("rm -rf " .. cbclua_get_codepath() .. "/*")
-	cbclua_unload_all_codemods()
+	userprgm.unload()
 end	
 
 function InteractConnection:cmd_mkcodedir()
@@ -124,13 +119,13 @@ function InteractConnection:cmd_putcode()
 end
 
 function InteractConnection:cmd_resetenv()
-	self:make_globalenv()
+	self:reset_interaction()
 end
 
-function InteractConnection:make_globalenv()
-	globalenv = interactenv.InteractEnvironment()
+function InteractConnection:reset_interaction()
+	userprgm.reset_interaction()
 	
-	local loaded, msg = globalenv:is_module_loaded()
+	local loaded, msg = userprgm.is_interact_module_loaded()
 	if not loaded and msg then
 		self:send_error("Interact module not loaded:\n" .. msg)
 	end

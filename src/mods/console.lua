@@ -1,15 +1,15 @@
 local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
-local maintask = require "cbclua.maintask"
+local userprgm = require "cbclua.userprgm"
 
 local function console_task()
 	while true do
 		cbc.black_button:wait()
 		
-		if not maintask.is_running() then
-			maintask.run()
+		if not userprgm.is_running() then
+			userprgm.run()
 		else
-			maintask.stop("console")
+			userprgm.stop("console")
 		end
 	end
 end

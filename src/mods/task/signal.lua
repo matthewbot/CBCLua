@@ -8,7 +8,7 @@ function Signal:construct()
 end
 
 function Signal:notify()
-	while #wakelist > 0 do
+	while #self.wakelist > 0 do
 		local waketask = table.remove(self.wakelist, 1)
 		if waketask:get_state() == "suspended" then
 			waketask:remove_task_observer(self)

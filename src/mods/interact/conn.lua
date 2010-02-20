@@ -26,6 +26,7 @@ end
 
 function InteractConnection:run()
 	self:update_task_list()
+	self:verify_interaction()
 	
 	while true do
 		local command = self:read_line()
@@ -99,7 +100,6 @@ end
 
 function InteractConnection:cmd_clearcode()
 	os.execute("rm -rf " .. cbclua_get_codepath() .. "/*")
-	userprgm.unload()
 end	
 
 function InteractConnection:cmd_mkcodedir()
@@ -118,13 +118,12 @@ function InteractConnection:cmd_putcode()
 	end
 end
 
-function InteractConnection:cmd_resetenv()
-	self:reset_interaction()
+function InteractConnection:cmd_reset()
+	userprgm.reset()
+	self:verify_interaction()
 end
 
-function InteractConnection:reset_interaction()
-	userprgm.reset_interaction()
-	
+function InteractConnection:verify_interaction()
 	local loaded, msg = userprgm.is_interact_module_loaded()
 	if not loaded and msg then
 		self:send_error("Interact module not loaded:\n" .. msg)

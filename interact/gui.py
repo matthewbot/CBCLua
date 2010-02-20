@@ -34,6 +34,7 @@ class ShellFrame(wx.Frame):
 		cbc_menu_connect = cbc_menu.Append(wx.ID_ANY, "&Connect")
 		cbc_menu_disconnect = cbc_menu.Append(wx.ID_ANY, "&Disconnect")
 		cbc_menu.AppendSeparator()
+		cbc_menu_reset = cbc_menu.Append(wx.ID_ANY, "&Reset CBC")
 		cbc_menu_clearhistory = cbc_menu.Append(wx.ID_ANY, "Clear &History")
 		
 		program_menu = wx.Menu()
@@ -52,6 +53,7 @@ class ShellFrame(wx.Frame):
 		
 		self.Bind(wx.EVT_MENU, self.evt_menu_connect, cbc_menu_connect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_disconnect, cbc_menu_disconnect)
+		self.Bind(wx.EVT_MENU, self.evt_menu_reset, cbc_menu_reset)
 		self.Bind(wx.EVT_MENU, self.evt_menu_clearhistory, cbc_menu_clearhistory)
 		self.Bind(wx.EVT_MENU, self.evt_menu_download, program_menu_download)
 		self.Bind(wx.EVT_MENU, self.evt_menu_reload, program_menu_reload)
@@ -133,6 +135,9 @@ class ShellFrame(wx.Frame):
 		
 	def evt_menu_disconnect(self, menuevent):
 		self.callbacks.on_shell_disconnect()
+		
+	def evt_menu_reset(self, menuevent):
+		self.callbacks.on_shell_reset()
 		
 	def evt_menu_clearhistory(self, menuevent):
 		self.history = [ ]

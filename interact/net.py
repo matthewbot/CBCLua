@@ -46,8 +46,8 @@ class CBCConnection(threading.Thread):
 	def send_clear_code(self):
 		self.write_line("CLEARCODE")
 		
-	def send_reset_env(self):
-		self.write_line("RESETENV")
+	def send_reset(self):
+		self.write_line("RESET")
 		
 	def send_download(self, rootpath):
 		self.send_stop()
@@ -69,7 +69,7 @@ class CBCConnection(threading.Thread):
 				localfilepath = curpath + filename
 				self.put_file(cbcfilepath, localfilepath)	
 				
-		self.send_reset_env()
+		self.send_reset()
 	
 	def make_code_dir(self, codedir):		
 		self.write_line("MKCODEDIR")

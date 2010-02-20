@@ -3,6 +3,10 @@ local cbc = require "cbclua.cbc"
 local table = require "table"
 local os = require "os"
 
+-- Predeclares
+
+local reset_interaction
+
 -- Main program --
 
 local main_task
@@ -20,6 +24,8 @@ function run()
 	if is_running() then
 		return false
 	end
+	
+	reset() -- unload all modules so we start from a clean slate
 	
 	return pcall(function ()
 		local mainmod = require "main"
@@ -51,8 +57,9 @@ function stop(who)
 	return true
 end
 
-function unload()
+function reset()
 	cbclua_unload_all_codemods()
+	reset_interaction()
 end
 
 -- Interaction --

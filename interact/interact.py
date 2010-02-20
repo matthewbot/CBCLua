@@ -80,6 +80,11 @@ class InteractApp(wx.App):
 			self.shellframe.write_line("Must download a program before reloading it!", "systemerror")
 		else:
 			self.on_shell_download(self.lastdownload)
+			
+	@verify_connected("Must be connected to reset")
+	def on_shell_reset(self):
+		self.cbcconn.send_reset()
+		self.shellframe.write_line("Program reset!", "system")
 		
 	def on_shell_window_console(self):
 		self.consoleframe.Show()

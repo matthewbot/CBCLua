@@ -10,10 +10,15 @@ local reset_interaction
 -- Main program --
 
 local main_task
-local shutdown_hooks = { }
+local stop_hooks = { }
 
-function add_shutdown_hook(hook)
-	table.insert(shutdown_hooks, hook)
+function add_stop_hook(hook)
+	table.insert(stop_hooks, hook)
+	return #stop_hooks
+end
+
+function remove_stop_hook(num)
+	table.remove(stop_hooks, num)
 end
 
 function is_running()
@@ -47,18 +52,20 @@ function stop(who)
 		print("<<< Program stopped by " .. (who or "unknown") .. " >>>")
 	end
 
-	cbc.stop()
-	for _, hook in ipairs(shutdown_hooks) do
-		pcall(hook)
+	for _, hook in ipairs(stop_hooks) do
+		pcall(hook, who)
 	end
-	shutdown_hooks = { }
 	
 	task.stop_all_user_tasks()
+	cbc.stop()
 	return true
 end
 
 function reset()
+	stop("reset")
 	cbclua_unload_all_codemods()
+	stop_hooks = { }
+	collectgarbage("collect")
 	reset_interaction()
 end
 

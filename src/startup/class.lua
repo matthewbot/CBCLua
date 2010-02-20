@@ -110,12 +110,14 @@ end
 
 -- Make a super table
 
+local findlocal
+
 super = { }
 local super_mt = { }
 setmetatable(super, super_mt)
 
 function super_mt.__index(super, methname)
-	local self = debug.findlocal(2, "self")
+	local self = findlocal(2, "self")
 	if self == nil then
 		error("Cannot refer to super outside of a method!", 2)
 	end
@@ -130,3 +132,16 @@ function super_mt.__index(super, methname)
 	end
 end
 	
+function findlocal(depth, name)
+	local count = 1
+	while true do
+		local curname, curvalue = debug.getlocal(depth+1, count)
+		if curname == name then
+			return curvalue
+		elseif not curname then
+			return nil
+		end
+		count = count + 1
+	end
+end
+

@@ -34,7 +34,7 @@ class ShellFrame(wx.Frame):
 		cbc_menu_connect = cbc_menu.Append(wx.ID_ANY, "&Connect")
 		cbc_menu_disconnect = cbc_menu.Append(wx.ID_ANY, "&Disconnect")
 		cbc_menu.AppendSeparator()
-		cbc_menu_reset = cbc_menu.Append(wx.ID_ANY, "&Reset CBC")
+		cbc_menu_reset = cbc_menu.Append(wx.ID_ANY, "&Reset")
 		cbc_menu_clearhistory = cbc_menu.Append(wx.ID_ANY, "Clear &History")
 		
 		program_menu = wx.Menu()

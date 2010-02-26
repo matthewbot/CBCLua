@@ -164,6 +164,10 @@ local function loader(name)
 		return "\n\tno CBCLua module '" .. name .. "'"
 	end
 	
+	if iscodemod then
+		table.insert(all_codemod_names, name)
+	end
+	
 	return function ()
 		local modfunc, err = loadfile(filename)
 		
@@ -177,10 +181,6 @@ local function loader(name)
 		setfenv(modfunc, mod)
 	
 		modfunc()
-			
-		if iscodemod then
-			table.insert(all_codemod_names, name)
-		end
 		
 		package.loaded[name] = mod -- this, for some reason, must happen inside the module function
 	end

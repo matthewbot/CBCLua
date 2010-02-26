@@ -57,8 +57,8 @@ class CBCConnection(threading.Thread):
 			if curpath == rootpath:
 				cbccurpath = ""
 			else:
-				cbccurpath = curpath[len(rootpath)+1:] + "/" # cbc-relative path is the current path sans the root path
-			curpath += "/"
+				cbccurpath = curpath[len(rootpath)+1:].replace(os.sep, "/") + "/" # cbc-relative path is the current path sans the root path
+			curpath += os.sep
 			
 			for subdir in subdirs:
 				cbcdir = cbccurpath + subdir

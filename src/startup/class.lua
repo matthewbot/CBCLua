@@ -145,3 +145,21 @@ function findlocal(depth, name)
 	end
 end
 
+function is_a(obj, class)
+	return is_baseclass(class, obj.class)
+end
+
+function is_baseclass(baseclass, curclass)
+	if baseclass == curclass then
+		return true
+	end
+		
+	for _, nextclass in ipairs(curclass.mixins) do
+		if is_baseclass(baseclass, nextclass) then
+			return true
+		end
+	end
+	
+	return false
+end
+	

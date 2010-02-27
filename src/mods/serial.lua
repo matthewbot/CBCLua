@@ -14,7 +14,7 @@ function SerialPort:construct()
 	if weaktab.serial_instance ~= nil then -- if the weak table still has a reference to us
 		collectgarbage("collect") -- do a full garbage collection to be sure
 		if weaktab.serial_instance ~= nil then 
-			error("Only one SerialPort can created at a time!")
+			error("Only one SerialPort can created at a time!", 2)
 		end
 	end
 

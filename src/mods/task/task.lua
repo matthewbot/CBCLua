@@ -87,7 +87,7 @@ function Task:add_task_observer(observer)
 end
 
 function Task:remove_task_observer(observer)
-	self.stateobservers[observer] = false
+	self.stateobservers[observer] = nil
 end
 
 function Task:get_error()
@@ -142,6 +142,7 @@ function Task:resume()
 	
 	if self.state == "sleep" then
 		self.waketime = nil
+		sched.remove_sleep_task(self)
 	end
 	self:set_state("active")
 	sched.add_active_task(self)

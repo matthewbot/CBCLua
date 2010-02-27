@@ -9,25 +9,27 @@ function Signal:construct()
 end
 
 function Signal:notify()
-	while #self.wakelist > 0 do
-		local waketask = table.remove(self.wakelist, 1)
-		if waketask:get_state() == "suspended" then
-			waketask:remove_task_observer(self)
-			waketask:resume()
-			break
-		end
+	local waketask = table.remove(self.wakelist, 1)
+	if not waketask then
+		return false
 	end
+	
+	waketask:remove_task_observer(self)
+	waketask:resume()
+	return true
 end
 
 function Signal:notify_all()
-	for _, task in ipairs(self.wakelist) do
-		if task:get_state() == "suspended" then
-			task:remove_task_observer(self)
-			task:resume()
-		end
+	if #self.wakelist == 0 then
+		return false
 	end
-	
+
+	for _, task in ipairs(self.wakelist) do
+		task:remove_task_observer(self)
+		task:resume()
+	end
 	self.wakelist = { }
+	return true
 end
 
 function Signal:wait(timeout)
@@ -48,7 +50,7 @@ local debug = require "debug"
 
 function Signal:taskobserver_state_changed(task, state, prevstate)
 	if state ~= "active" then
-		return
+		return true
 	end
 
 	local pos=1

@@ -48,9 +48,22 @@ function SerialPort:clear()
 	self.readbuf = ""
 end
 
-function SerialPort:wait(amt)
-	while #self.readbuf < amt do
-		self.readsig:wait()
+function SerialPort:wait(amt, timeout)
+	if timeout then
+		local curtime = timer.seconds()
+		local stoptime = curtime + timeout
+		while #self.readbuf < amt and curtime < stoptime do
+			self.readsig:wait(stoptime - curtime)
+			curtime = timer.seconds()
+		end
+		
+		if curtime >= stoptime then
+			return false
+		end
+	else
+		while #self.readbuf < amt do
+			self.readsig:wait()
+		end
 	end
 		
 	return true

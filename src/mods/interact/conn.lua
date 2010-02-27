@@ -51,13 +51,15 @@ end
 function InteractConnection:cmd_expr()
 	local expr = self:read_data()
 	task.start(function ()
-		local ok, result = userprgm.interact(expr)
+		local ok, resultstr = userprgm.interact(expr)
+		
 		if ok then
 			self:write_line("RESULT")
 		else
 			self:write_line("ERROR")
 		end
-		self:write_data(result)
+
+		self:write_data(resultstr)
 	end, "interact eval", "cstack")
 end
 

@@ -2,6 +2,7 @@ local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
 local table = require "table"
 local os = require "os"
+local debug = require "debug"
 
 -- Predeclares
 
@@ -101,17 +102,20 @@ function is_interact_module_loaded()
 	return interact_mod_loaded, interact_mod_errmsg
 end
 
+local interact_traceback
+
 function interact(expr)
+	local stacktrace = false
+	if expr:match("^:t ") then
+		stacktrace = true
+		expr = expr:sub(4)
+	end
+
 	-- compile as both a bare chunk and as an expression to be returned
 	local chunk, err = loadstring(expr, "=chunk") 
 	local exprchunk = loadstring("return " .. expr, "=expr")
 	
-	local printnil -- whether to print a nil value
-	if chunk then -- if we compiled as a chunk
-		printnil = false -- don't print a nil
-	else
-		printnil = true
-	end
+	local printdone = chunk ~= nil -- print done if we compiled as a chunk
 	
 	if exprchunk then -- if we're able to compile as an expression
 		chunk = exprchunk -- evaluate the expression version to get a return value
@@ -122,27 +126,49 @@ function interact(expr)
 	end
 	
 	setfenv(chunk, interact_mod)
-	local ok, result = pcall(chunk)
+	local resulttable 
+	if stacktrace then
+		resulttable = { xpcall(chunk, interact_traceback) }
+	else
+		resulttable = { pcall(chunk) }
+	end
+	local ok = resulttable[1]
 	if not ok then
-		return false, result
+		return false, resulttable[2]
 	end
 	
-	local resulttype = type(result)
 	local resultstr
-	
-	if resulttype == "string" then
-		resultstr = "\"" .. result .. "\""
-	elseif resulttype == "nil" then
-		if printnil then
-			resultstr = "nil"
-		else
-			resultstr = "Done"
-		end
+	if printdone and #resulttable == 1 then
+		resultstr = "Done"
 	else
-		resultstr = tostring(result)
+		local resultparts = { }
+		for i=2, #resulttable do
+			local result = resulttable[i]
+			local resultpart
+			
+			if type(result) == "string" then
+				resultpart = "\"" .. result .. "\""
+			else
+				resultpart = tostring(result)
+			end
+			
+			table.insert(resultparts, resultpart)
+		end
+		
+		resultstr = table.concat(resultparts, ", ")
 	end
 	
 	return true, resultstr
+end
+
+function interact_traceback(msg)
+	local traceback = debug.traceback(msg, 3)
+	local lines = { }
+	for line in traceback:gmatch("(.-)\n") do
+		table.insert(lines, line)
+	end
+	
+	return table.concat(lines, "\n", 1, #lines-2)
 end
 
 -- 

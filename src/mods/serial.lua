@@ -21,7 +21,6 @@ function SerialPort:construct()
 	self.readbuf = ""
 	self.rx = assert(io.open("/dev/uart1", "rb"), "failed to open uart1 for reading") -- open read write so that we never get EOFS since we 
 	self.tx = assert(io.open("/dev/uart1", "wb"), "failed to open uart1 for writing")
-	self.rx:setvbuf("no")
 	self.tx:setvbuf("no")
 	self.readsig = task.Signal()
 	self.readtask = task.start(util.bind(self, "read_task"), "serial read")
@@ -101,6 +100,6 @@ function SerialPort:read_task()
 	while true do
 		task.sleep_io(self.rx)
 		self.readbuf = self.readbuf .. rawio.read(self.rx)
-		self.readsig:notify()
+		self.readsig:notify_all()
 	end
 end

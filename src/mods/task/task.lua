@@ -136,10 +136,13 @@ function Task:suspend()
 end
 
 function Task:resume()
-	if self.state ~= "suspended" then
-		error("Can't resume task that isn't suspended!", 2)
+	if self.state ~= "suspended" and self.state ~= "sleep" then
+		error("Can't resume task that isn't suspended or sleeping!", 2)
 	end
 	
+	if self.state == "sleep" then
+		self.waketime = nil
+	end
 	self:set_state("active")
 	sched.add_active_task(self)
 end
@@ -206,7 +209,7 @@ function Task:sched_wakeup()
 end
 
 function Task:sched_wakeup_io()
-	assert(self.state == "sleepio", "Sched can't wake-io up non-iosleeping Task!")
+	assert(self.state == "sleepio", "Sched can't wake-io a non-iosleeping Task!")
 	
 	self:set_state("active")
 	self.wakeio = nil

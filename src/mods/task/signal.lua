@@ -1,4 +1,5 @@
 local sched = require "cbclua.task.sched"
+local timer = require "cbclua.timer"
 local table = require "table"
 
 Signal = create_class "Signal"
@@ -29,27 +30,36 @@ function Signal:notify_all()
 	self.wakelist = { }
 end
 
-function Signal:wait()
+function Signal:wait(timeout)
 	local curtask = sched.get_current_task()
 	table.insert(self.wakelist, curtask)
 	curtask:add_task_observer(self)
-	curtask:suspend()
+	
+	if timeout then
+		curtask:sleep(timeout)
+	else
+		curtask:suspend()
+	end
 end
 
 -- TaskObserver Callback
 
-function Signal:tasksobserver_state_changed(task, state, prevstate)
-	assert(prevstate == "suspended", "Notified from task not suspended?")
-	
+local debug = require "debug"
+
+function Signal:taskobserver_state_changed(task, state, prevstate)
+	if state ~= "active" then
+		return
+	end
+
 	local pos=1
-	while pos <= #self.waitlist do
-		if self.waitlist[pos] == task then
+	while pos <= #self.wakelist do
+		if self.wakelist[pos] == task then
 			break
 		end
 	end
 	
-	assert(pos <= #self.waitlist, "Notified from task not on waitlist?")
-	table.remove(self.waitlist, pos)
+	assert(pos <= #self.wakelist, "Notified from task not on wakelist?")
+	table.remove(self.wakelist, pos)
 	return false -- don't need any more notifications
 end
 

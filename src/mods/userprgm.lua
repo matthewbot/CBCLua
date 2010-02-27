@@ -117,7 +117,10 @@ function interact(expr)
 
 	-- compile as both a bare chunk and as an expression to be returned
 	local chunk, err = loadstring(expr, "=chunk") 
-	local exprchunk = loadstring("return " .. expr, "=expr")
+	local exprchunk 
+	if not expr:match("^import") then -- hack for import statements to work correctly
+		exprchunk = loadstring("return " .. expr, "=expr")
+	end
 	
 	local printdone = chunk ~= nil -- print done if we compiled as a chunk
 	

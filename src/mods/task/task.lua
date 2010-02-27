@@ -124,7 +124,7 @@ end
 
 function Task:suspend()
 	if self.state ~= "active" then
-		error("Can't suspend inactive task!", 2)
+		error("Can't suspend inactive task '" .. self.name .. "'! (state is " .. self.state .. ")", 2)
 	end
 	
 	self:set_state("suspended")
@@ -137,7 +137,7 @@ end
 
 function Task:resume()
 	if self.state ~= "suspended" and self.state ~= "sleep" then
-		error("Can't resume task that isn't suspended or sleeping!", 2)
+		error("Can't resume task '" .. self.name .. "' that isn't suspended or sleeping! (state is " .. self.state .. ")", 2)
 	end
 	
 	if self.state == "sleep" then

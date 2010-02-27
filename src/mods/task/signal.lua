@@ -49,7 +49,7 @@ end
 local debug = require "debug"
 
 function Signal:taskobserver_state_changed(task, state, prevstate)
-	if state ~= "active" then
+	if not (state == "active" or state == "stopped") then -- we only care if the task becomes active or is stopped
 		return true
 	end
 
@@ -58,6 +58,7 @@ function Signal:taskobserver_state_changed(task, state, prevstate)
 		if self.wakelist[pos] == task then
 			break
 		end
+		pos = pos + 1
 	end
 	
 	assert(pos <= #self.wakelist, "Notified from task not on wakelist?")

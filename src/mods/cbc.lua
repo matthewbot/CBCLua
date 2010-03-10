@@ -47,10 +47,10 @@ function AnalogSensor:read()
 end
 
 for i=0,7 do
-	sensors[i] = DigitalSensor(i)
+	sensors[i] = AnalogSensor(i)
 end
 for i=8,15 do
-	sensors[i] = AnalogSensor(i)
+	sensors[i] = DigitalSensor(i)
 end
 
 --[[ Motors ]]--

@@ -11,6 +11,7 @@ class CBCConnection(threading.Thread):
 		self.daemon = True
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+		self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 		self.sockbuf = ""
 		self.callbacks = callbacks
 		self.ip = ip

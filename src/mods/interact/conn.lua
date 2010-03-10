@@ -20,6 +20,8 @@ end
 
 function InteractConnection:init()
 	self.sock:settimeout(0)
+	self.sock:setoption('reuseaddr', true)
+	self.sock:setoption('tcp-nodelay', true)
 	self:write_line(cbclua_get_name())
 	self:write_line(cbclua_get_version())
 end	

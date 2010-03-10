@@ -121,6 +121,12 @@ class ShellFrame(wx.Frame):
 				self.input.ChangeValue(self.history[self.history_pos])
 			self.input.SetInsertionPointEnd()
 			return
+		elif keycode == ord('R') and keyevent.ControlDown():
+			self.callbacks.on_shell_reload()
+			return
+		elif keycode == ord('S') and keyevent.ControlDown():
+			self.callbacks.on_shell_stop()
+			return
 				
 		keyevent.Skip()
 			

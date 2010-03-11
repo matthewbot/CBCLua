@@ -1,4 +1,5 @@
 local taskmod = require "cbclua.task.task"
+local sched = require "cbclua.task.sched"
 local timer = require "cbclua.timer"
 local math = require "math"
 import "cbclua.task.control"
@@ -86,8 +87,16 @@ function timeout(timeout, func)
 end
 
 function stop_all_user_tasks()
+	local curtask = sched.get_current_task()
+
 	for task in taskmod.user_tasks() do
-		task:stop()
+		if task ~= curtask then
+			task:stop()
+		end
+	end
+	
+	if not curtask:is_system() then
+		curtask:stop()
 	end
 end
 

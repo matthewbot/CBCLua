@@ -61,8 +61,9 @@ function stop(who)
 		pcall(hook, who)
 	end
 	
-	task.stop_all_user_tasks()
 	cbc.stop()
+	task.stop_all_user_tasks()
+
 	return true
 end
 

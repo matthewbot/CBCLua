@@ -160,10 +160,3 @@ end
 for i=0,3 do 
 	channels[i] = Channel(i)
 end
-
--- CBC performance tweak
-
-local cbc = require "cbclua.cbc"
-
-cbc.set_proc("/sys/class/video4linux/video0/auto_exposure", 0)
-cbc.set_proc("/sys/class/video4linux/video0/exposure", 1)

@@ -199,7 +199,7 @@ function set_proc(file, val)
 		return
 	end
 	
-	local file = io.open(file, "w")
+	local file = assert(io.open(file, "w"), "Failed to open proc '" .. file .. "'")
 	file:write(val, "\n")
 	file:close()
 end

@@ -1,11 +1,9 @@
-local util = require "std.util"
-local cbc = require "std.cbc"
-local timer = require "std.timer"
-local task = require "std.task"
+local util = require "cbclua.util"
+local cbc = require "cbclua.cbc"
+local timer = require "cbclua.timer"
+local task = require "cbclua.task"
 local io = require "io"
 local os = require "os"
-
-import "std.log"
 
 -- Private state
 
@@ -43,18 +41,12 @@ function start(light_sensor, time)
 	if option == "light" then
 		wait_for_light(light_sensor)
 	else
-		if util.on_cbc_console() then
-			print("Starting light skipped, starting in 3 seconds")
-			task.sleep(3)
-		else
-			util.prompt("Starting signal")
-		end
+		util.wait_continue("Starting!")
 	end
 	
 	print("Match started")
 	start_time = timer.seconds()
-	set_time_func(get_game_time) -- this makes the logging system report the time in game time
-	task.start(shutdown_task, "shutdown task", true)
+	task.start(shutdown_task, "shutdown task")
 end
 
 -- Helpers

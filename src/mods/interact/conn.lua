@@ -125,6 +125,8 @@ end
 function InteractConnection:cmd_reset()
 	userprgm.reset()
 	self:verify_interaction()
+	os.execute("sync")
+	collectgarbage("collect")
 end
 
 function InteractConnection:verify_interaction()

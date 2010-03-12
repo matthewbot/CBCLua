@@ -146,8 +146,12 @@ function interact(expr)
 	end
 	
 	local resultstr
-	if printdone and #resulttable == 1 then
-		resultstr = "Done"
+	if #resulttable == 1 then
+		if printdone then
+			resultstr = "Done"
+		else
+			resultstr = "nil"
+		end
 	else
 		local resultparts = { }
 		for i=2, #resulttable do

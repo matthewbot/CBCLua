@@ -185,6 +185,12 @@ function interact_traceback(msg)
 	return table.concat(lines, "\n", 1, #lines-2)
 end
 
+-- USB loading
+
+function usb_load()
+	print("Loading code from USB")
+end
+
 -- 
 
 function os.exit()

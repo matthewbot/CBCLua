@@ -4,12 +4,18 @@ local userprgm = require "cbclua.userprgm"
 
 local function console_task()
 	while true do
-		cbc.black_button:wait()
+		task.wait(cbc.black_button)
+		local released = task.wait_while(cbc.black_button, 1.0)
 		
-		if not userprgm.is_running() then
-			userprgm.run()
+		if released then
+			if not userprgm.is_running() then
+				userprgm.run()
+			else
+				userprgm.stop("console")
+			end
 		else
-			userprgm.stop("console")
+			userprgm.usb_load()
+			task.wait_while(cbc.black_button)
 		end
 	end
 end

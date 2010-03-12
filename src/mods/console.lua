@@ -14,7 +14,7 @@ local function console_task()
 				userprgm.stop("console")
 			end
 		else
-			userprgm.usb_load()
+			userprgm.usb_load_verbose()
 			task.wait_while(cbc.black_button)
 		end
 	end

@@ -227,9 +227,26 @@ function usb_load()
 		return false, "Failed to unmount usb drive"
 	end
 	
-	return true
+	return true, "Loaded " .. load_path
 end
 
+function usb_load_verbose()
+	print("<<< Loading program from USB >>>")
+	local ok, msg = usb_load()
+	if ok then
+		if msg then
+			print("<<< " .. msg .. " >>>")
+		else
+			print("<<< Program loaded! >>>")
+		end
+	else
+		print("!!! Program failed to load !!!")
+		
+		if msg then
+			print("!!! " .. msg .. " !!!")
+		end
+	end
+end
 -- 
 
 function os.exit()

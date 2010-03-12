@@ -2,6 +2,7 @@ local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
 local table = require "table"
 local os = require "os"
+local io = require "io"
 local debug = require "debug"
 
 -- Predeclares
@@ -187,8 +188,46 @@ end
 
 -- USB loading
 
+local mount_usb_script = "/mnt/kiss/usercode/mount-usb"
+local unmount_usb_script = "/mnt/kiss/usercode/umount-usb"
+local usb_path = "/mnt/browser/usb/"
+
 function usb_load()
-	print("Loading code from USB")
+	if cbclua_get_host() ~= "chumby" then
+		error("user_load() only implemented on chumby", 2)
+	end
+
+	if os.execute(mount_usb_script) ~= 0 then
+		return false, "Failed to mount USB"
+	end
+	
+	local usbload = io.open(usb_path .. "usbload.txt", "r")
+	if not usbload then
+		os.execute(unmount_usb_script)
+		return false, "Missing usbload.txt"
+	end
+	
+	local load_path = usbload:read()
+	usbload:close()
+	local code_path = cbclua_get_codepath()
+	
+	if os.execute("rm -rf " .. code_path) ~= 0 then
+		os.execute(unmount_usb_script)
+		return false, "Failed to remove old code"
+	end
+	
+	if os.execute("cp -r " .. usb_path .. load_path .. " " .. code_path) ~= 0 then
+		os.execute(unmount_usb_script)
+		return false, "Failed to copy loadpath (" .. load_path .. ") to code directory"
+	end
+	
+	os.execute("sync")
+	
+	if os.execute(unmount_usb_script) ~= 0 then
+		return false, "Failed to unmount usb drive"
+	end
+	
+	return true
 end
 
 -- 

@@ -45,9 +45,3 @@ void watchdog_disable() {
     watchdog_enabled = false;
 }
 
-void watchdog_yield() {
-	watchdog_disable();
-	sched_yield();
-	watchdog();
-}
-

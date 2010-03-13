@@ -3,7 +3,5 @@
 
 void watchdog(); // sets the watchdog time
 void watchdog_disable();
-void watchdog_yield();
-
 
 #endif

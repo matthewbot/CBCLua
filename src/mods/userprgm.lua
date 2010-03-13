@@ -1,5 +1,6 @@
 local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
+local timer = require "cbclua.timer"
 local table = require "table"
 local os = require "os"
 local io = require "io"
@@ -196,6 +197,8 @@ function usb_load()
 	if cbclua_get_host() ~= "chumby" then
 		error("user_load() only implemented on chumby", 2)
 	end
+	
+	timer.watchdog_disable() -- remove stall warning
 
 	if os.execute(mount_usb_script) ~= 0 then
 		return false, "Failed to mount USB"

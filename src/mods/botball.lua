@@ -31,14 +31,18 @@ function get_game_time_remaining()
 end
 
 function start(light_sensor, time)
-	match_length = time or 120
+	match_length = time or 110
 
+	print("Starting options")
 	local option = util.menu{
-		["Use starting light"] = "light",
+		["Quick starting light"] = "quick",
+		["Manual starting light"] = "manual",
 		["Run immediately"] = "run"
 	}
 	
-	if option == "light" then
+	if option == "quick" then
+		wait_for_light_fast(light_sensor)
+	elseif option == "manual" then
 		wait_for_light(light_sensor)
 	else
 		util.wait_continue("Starting!")
@@ -51,15 +55,35 @@ end
 
 -- Helpers
 
+function wait_for_light_fast(light)
+	local THRESH = 500
+	
+	print("Turn light on")
+	
+	task.wait(function () return light() < THRESH end)
+	
+	print("Light ok, press A for hands off")
+	while true do
+		cbc.a_button:wait()
+		if light() > THRESH then
+			break
+		end
+		print("Light still on! Press A for hands off")
+	end
+	print("Waiting!")
+	
+	task.wait(function () return light() < THRESH end)
+end
+
 function wait_for_light(light)
 	print("Beginning light calibration")
 	
-	util.prompt("Turn light on")
+	util.wait_continue("Turn light on")
 	
 	local on = light:read()
 	print("Light on: " .. on)
 	
-	util.prompt("Turn light off")
+	util.wait_continue("Turn light off")
 	
 	local off = light:read()
 	print("Light off: " .. off)

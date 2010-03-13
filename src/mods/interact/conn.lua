@@ -3,6 +3,7 @@ local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"
 local userprgm = require "cbclua.userprgm"
 local util = require "cbclua.util"
+local timer = require "cbclua.timer"
 local os = require "os"
 local io = require "io"
 import "cbclua.interact.config"
@@ -44,6 +45,8 @@ function InteractConnection:run()
 			self:write_line("ERROR")
 			self:write_data("Bad command " .. command)
 		end
+		
+		task.yield()
 	end
 		
 	self.sock:close()
@@ -125,6 +128,7 @@ end
 function InteractConnection:cmd_reset()
 	userprgm.reset()
 	self:verify_interaction()
+	timer.watchdog_disable()
 	os.execute("sync")
 	collectgarbage("collect")
 end

@@ -1,4 +1,4 @@
-local version = "CBCLua 2 v0.96"
+local version = "CBCLua 2 v1.00"
 local codepath = os.getenv("CBCLUA_CODEPATH")
 local modpath = os.getenv("CBCLUA_MODSPATH")
 local name_filename = os.getenv("CBCLUA_NAME_FILE")

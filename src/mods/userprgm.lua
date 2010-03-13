@@ -81,6 +81,10 @@ local interact_mod
 local interact_mod_loaded
 local interact_mod_errmsg
 
+function load_interaction()
+	reset_interaction()
+end
+
 function reset_interaction()
 	interact_mod = { }
 	cbclua_make_module(interact_mod)
@@ -100,8 +104,6 @@ function reset_interaction()
 		interact_mod_errmsg = nil
 	end
 end
-
-reset_interaction()
 
 function is_interact_module_loaded()
 	return interact_mod_loaded, interact_mod_errmsg

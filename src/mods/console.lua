@@ -9,12 +9,25 @@ local function console_task()
 		
 		if released then
 			if not userprgm.is_running() then
-				userprgm.run()
+				local ok, msg = userprgm.run()
+				
+				if not ok then
+					print("!!! Failed to run main !!!")
+					print(msg)
+				end
 			else
 				userprgm.stop("console")
 			end
 		else
 			userprgm.usb_load_verbose()
+			
+			local ok, msg = userprgm.is_interact_module_loaded()
+			
+			if not ok and msg then
+				print("!!! Error while loading interaction module !!!")
+				print(msg)
+			end
+			
 			task.wait_while(cbc.black_button)
 		end
 	end

@@ -21,7 +21,7 @@ $(cbc-modules):
 
 .PHONY: clean	
 clean:
-	rm -rf build local/cmods/* cbclua/cmods/* cbclua/lua src/lua-5.1.4-arm/*.o src/luasocket-2.0.2-arm/src/*.o
+	rm -rf build local/cmods/* cbclua/cmods/* cbclua/lua src/lua-5.1.4-arm/*.o src/luasocket-2.0.2-arm/src/*.o doc
 	
 .PHONY: usbinstall
 usbinstall: cbc
@@ -31,6 +31,11 @@ usbinstall: cbc
 .PHONY: wifiinstall
 wifiinstall: cbc
 	./wifiinstall.sh
+	
+.PHONY: doc
+doc:
+	rm -rf doc
+	luadoc --nofiles -d doc/cbclua src/mods
 	
 .PHONY: cbc-lua-binary
 cbc-lua-binary:

@@ -6,6 +6,7 @@ Requirements
 ------------
 * Lua 5.1.4
 * LuaSocket
+* LuaDoc
 * Python
 * WxPython
 * [Chumby Toolchain][]
@@ -15,6 +16,7 @@ Building
 --------
 
 	make             # builds a local install at local/
+	make doc         # generates documentation in doc/
 	make usbinstall  # builds a cbc install at cbclua/, then packages it into a usb installer inside usbinstall/
 	make wifiinstall # builds a cbc install at cbclua/, then copies it via ssh to a networked cbc
 

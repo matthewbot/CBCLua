@@ -1,3 +1,4 @@
+--- Botball starting light and timing utilities
 module("cbclua.botball")
 
 local util = require "cbclua.util"
@@ -20,18 +21,26 @@ local assert_match_start
 
 -- Functions
 
+--- Gets the current game time
+-- @return the number of seconds since the match started
 function get_game_time()
 	assert_match_start()
 	
 	return timer.seconds() - start_time
 end
 
+--- Gets the amount of game time remaining
+-- @return number of seconds till the game ends
 function get_game_time_remaining()
 	assert_match_start()
 
 	return match_length - game_game_time()
 end
 
+--- Botball game starting function
+-- Handles the starting light as well as the shutdown timing
+-- @param light_sensor a sensor object to use as the starting light
+-- @param time the amount of time before the match terminates. Defaults to 110.
 function start(light_sensor, time)
 	match_length = time or 110
 

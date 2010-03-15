@@ -1,3 +1,5 @@
+module("cbclua.interact.tasks")
+
 local socket = require "socket"
 local task = require "cbclua.task"
 local connlist = require "cbclua.interact.connlist"

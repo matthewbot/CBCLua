@@ -1,3 +1,5 @@
+module("cbclua.vision")
+
 local task = require "cbclua.task"
 local util = require "cbclua.util"
 local raw = require "cbclua.rawcbc"

@@ -1,3 +1,5 @@
+module("cbclua.task.control")
+
 local sched = require "cbclua.task.sched"
 
 function sleep(amt)

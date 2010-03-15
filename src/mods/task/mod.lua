@@ -1,3 +1,5 @@
+module("cbclua.task")
+
 export "cbclua.task.task"
 export "cbclua.task.signal"
 export "cbclua.task.util"

@@ -1,3 +1,5 @@
+module("cbclua.interact.hooks")
+
 local connlist = require "cbclua.interact.connlist"
 local cbc = require "cbclua.cbc"
 local table = require "table"

@@ -1,3 +1,5 @@
+module("cbclua.botball")
+
 local util = require "cbclua.util"
 local cbc = require "cbclua.cbc"
 local timer = require "cbclua.timer"

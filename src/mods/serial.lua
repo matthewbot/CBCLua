@@ -1,3 +1,5 @@
+module("cbclua.serial")
+
 local task = require 'cbclua.task'
 local timer = require 'cbclua.timer'
 local util = require 'cbclua.util'

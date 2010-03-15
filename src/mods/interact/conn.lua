@@ -1,3 +1,5 @@
+module("cbclua.interact.conn")
+
 local task = require "cbclua.task"
 local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"

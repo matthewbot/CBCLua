@@ -1,3 +1,5 @@
+module("cbclua.bit")
+
 local string = require "string"
 local math = require "math"
 

@@ -1,3 +1,5 @@
+module("cbclua.task.task")
+
 local sched = require "cbclua.task.sched"
 local timer = require "cbclua.timer"
 local coroutine = require "coroutine"

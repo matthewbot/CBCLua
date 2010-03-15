@@ -1,3 +1,5 @@
+module("cbclua.task.util")
+
 local taskmod = require "cbclua.task.task"
 local sched = require "cbclua.task.sched"
 local timer = require "cbclua.timer"

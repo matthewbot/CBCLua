@@ -1,3 +1,5 @@
+module("cbclua.interact")
+
 local task = require "cbclua.task"
 local tasks = require "cbclua.interact.tasks"
 local userprgm = require "cbclua.userprgm"

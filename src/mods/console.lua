@@ -1,3 +1,5 @@
+module("cbclua.console")
+
 local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
 local userprgm = require "cbclua.userprgm"

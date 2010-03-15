@@ -1,3 +1,5 @@
+module("cbclua.cbc")
+
 local raw = require "cbclua.rawcbc"
 local task = require "cbclua.task"
 local io = require "io"

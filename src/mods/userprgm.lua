@@ -1,3 +1,5 @@
+module("cbclua.userprgm")
+
 local task = require "cbclua.task"
 local cbc = require "cbclua.cbc"
 local timer = require "cbclua.timer"

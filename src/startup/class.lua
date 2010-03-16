@@ -15,7 +15,7 @@ function create_class(name, ...)
 	end
 	
 	class.name = name
-	class.mixins = {...}
+	class.supers = {...}
 	class.methods = { }
 	setmetatable(class, class_mt)
 	
@@ -53,8 +53,8 @@ local function find_method(class, methname)
 		return meth
 	end
 	
-	for _,mixinclass in ipairs(class.mixins) do
-		meth = find_method(mixinclass, methname)
+	for _,super in ipairs(class.supers) do
+		meth = find_method(super, methname)
 		if meth then
 			return meth
 		end
@@ -106,13 +106,15 @@ function is_a(obj, class)
 	return is_baseclass(class, obj.class)
 end
 
-function is_baseclass(baseclass, curclass)
-	if baseclass == curclass then
+function is_subclass(class, super)
+	-- see if we're the same class
+	if class == super then 
 		return true
 	end
 		
-	for _, nextclass in ipairs(curclass.mixins) do
-		if is_baseclass(baseclass, nextclass) then
+	-- otherwise, see if any of our superclasses are subclasses of super
+	for _, class_super in ipairs(class.supers) do
+		if is_baseclass(class_super, super) then
 			return true
 		end
 	end

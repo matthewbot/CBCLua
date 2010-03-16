@@ -20,6 +20,10 @@ function SensorBase:__call()
 end
 
 function SensorBase:read()
+	return self:read_raw()
+end
+
+function SensorBase:read_raw()
 	error("Abstract")
 end
 
@@ -32,7 +36,7 @@ function DigitalSensor:construct(num)
 	self.num = num
 end
 
-function DigitalSensor:read()
+function DigitalSensor:read_raw()
 	return raw.digital(self.num)
 end
 
@@ -42,7 +46,7 @@ function AnalogSensor:construct(num)
 	self.num = num
 end
 
-function AnalogSensor:read()
+function AnalogSensor:read_raw()
 	return raw.analog10(self.num)
 end
 

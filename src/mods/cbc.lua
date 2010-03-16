@@ -3,13 +3,6 @@ local task = require "cbclua.task"
 local io = require "io"
 local math = require "math"
 
---[[ Globals ]]--
-
-motors = { }
-sensors = { }
-servos = { }
-buttons = { } -- buttons are also stored as globals (buttons["left"] == left_button)
-
 --[[ SensorBase ]]--
 -- Base class for any kind of sensor-looking thing
 
@@ -50,13 +43,6 @@ function AnalogSensor:read_raw()
 	return raw.analog10(self.num)
 end
 
-for i=0,7 do
-	sensors[i] = AnalogSensor(i)
-end
-for i=8,15 do
-	sensors[i] = DigitalSensor(i)
-end
-
 --[[ Motors ]]--
 
 Motor = create_class "Motor"
@@ -89,10 +75,6 @@ Motor.getpos = make_motor_wrapper("get_motor_position_counter")
 Motor.clearpos = make_motor_wrapper("clear_motor_position_counter")
 Motor.getdone = make_motor_wrapper("get_motor_done")
 
-for i=0,3 do
-	motors[i] = Motor(i)
-end
-
 --[[ Servos ]]--
 
 Servo = create_class "Servo"
@@ -115,10 +97,6 @@ end
 
 function Servo:getpos()
 	return raw.get_servo_position(self.num)
-end
-
-for i=0,3 do
-	servos[i] = Servo(i)
 end
 
 enable_servos = raw.enable_servos
@@ -159,12 +137,6 @@ function Button:getLetter()
 	return self.name:sub(1,1):upper()
 end
 
-for _,name in pairs{"black", "up", "down", "left", "right", "a", "b"} do
-	local button = Button(name)
-	_M[name .. "_button"] = button
-	buttons[name] = button
-end
-
 --[[ Misc ]]--
 power_level = raw.power_level
 display_clear = raw.display_clear
@@ -172,10 +144,10 @@ beep = raw.beep
 
 function stop()
 	for i=0,3 do
-		motors[i]:off()
+		raw.off(i)
 	end
 	
-	disable_servos()
+	raw.disable_servos()
 end
 
 --[[ Control functions ]]--

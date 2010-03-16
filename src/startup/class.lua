@@ -44,7 +44,7 @@ function class_mt.__newindex(class, key, value)
 end
 
 function class_mt.__index(class, key)
-	return class.methods[key]
+	return find_method(class, key)
 end
 
 local find_method
@@ -106,43 +106,6 @@ local mmnames = { 'add', 'sub', 'mul', 'div', 'mod', 'pow', 'unm', 'concat', 'le
 for _,mmname in pairs(mmnames) do
 	mmname = "__" .. mmname
 	inst_mt[mmname] = make_metamethod(mmname)
-end
-
--- Make a super table
-
-local findlocal
-
-super = { }
-local super_mt = { }
-setmetatable(super, super_mt)
-
-function super_mt.__index(super, methname)
-	local self = findlocal(2, "self")
-	if self == nil then
-		error("Cannot refer to super outside of a method!", 2)
-	end
-	
-	local meth = find_method_mixins(self.class, methname)
-	if meth == nil then
-		error("No superclass of class " .. self.class.name .. " contains a method named " .. methname)
-	end
-	
-	return function (super, ...) -- return a thunk closure
-		return meth(self, ...) -- that replaces the 'self' arg from the useless super table to the actual self object
-	end
-end
-	
-function findlocal(depth, name)
-	local count = 1
-	while true do
-		local curname, curvalue = debug.getlocal(depth+1, count)
-		if curname == name then
-			return curvalue
-		elseif not curname then
-			return nil
-		end
-		count = count + 1
-	end
 end
 
 function is_a(obj, class)

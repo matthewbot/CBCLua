@@ -47,24 +47,18 @@ function class_mt.__index(class, key)
 	return find_method(class, key)
 end
 
-local find_method
-
-local function find_method_mixins(class, methname)
+local function find_method(class, methname)
+	local meth = class.methods[methname]
+	if meth then
+		return meth
+	end
+	
 	for _,mixinclass in ipairs(class.mixins) do
 		meth = find_method(mixinclass, methname)
 		if meth then
 			return meth
 		end
 	end
-end
-
-function find_method(class, methname)
-	local meth = class.methods[methname]
-	if meth then
-		return meth
-	end
-	
-	return find_method_mixins(class, methname)
 end
 
 function inst_mt.__index(inst, key)

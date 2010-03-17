@@ -5,7 +5,6 @@ local math = require "math"
 local os = require "os"
 
 image_width, image_height = 160, 120
-channels = { }
 
 -- Public Functions
 
@@ -29,8 +28,7 @@ end
 
 -- Channel and Blob
 
-local Channel = create_class "Channel"
-local Blob = create_class "Blob"
+Channel = create_class "Channel"
 
 function Channel:construct(num)
 	self.num = num
@@ -77,6 +75,8 @@ function Channel:find(pred)
 		end
 	end
 end
+
+Blob = create_class "Blob"
 
 function Blob:construct(num, chan)
 	self.num = num
@@ -155,8 +155,4 @@ function Blob:vert_dist_to(other)
 	else
 		return dist
 	end
-end
-
-for i=0,3 do 
-	channels[i] = Channel(i)
 end

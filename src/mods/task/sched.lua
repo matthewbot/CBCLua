@@ -2,6 +2,7 @@ module("cbclua.task.sched")
 
 local timer = require "cbclua.timer"
 local table = require "table"
+local list = require "list"
 
 local current_task = nil
 
@@ -16,17 +17,6 @@ local active_list_nextpos = 1
 local sleep_list = { } -- TaskEntrys currently sleeping, ordered by wake up time
 local io_list = { } -- TaskEntrys currently waiting on IO
 
-local function search_list(list, val)
-	local pos=1
-	while pos <= #list do
-		if list[pos] == val then
-			return pos
-		else
-			pos = pos + 1
-		end
-	end
-end
-
 function add_active_task(task)
 	table.insert(active_list, task)
 end
@@ -34,7 +24,7 @@ end
 local debug = require "debug"
 
 function remove_active_task(task, noerr)
-	local pos = search_list(active_list, task)
+	local pos = table.findvalue(active_list, task)
 
 	if not noerr then
 		assert(pos, "Can't remove task that isn't active!")
@@ -65,7 +55,7 @@ function add_sleep_task(task)
 end
 
 function remove_sleep_task(task)
-	local pos = assert(search_list(sleep_list, task), "Can't remove task that isn't sleeping!")
+	local pos = assert(table.findvalue(sleep_list, task), "Can't remove task that isn't sleeping!")
 	
 	table.remove(sleep_list, pos)
 end
@@ -76,7 +66,7 @@ function add_io_task(task)
 end
 
 function remove_io_task(task)
-	local pos = assert(search_list(io_list, task), "Can't remove task that isn't blocking on IO!")
+	local pos = assert(table.findvalue(io_list, task), "Can't remove task that isn't blocking on IO!")
 	
 	table.remove(io_list, pos)
 end
@@ -148,10 +138,7 @@ function run_active_tasks()
 end
 
 function block_io(sleepamt)
-	local files = { }
-	for i,iotask in ipairs(io_list) do
-		files[i] = iotask.wakeio
-	end
+	local files = list.project("wakeio", io_list)
 
 	local wakeflags = { timer.sleep_select(sleepamt, unpack(files)) }
 	
@@ -162,7 +149,7 @@ function block_io(sleepamt)
 		end
 	end
 	
-	for _,waketask in ipairs(waketasks) do
+	for waketask in list.elems(waketasks) do
 		remove_io_task(waketask)
 		waketask:sched_wakeup_io()
 	end

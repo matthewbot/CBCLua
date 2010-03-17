@@ -4,6 +4,7 @@ local sched = require "cbclua.task.sched"
 local timer = require "cbclua.timer"
 local coroutine = require "coroutine"
 local debug = require "debug"
+local set = require "set"
 
 Task = create_class("Task", sched.TaskEntry)
 
@@ -13,11 +14,11 @@ local user_task_set = setmetatable({ }, {__mode="k"})
 local all_task_set = setmetatable({ }, {__mode="k"})
 
 function user_tasks()
-	return pairs(user_task_set)
+	return set.elements(user_task_set)
 end
 
 function all_tasks()
-	return pairs(all_task_set)
+	return set.elements(all_task_set)
 end
 
 local next_task_id = 1
@@ -40,7 +41,7 @@ function Task:construct(func, name, typestr)
 	end
 	
 	self.state = "stopped"
-	self.stateobservers = { }
+	self.stateobservers = set.new{}
 end
 
 function Task:get_id()
@@ -73,11 +74,11 @@ end
 function Task:notify_task_observers(prevstate)
 	local state = self.state
 	
-	local new_stateobservers = { } -- could be more efficient, data structure library would help here too
-	for observer, _ in pairs(self.stateobservers) do
+	local new_stateobservers = set.new{}
+	for observer in set.elements(self.stateobservers) do
 		local keep = observer:taskobserver_state_changed(self, state, prevstate)
 		if keep then
-			new_stateobservers[observer] = true
+			set.insert(new_stateobservers, observer)
 		end
 	end
 	
@@ -85,11 +86,11 @@ function Task:notify_task_observers(prevstate)
 end
 
 function Task:add_task_observer(observer)
-	self.stateobservers[observer] = true
+	set.insert(self.stateobservers, observer)
 end
 
 function Task:remove_task_observer(observer)
-	self.stateobservers[observer] = nil
+	set.remove(self.stateobservers, observer)
 end
 
 function Task:get_error()

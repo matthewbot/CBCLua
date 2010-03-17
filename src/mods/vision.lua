@@ -70,7 +70,7 @@ end
 
 function Channel:find(pred)
 	for i=1,self:get_count() do
-		local blob = self:get_blob()
+		local blob = self:get_blob(i)
 		
 		if pred(blob) then
 			return blob
@@ -112,7 +112,7 @@ function Blob:track_bbox_width_float()
 	return self.bbox_right_float - self.bbox_left_float
 end
 
-local yscale_num = (image_width - 1)/2
+local yscale_num = (image_height - 1)/2
 local function yscale(num)
 	return (num - yscale_num) / yscale_num
 end

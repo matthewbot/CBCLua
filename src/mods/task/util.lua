@@ -1,6 +1,6 @@
 module("cbclua.task.util")
 
-local taskmod = require "cbclua.task.task"
+local entry = require "cbclua.task.entry"
 local sched = require "cbclua.task.sched"
 local timer = require "cbclua.timer"
 local math = require "math"
@@ -12,7 +12,7 @@ function async(func, ...)
 		return func(unpack(args))
 	end
 	
-	local task = taskmod.Task(asyncfunc, "async task", "daemon")
+	local task = entry.TaskEntry(asyncfunc, "async task", "daemon")
 	task:start()
 	return task
 end
@@ -91,7 +91,7 @@ end
 function stop_all_user_tasks()
 	local curtask = sched.get_current_task()
 
-	for task in taskmod.user_tasks() do
+	for task in entry.user_tasks() do
 		if task ~= curtask then
 			task:stop()
 		end

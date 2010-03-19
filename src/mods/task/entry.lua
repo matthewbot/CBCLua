@@ -1,4 +1,4 @@
-module("cbclua.task.task")
+module("cbclua.task.entry")
 
 local sched = require "cbclua.task.sched"
 local timer = require "cbclua.timer"
@@ -6,7 +6,7 @@ local coroutine = require "coroutine"
 local debug = require "debug"
 local set = require "set"
 
-Task = create_class("Task", sched.TaskEntry)
+TaskEntry = create_class("TaskEntry")
 
 -- Task Sets --
 
@@ -22,7 +22,7 @@ function all_tasks()
 end
 
 local next_task_id = 1
-function Task:construct(func, name, typestr)
+function TaskEntry:construct(func, name, typestr)
 	assert(type(func) == "function", "Function argument (2) must be a function!")
 	assert(type(name) == "string", "Name argument (1) must be string!")
 	self.func = func
@@ -44,23 +44,23 @@ function Task:construct(func, name, typestr)
 	self.stateobservers = set.new{}
 end
 
-function Task:get_id()
+function TaskEntry:get_id()
 	return self.id
 end
 
-function Task:get_name()
+function TaskEntry:get_name()
 	return self.name
 end
 
-function Task:get_state()
+function TaskEntry:get_state()
 	return self.state
 end
 
-function Task:is_system()
+function TaskEntry:is_system()
 	return self.system
 end
 
-function Task:set_state(state)
+function TaskEntry:set_state(state)
 	local prevstate = self.state
 	
 	if prevstate == state then
@@ -71,7 +71,7 @@ function Task:set_state(state)
 	self:notify_task_observers(prevstate)
 end
 
-function Task:notify_task_observers(prevstate)
+function TaskEntry:notify_task_observers(prevstate)
 	local state = self.state
 	
 	local new_stateobservers = set.new{}
@@ -85,19 +85,19 @@ function Task:notify_task_observers(prevstate)
 	self.stateobservers = new_stateobservers
 end
 
-function Task:add_task_observer(observer)
+function TaskEntry:add_task_observer(observer)
 	set.insert(self.stateobservers, observer)
 end
 
-function Task:remove_task_observer(observer)
+function TaskEntry:remove_task_observer(observer)
 	set.remove(self.stateobservers, observer)
 end
 
-function Task:get_error()
+function TaskEntry:get_error()
 	return self.errmsg
 end
 
-function Task:start()
+function TaskEntry:start()
 	if self.state ~= "stopped" then
 		return
 	end
@@ -108,7 +108,7 @@ function Task:start()
 	self:set_state("active")
 end
 
-function Task:stop()
+function TaskEntry:stop()
 	if self.state == "active" then
 		sched.remove_active_task(self)
 	elseif self.state == "sleep" then
@@ -125,7 +125,7 @@ function Task:stop()
 	end
 end
 
-function Task:suspend()
+function TaskEntry:suspend()
 	if self.state ~= "active" then
 		error("Can't suspend inactive task '" .. self.name .. "'! (state is " .. self.state .. ")", 2)
 	end
@@ -138,7 +138,7 @@ function Task:suspend()
 	end
 end
 
-function Task:resume()
+function TaskEntry:resume()
 	if self.state ~= "suspended" and self.state ~= "sleep" then
 		error("Can't resume task '" .. self.name .. "' that isn't suspended or sleeping! (state is " .. self.state .. ")", 2)
 	end
@@ -151,11 +151,11 @@ function Task:resume()
 	sched.add_active_task(self)
 end
 	
-function Task:sleep(amt)
+function TaskEntry:sleep(amt)
 	return self:sleep_till(amt + timer.seconds())
 end
 	
-function Task:sleep_till(waketime)
+function TaskEntry:sleep_till(waketime)
 	assert(sched.get_current_task() == self, "Can't sleep a task that isn't the current task!")
 	
 	self.waketime = waketime
@@ -166,7 +166,7 @@ function Task:sleep_till(waketime)
 	return coroutine.yield()
 end
 
-function Task:sleep_io(io)
+function TaskEntry:sleep_io(io)
 	assert(sched.get_current_task() == self, "Can't sleep_io a task that isn't the current task!")
 	
 	self.wakeio = io
@@ -177,7 +177,7 @@ function Task:sleep_io(io)
 	return coroutine.yield()
 end
 
-function Task:yield()
+function TaskEntry:yield()
 	assert(sched.get_current_task() == self, "Can't yield a task that isn't the current task!")
 	
 	return coroutine.yield()
@@ -185,7 +185,7 @@ end
 
 -- scheduler callbacks
 
-function Task:sched_resume()
+function TaskEntry:sched_resume()
 	local co = self.co
 	assert(co and self.state == "active", "Sched can't resume inactive Task!")
 	
@@ -204,7 +204,7 @@ function Task:sched_resume()
 	end
 end
 	
-function Task:sched_wakeup()
+function TaskEntry:sched_wakeup()
 	assert(self.state == "sleep", "Sched can't wake up non-sleeping Task!")
 	
 	self:set_state("active")
@@ -212,7 +212,7 @@ function Task:sched_wakeup()
 	sched.add_active_task(self)
 end
 
-function Task:sched_wakeup_io()
+function TaskEntry:sched_wakeup_io()
 	assert(self.state == "sleepio", "Sched can't wake-io a non-iosleeping Task!")
 	
 	self:set_state("active")

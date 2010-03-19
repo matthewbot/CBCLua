@@ -1,6 +1,7 @@
 module("cbclua.interact.conn")
 
 local task = require "cbclua.task"
+local sched = require "cbclua.sched"
 local rawio = require "cbclua.rawio"
 local cbc = require "cbclua.cbc"
 local userprgm = require "cbclua.userprgm"
@@ -99,7 +100,7 @@ end
 function InteractConnection:cmd_stoptask()
 	local taskid = tonumber(self:read_line())
 	
-	for t in task.all_tasks() do
+	for t in sched.all_tasks() do
 		if t:get_id() == taskid then
 			t:stop()
 			break
@@ -144,7 +145,7 @@ end
 
 function InteractConnection:update_task_list()
 	self:write_line("TASKLIST")
-	for t in task.all_tasks() do
+	for t in sched.all_tasks() do
 		self:write_line(t:get_id())
 		self:write_line(t:get_name())
 		self:write_line(t:get_state())

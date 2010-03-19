@@ -1,6 +1,6 @@
 module("cbclua.task.signal")
 
-local sched = require "cbclua.task.sched"
+local sched = require "cbclua.sched.sched"
 local timer = require "cbclua.timer"
 local table = require "table"
 local list = require "list"

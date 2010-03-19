@@ -1,7 +1,7 @@
 module("cbclua.task.util")
 
-local entry = require "cbclua.task.entry"
-local sched = require "cbclua.task.sched"
+local entry = require "cbclua.sched.entry"
+local sched = require "cbclua.sched.sched"
 local timer = require "cbclua.timer"
 local math = require "math"
 import "cbclua.task.control"

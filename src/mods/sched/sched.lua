@@ -1,4 +1,4 @@
-module("cbclua.task.sched")
+module("cbclua.sched.sched")
 
 local timer = require "cbclua.timer"
 local table = require "table"

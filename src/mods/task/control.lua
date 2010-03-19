@@ -1,6 +1,6 @@
 module("cbclua.task.control")
 
-local sched = require "cbclua.task.sched"
+local sched = require "cbclua.sched.sched"
 
 function sleep(amt)
 	return sched.get_current_task():sleep(amt)

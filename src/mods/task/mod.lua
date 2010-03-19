@@ -1,16 +1,14 @@
 module("cbclua.task")
 
-export "cbclua.task.entry"
+local sched = require "cbclua.sched"
+
 export "cbclua.task.signal"
 export "cbclua.task.util"
 export "cbclua.task.control"
 
-local sched = require "cbclua.task.sched"
-get_current_task = sched.get_current_task
-
-new = TaskEntry -- calling new creates a new Task
+new = sched.TaskEntry -- calling new creates a new TaskEntry
 function start(...)
-	local task = TaskEntry(...)
+	local task = sched.TaskEntry(...)
 	task:start()
 	return task
 end

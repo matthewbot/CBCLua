@@ -1,5 +1,7 @@
 -- CBCLua Module system
 
+local set = require "set"
+
 -- Public API for CBCLua Modules --
 
 local mod_mt = { }
@@ -35,6 +37,22 @@ function export(name, mod)
 	
 	local exports = get_system_table(mod, "_EXPORTS")
 	table.insert(exports, require(name))
+end
+
+function export_partial(name, mod, ...)
+	local names
+
+	if type(mod) == "table" then
+		names = {...}
+	else
+		names = {mod, ...}
+		mod = getfenv(2)
+	end
+	
+	assert(getmetatable(mod) == mod_mt, "export_partial may only be called from within a module!")	
+	
+	local partial_exports = get_system_table(mod, "_PARTIAL_EXPORTS")
+	table.insert(partial_exports, {mod = require(name), names = set.new(names)})
 end
 
 function cbclua_make_module(table)
@@ -79,6 +97,15 @@ function mod_mt.__index(mod, key)
 			local val = exportmod[key]
 			if val then
 				return val
+			end
+		end
+	end
+	
+	local partial_exports = rawget(mod, "_PARTIAL_EXPORTS")
+	if partial_exports then
+		for _,partial in ipairs(partial_exports) do
+			if partial.names[key] then
+				return partial.mod[key]
 			end
 		end
 	end

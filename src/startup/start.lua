@@ -33,6 +33,6 @@ end
 print("This is '" .. cbclua_get_name() .. "', running " .. cbclua_get_version())
 
 -- Finally, enter the task scheduler!
-local sched = require "cbclua.sched.sched"
-return sched.run() -- tail call
+local schedmain = require "cbclua.sched.main"
+return schedmain.sched_main() -- tail call
 

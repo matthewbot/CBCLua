@@ -102,7 +102,7 @@ function InteractConnection:cmd_stoptask()
 	
 	for t in sched.all_tasks() do
 		if t:get_id() == taskid then
-			t:stop()
+			task.stop(t)
 			break
 		end
 	end
@@ -148,8 +148,12 @@ function InteractConnection:update_task_list()
 	for t in sched.all_tasks() do
 		self:write_line(t:get_id())
 		self:write_line(t:get_name())
-		self:write_line(t:get_state())
-		self:write_line(t:is_system() and "system" or "normal")
+		local state = t:get_state()
+		if state == "wait" then
+			state = state .. " (" .. t:get_wait_type() .. ")"
+		end
+		self:write_line(state)
+		self:write_line(t:get_type())
 	end
 	self:write_line("")
 end

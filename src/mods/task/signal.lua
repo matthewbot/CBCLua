@@ -1,9 +1,10 @@
 module("cbclua.task.signal")
 
-local sched = require "cbclua.sched.sched"
+local sched = require "cbclua.sched"
 local timer = require "cbclua.timer"
 local table = require "table"
 local list = require "list"
+import "cbclua.task.control"
 
 Signal = create_class "Signal"
 
@@ -17,8 +18,7 @@ function Signal:notify()
 		return false
 	end
 	
-	waketask:remove_task_observer(self)
-	waketask:resume()
+	sched.add_task(waketask)
 	return true
 end
 
@@ -28,44 +28,34 @@ function Signal:notify_all()
 	end
 
 	for task in list.elems(self.wakelist) do
-		task:remove_task_observer(self)
-		task:resume()
+		sched.add_task(task)
 	end
 	self.wakelist = { }
 	return true
 end
 
 function Signal:wait(timeout)
-	local curtask = sched.get_current_task()
+	local curtask = sched.get_current()
+	sched.remove_task(curtask, "Signal")
 	table.insert(self.wakelist, curtask)
-	curtask:add_task_observer(self)
 	
+	local timerentry
 	if timeout then
-		curtask:sleep(timeout)
-	else
-		curtask:suspend()
-	end
-end
-
--- TaskObserver Callback
-
-local debug = require "debug"
-
-function Signal:taskobserver_state_changed(task, state, prevstate)
-	if not (state == "active" or state == "stopped") then -- we only care if the task becomes active or is stopped
-		return true
-	end
-
-	local pos=1
-	while pos <= #self.wakelist do
-		if self.wakelist[pos] == task then
-			break
-		end
-		pos = pos + 1
+		timerentry = sched.TimerEntry(timer.seconds() + timeout, function ()
+			sched.add_task(curtask, "timeout")
+		end)
+		sched.register_timer(timerentry)
 	end
 	
-	assert(pos <= #self.wakelist, "Notified from task not on wakelist?")
-	table.remove(self.wakelist, pos)
-	return false -- don't need any more notifications
+	local resumearg = yield_with_cleanup(function ()
+		if timerentry then
+			sched.unregister_timer(timerentry)
+		end
+		
+		local pos = table.findvalue(self.wakelist, curtask)
+		table.remove(self.wakelist, pos)		
+	end)
+	
+	return resumearg ~= "timeout"
 end
 

@@ -1,7 +1,7 @@
 module("cbclua.task.util")
 
-local entry = require "cbclua.sched.entry"
-local sched = require "cbclua.sched.sched"
+local signal = require "cbclua.task.signal"
+local sched = require "cbclua.sched"
 local timer = require "cbclua.timer"
 local math = require "math"
 import "cbclua.task.control"
@@ -12,8 +12,8 @@ function async(func, ...)
 		return func(unpack(args))
 	end
 	
-	local task = entry.TaskEntry(asyncfunc, "async task", "daemon")
-	task:start()
+	local task = sched.TaskEntry(asyncfunc, "async task", "daemon")
+	sched.add_task(task)
 	return task
 end
 
@@ -71,33 +71,50 @@ end
 -- Run func for a maximum amount of time
 
 function timeout(timeout, func)
-	local func_ended = false
+	local sig = signal.Signal()
+	
 	local func_results
-	local taskid = async(function ()
+	local func_task = task.async(function ()
 		func_results = { func() }
-		func_ended = true
+		sig.notify()
 	end)
 	
-	wait(function () return func_ended end, timeout)
-	
-	if not func_ended then
-		list.stop(taskid)
-		return false
-	else
+	if sig:wait(timeout) then
 		return true, unpack(func_results)
+	else
+		func_task:stop()
+		sched.remove_task(func_task)
+		return false
+	end
+end
+
+function timeout(timeout, func)
+	local func_results
+	local task = async(function ()
+		func_results = { func() }
+	end)
+	
+	local ended = join(task, timeout)
+	
+	if ended then
+		return true, unpack(func_results)
+	else
+		stop(task)
+		return false
 	end
 end
 
 function stop_all_user_tasks()
-	local curtask = sched.get_current_task()
+	local curtask = sched.get_current()
 
-	for task in entry.user_tasks() do
+	for task in sched.user_tasks() do
 		if task ~= curtask then
 			task:stop()
+			sched.remove_task(task)
 		end
 	end
 	
-	if not curtask:is_system() then
+	if curtask:get_type() == "user" then
 		curtask:stop()
 	end
 end

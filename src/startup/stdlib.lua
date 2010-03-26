@@ -24,3 +24,13 @@ function table.findvalue(tab, val)
 	end
 end
 
+function _G.assert (v, f, ...)
+  if not v then
+    if f == nil then
+      f = "Assertion failed!"
+    end
+    error (string.format (f, ...), 2)
+  end
+  return v
+end
+

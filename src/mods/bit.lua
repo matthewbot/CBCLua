@@ -19,8 +19,19 @@ end
 -- @return true if bit is set, false if not
 -- @see set
 -- @see clear
-function get(x, p) 
-	return x % (p + p) >= p 
+function get(x, p)
+	return get_flag(x, flag(p))
+end
+
+--- Returns true if the specified flag is set in x, false otherwise
+-- @param x The bit field to check
+-- @param f The flag to check
+-- @return true if the flag is set, false if not
+-- @see flag
+-- @see set_flag
+-- @see clear_flag
+function get_flag(x, f) 
+	return x % (f + f) >= f
 end 
 
 --- Returns x with its p'th bit set
@@ -29,8 +40,19 @@ end
 -- @return The new bit field
 -- @see get
 -- @see clear
-function set(x, p) 
-	return get(x, p) and x or x + p 
+function set(x, p)
+	return set_flag(x, flag(p))
+end
+
+--- Returns x with the f flag set
+-- @param x The bit field to start with
+-- @param f The flag to set
+-- @return The new bit field
+-- @see flag
+-- @see get_flag
+-- @see clear_flag
+function set_flag(x, f)
+	return get_flag(x, f) and x or x + f
 end 
 
 --- Returns x with its p'th bit unset
@@ -40,7 +62,18 @@ end
 -- @see get
 -- @see set
 function clear(x, p) 
-	return get(x, p) and x - p or x 
+	return clear_flag(x, flag(p))
+end
+
+--- Returns x with the f flag unset
+-- @param x the bit field to start with
+-- @param f the flag to unset
+-- @return the new bit field
+-- @see flag
+-- @see get_flag
+-- @see set_flag
+function clear_flag(x, f)
+	return get_flag(x, f) and x - f or x 
 end 
 
 -- Utility functions for big-endian 16 bit words (create)

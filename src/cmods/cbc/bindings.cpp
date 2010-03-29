@@ -64,6 +64,8 @@ const luaL_Reg luafuncs[] = {
 	{"power_level", lbind<power_level>},
 	{"display_clear", lbind<display_clear>},
 	{"beep", lbind<beep>},
+	{"set_analog_floats", lbind<set_analog_floats>},
+	{"get_analog_floats", lbind<get_analog_floats>},
 	
 	{NULL, NULL}
 };

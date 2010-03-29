@@ -73,6 +73,8 @@ extern "C" {
 	
 	void display_clear() { }
 	void libcbc_init() { }
+	void set_analog_floats(int mask) { }
+	int get_analog_floats() { return 0; }
 }
 
 #endif

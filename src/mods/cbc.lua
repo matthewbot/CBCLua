@@ -27,8 +27,8 @@ end
 
 DigitalSensor = create_class("DigitalSensor", SensorBase)
 
-function DigitalSensor:construct(num)
-	self.num = num
+function DigitalSensor:construct(args)
+	self.num = assert(args.num or args[1], "Missing sensor num argument to DigialSensor")
 end
 
 function DigitalSensor:read_raw()
@@ -37,8 +37,8 @@ end
 
 AnalogSensor = create_class("AnalogSensor", SensorBase)
 
-function AnalogSensor:construct(num)
-	self.num = num
+function AnalogSensor:construct(args)
+	self.num = assert(args.num or args[1], "Missing sensor num argument to AnalogSensor")
 end
 
 function AnalogSensor:read_raw()
@@ -49,8 +49,8 @@ end
 
 Motor = create_class "Motor"
 
-function Motor:construct(num)
-	self.num = num
+function Motor:construct(args)
+	self.num = assert(args.num or args[1], "Missing num argument to Motor")
 end
 
 function Motor:wait()

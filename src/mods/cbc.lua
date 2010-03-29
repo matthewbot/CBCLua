@@ -2,6 +2,7 @@ module("cbclua.cbc")
 
 local raw = require "cbclua.rawcbc"
 local task = require "cbclua.task"
+local bit = require "cbclua.bit"
 local io = require "io"
 local math = require "math"
 
@@ -39,6 +40,27 @@ AnalogSensor = create_class("AnalogSensor", SensorBase)
 
 function AnalogSensor:construct(args)
 	self.num = assert(args.num or args[1], "Missing sensor num argument to AnalogSensor")
+	if args.float ~= nil then
+		self:set_float(args.float)
+	else
+		self:set_float(false)
+	end
+end
+
+function AnalogSensor:set_float(val)
+	if val == nil then val = true end
+	
+	local bits = raw.get_analog_floats()
+	if val then
+		bits = bit.set(bits, self.num)
+	else
+		bits = bit.clear(bits, self.num)
+	end
+	raw.set_analog_floats(bits)
+end
+
+function AnalogSensor:get_float()
+	return bit.get(raw.get_analog_floats(), self.num)
 end
 
 function AnalogSensor:read_raw()

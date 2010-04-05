@@ -73,12 +73,23 @@ Motor = create_class "Motor"
 
 function Motor:construct(args)
 	self.num = assert(args.num or args[1], "Missing num argument to Motor")
+	if args.pid then
+		self:set_pid(args.pid)
+	end
 end
 
 function Motor:wait()
 	while not(raw.get_motor_done(self.num)) do
 		task.sleep(0.020)
 	end
+end
+
+local default_pid = {p=3, i=3/2, d=-2/3}
+function Motor:set_pid(args)
+	local p = args.p or default_pid.p
+	local i = args.i or default_pid.i
+	local d = args.d or default_pid.d
+	raw.set_pid_gains(self.num, math.round(p*10), math.round(i*10), math.round(d*10), 10, 10, 10)
 end
 
 -- Produces a wrapper method that substitutes the motor object first argument for the motor number
@@ -90,7 +101,7 @@ local function make_motor_wrapper(funcname)
 end
 
 -- these map directly
-for _,funcname in ipairs{"fd", "bk", "off", "mav", "mtp", "mrp", "getpwm", "setpwm", "set_pid_gains"} do
+for _,funcname in ipairs{"fd", "bk", "off", "mav", "mtp", "mrp", "getpwm", "setpwm"} do
 	Motor[funcname] = make_motor_wrapper(funcname)
 end
 

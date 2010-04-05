@@ -89,7 +89,8 @@ function Motor:set_pid(args)
 	local p = args.p or default_pid.p
 	local i = args.i or default_pid.i
 	local d = args.d or default_pid.d
-	raw.set_pid_gains(self.num, math.round(p*10), math.round(i*10), math.round(d*10), 10, 10, 10)
+	local denom = args.denom or 30
+	raw.set_pid_gains(self.num, math.round(p*denom), math.round(i*denom), math.round(d*denom), denom, denom, denom)
 end
 
 -- Produces a wrapper method that substitutes the motor object first argument for the motor number

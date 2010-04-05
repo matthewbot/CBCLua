@@ -24,8 +24,6 @@ function SerialPort:construct()
 	self.rx = assert(io.open("/dev/uart1", "rb"), "failed to open uart1 for reading") -- open read write so that we never get EOFS since we 
 	self.tx = assert(io.open("/dev/uart1", "wb"), "failed to open uart1 for writing")
 	self.tx:setvbuf("no")
-	self.readsig = task.Signal()
-	self.readtask = task.start(util.bind(self, "read_task"), "serial read")
 	
 	weaktab.serial_instance = self
 end
@@ -54,7 +52,7 @@ function SerialPort:wait(amt, timeout)
 		local curtime = timer.seconds()
 		local stoptime = curtime + timeout
 		while #self.readbuf < amt and curtime < stoptime do
-			self.readsig:wait(stoptime - curtime)
+			self:fill_buf(stoptime - curtime)
 			curtime = timer.seconds()
 		end
 		
@@ -63,7 +61,7 @@ function SerialPort:wait(amt, timeout)
 		end
 	else
 		while #self.readbuf < amt do
-			self.readsig:wait()
+			self:fill_buf()
 		end
 	end
 		
@@ -98,10 +96,8 @@ function SerialPort:write(data, ...)
 	self.tx:write(data)
 end
 
-function SerialPort:read_task()
-	while true do
-		task.sleep_io(self.rx)
-		self.readbuf = self.readbuf .. rawio.read(self.rx)
-		self.readsig:notify_all()
-	end
+function SerialPort:fill_buf(timeout)
+	if not task.sleep_io(self.rx, timeout) then return false end
+	self.readbuf = self.readbuf .. rawio.read(self.rx)
+	return true
 end

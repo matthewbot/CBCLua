@@ -141,24 +141,18 @@ disable_servos = raw.disable_servos
 --[[ Buttons ]]--
 
 Button = create_class "Button"
+local button_pressed = { }
 
 function Button:construct(name)
 	self.name = name
 	self.btnfunc = raw[name .. "_button"]
-	self.pressed = 0
-end
-
--- used by interact to remotely simulate a button press
-function Button:press()
-	self.pressed = self.pressed + 1
-end
-
-function Button:release()
-	self.pressed = self.pressed - 1
 end
 
 function Button:getPressed()
-	return self.pressed > 0 or self.btnfunc()
+	if self.btnfunc() then return true end
+	local presscount = button_pressed[self.name]
+	if presscount ~= nil and presscount >= 1 then return true end
+	return false
 end
 
 function Button:__call()
@@ -171,6 +165,36 @@ end
 
 function Button:getLetter()
 	return self.name:sub(1,1):upper()
+end
+
+function Button:press()
+	press_button(self.name)
+end
+
+function Button:release()
+	release_button(self.name)
+end
+
+function press_button(name)
+	local presscount = button_pressed[name]
+	if presscount == nil then
+		button_pressed[name] = 1
+	else
+		button_pressed[name] = presscount + 1
+	end
+end
+
+function release_button(name)
+	local presscount = button_pressed[name]
+	if presscount == nil or presscount == 0 then
+		return
+	else
+		button_pressed[name] = presscount - 1
+	end
+end
+
+for _, name in pairs{"up","down","left","right","a","b","black"} do
+	_M[name .. "_button"] = Button(name)
 end
 
 --[[ Misc ]]--

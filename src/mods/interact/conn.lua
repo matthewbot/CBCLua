@@ -84,12 +84,12 @@ end
 
 function InteractConnection:cmd_buttondown()
 	local buttonname = self:read_line()
-	cbc.buttons[buttonname]:press()
+	cbc.press_button(buttonname)
 end
 
 function InteractConnection:cmd_buttonup()
 	local buttonname = self:read_line()
-	cbc.buttons[buttonname]:release()
+	cbc.release_button(buttonname)
 end
 
 function InteractConnection:cmd_stoptasks()

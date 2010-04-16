@@ -43,11 +43,13 @@ function class_mt.__newindex(class, key, value)
 	end
 end
 
+local find_method
+
 function class_mt.__index(class, key)
 	return find_method(class, key)
 end
 
-local function find_method(class, methname)
+function find_method(class, methname)
 	local meth = class.methods[methname]
 	if meth then
 		return meth

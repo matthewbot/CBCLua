@@ -115,16 +115,20 @@ Motor.getdone = make_motor_wrapper("get_motor_done")
 
 Servo = create_class "Servo"
 
-function Servo:construct(num)
-	self.num = num
+function Servo:construct(args)
+	self.num = assert(args.num or args[1], "Missing servo num argument to Servo")
 end
 
 function Servo:setpos(pos)
-	if pos <= 0 or pos >= 2047 then
+	if pos < 0 or pos > 2047 then
 		error("Attempt to set servo position out of range (must be 0-2047)", 2)
 	end
 
 	raw.set_servo_position(self.num, pos)
+end
+
+function Servo:disable()
+	raw.set_servo_position(self.num, -1)
 end
 
 function Servo:__call(pos) 

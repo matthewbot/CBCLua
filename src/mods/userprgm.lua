@@ -90,23 +90,25 @@ function load_interaction()
 end
 
 function reset_interaction()
-	interact_mod = { }
-	cbclua_make_module(interact_mod)
+	local ok, result = pcall(require, "interact")
+	if ok then
+		interact_mod = result
+		interact_mod_loaded = true
+		interact_mod_errmsg = nil
+	else
+		interact_mod = { }
+		cbclua_make_module(interact_mod)
+		interact_mod_loaded = false
+		
+		if not result:match("module 'interact' not found:") then
+			interact_mod_errmsg = result
+		else
+			interact_mod_errmsg = nil
+		end
+	end
 	
 	autorequire("", interact_mod) -- autorequire top level modules
 	autorequire("cbclua.", interact_mod) -- and cbclua modules
-	
-	local ok, msg = pcall(function ()
-		import("interact", interact_mod)
-	end)
-	
-	interact_mod_loaded = ok
-	
-	if not ok and not msg:match("module 'interact' not found:") then
-		interact_mod_errmsg = msg
-	else
-		interact_mod_errmsg = nil
-	end
 end
 
 function is_interact_module_loaded()

@@ -38,6 +38,10 @@
 // in seconds
 #define COMM_TIMEOUT .5
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int g_create_busy;
 extern int g_create_connected;
 
@@ -96,5 +100,9 @@ void create_play_song(int num);
 int create_read_block(char *data, int count);
 void create_write_byte(char byte);
 void create_clear_serial_buffer();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -8,7 +8,7 @@ extern "C" {
 	void tone(int frequency, int duration) { }
 	void beep() { }
 	int digital(int port) { return 0; } 
-	int set_digital_output_value(int port, int value) { return 0; }
+	void set_digital_output_value(int port, int value) { }
 	int analog10(int port) { return 0; }
 	int analog(int port) { return 0; }
 	int accel_x() { return 0; } 

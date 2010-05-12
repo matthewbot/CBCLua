@@ -26,10 +26,18 @@
 
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void fsleep(float ftime);
 void msleep(long mtime);
 
 float seconds();
+
+#ifdef __cplusplus
+}
+#endif
 
 #define sleep(x) fsleep(x)
 

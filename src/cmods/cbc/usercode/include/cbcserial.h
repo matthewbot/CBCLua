@@ -23,6 +23,10 @@
 
 #define CREATE_UART "/dev/uart1"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void serial_init();
 void serial_quit();
 
@@ -35,5 +39,9 @@ void serial_wryte_byte(char byte);
 void serial_flush_output();
 void serial_flush_input();
 void serial_flush();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -25,9 +25,17 @@
 
 #include "compat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void wait_for_light(int light_port_);
 void shut_down_in(float delay);
 void run_for(float howLong, void (*funky));
 void _shut_down_task();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

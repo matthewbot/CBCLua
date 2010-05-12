@@ -33,13 +33,24 @@
 #include <stdio.h>
 #include "compat.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int __pid_defaults[6];
 
-int set_digital_port_direction(int port, int direction);
+void set_digital_port_direction(int mask);
+int get_digital_port_direction();
 void tone(int frequency, int duration); /* makes a sound at frequency for duration ms */
 void beep(); /* make a beep */
+void play_sound(const char* filename); /* plays a sound file on the USB stick */
+int playing_sound(); /* returns 1 if a sound is still playing else 0 */
+void stop_sound();  /* stops playing current sound */
+void start_recording(const char* filename, int length); /* records a sound to the USB stick for length number of seconds */
+int recording_sound(); /* returns 1 if still recording, 0 if completed length number of seconds */
+void stop_recording(); /* stops recording */
 int digital(int port); /* returns a 1 or 0 reflecting the state of port (0 to 7) */
-int set_digital_output_value(int port, int value); /*sets port (0 to 7)to value (0 or 1) */
+void set_digital_output_value(int port, int value); /*sets port (0 to 7)to value (0 or 1) */
 int analog10(int port); /* returns 10-bit value from analog port (ports 8 to 15) */
 int analog(int port); /* returns 8-bit value from analog port (ports 8 to 15) */
 int accel_x(); /* returns x accelleration (-2047 to 2047, +/- 1.5 gee) */
@@ -96,6 +107,10 @@ void cbc_printf(int col, int row, char *t, ...);/*Does printf at col,row */
 void set_analog_floats(int mask);
 int get_analog_floats();
 void set_each_analog_state(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7);
+
+#ifdef __cplusplus
+}
+#endif
 
 #define SIMPLEWORLD 0
 #define BB08WORLD 1

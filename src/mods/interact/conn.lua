@@ -112,6 +112,10 @@ function InteractConnection:cmd_clearcode()
 	os.execute("rm -rf " .. cbclua_get_codepath() .. "/*")
 end	
 
+function InteractConnection:cmd_cleardisp()
+	cbc.display_clear()
+end
+
 function InteractConnection:cmd_mkcodedir()
 	local dir = self:read_line()
 	rawio.mkdir(cbclua_get_codepath() .. "/" .. dir)

@@ -36,6 +36,7 @@ class ShellFrame(wx.Frame):
 		cbc_menu.AppendSeparator()
 		cbc_menu_reset = cbc_menu.Append(wx.ID_ANY, "&Reset")
 		cbc_menu_clearhistory = cbc_menu.Append(wx.ID_ANY, "Clear &History")
+		cbc_menu_cleardisplay = cbc_menu.Append(wx.ID_ANY, "Clear &Display")
 		
 		program_menu = wx.Menu()
 		program_menu_download = program_menu.Append(wx.ID_ANY, "&Download")
@@ -55,6 +56,7 @@ class ShellFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.evt_menu_disconnect, cbc_menu_disconnect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_reset, cbc_menu_reset)
 		self.Bind(wx.EVT_MENU, self.evt_menu_clearhistory, cbc_menu_clearhistory)
+		self.Bind(wx.EVT_MENU, self.evt_menu_cleardisplay, cbc_menu_cleardisplay)
 		self.Bind(wx.EVT_MENU, self.evt_menu_download, program_menu_download)
 		self.Bind(wx.EVT_MENU, self.evt_menu_reload, program_menu_reload)
 		self.Bind(wx.EVT_MENU, self.evt_menu_console, window_menu_console)
@@ -152,6 +154,9 @@ class ShellFrame(wx.Frame):
 		self.history = [ ]
 		self.history_pos = 0
 		self.output.ChangeValue("")
+		
+	def evt_menu_cleardisplay(self, menuevent):
+		self.callbacks.on_shell_clear_display()
 		
 	def evt_menu_download(self, menuevent):
 		if not self.callbacks.on_shell_checkdownload():

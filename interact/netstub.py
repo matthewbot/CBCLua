@@ -24,6 +24,9 @@ class StubConnection():
 	def send_clear_code(self):
 		pass
 		
+	def send_clear_display(self):
+		pass
+		
 	def send_reset_env(self):
 		pass
 		

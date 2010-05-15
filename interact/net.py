@@ -47,6 +47,9 @@ class CBCConnection(threading.Thread):
 	def send_clear_code(self):
 		self.write_line("CLEARCODE")
 		
+	def send_clear_display(self):
+		self.write_line("CLEARDISP")
+		
 	def send_reset(self):
 		self.write_line("RESET")
 		

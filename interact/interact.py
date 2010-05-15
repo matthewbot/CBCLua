@@ -65,6 +65,10 @@ class InteractApp(wx.App):
 		self.disconnect()
 		self.shellframe.write_line("Disconnected", "system")
 		
+	@verify_connected("Must be connected to clear display!")
+	def on_shell_clear_display(self):
+		self.cbcconn.send_clear_display()
+		
 	@verify_connected("Must be connected to download")
 	def on_shell_checkdownload(self):
 		return True

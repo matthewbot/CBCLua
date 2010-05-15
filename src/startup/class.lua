@@ -105,7 +105,7 @@ for _,mmname in pairs(mmnames) do
 end
 
 function is_a(obj, class)
-	return is_baseclass(class, obj.class)
+	return is_subclass(class, obj.class)
 end
 
 function is_subclass(class, super)

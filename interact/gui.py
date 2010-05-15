@@ -90,7 +90,10 @@ class ShellFrame(wx.Frame):
 			
 		self.callbacks.on_shell_send(text)
 		self.input.ChangeValue("")
-		self.history.append(text)
+		
+		if len(self.history) == 0 or self.history[-1] != text:
+			self.history.append(text)
+			
 		self.history_pos = len(self.history)
 		
 	def write_line(self, text="", style="user"):

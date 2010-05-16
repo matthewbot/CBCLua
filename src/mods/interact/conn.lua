@@ -125,6 +125,10 @@ function InteractConnection:cmd_putcode()
 	local filename = self:read_line()
 	local filedata = self:read_data()
 	
+	if filename:sub(1,1) == "/" then
+		filename = filename:sub(2)
+	end
+	
 	local file = io.open(cbclua_get_codepath() .. "/" .. filename, "w")
 	if file then
 		file:write(filedata)

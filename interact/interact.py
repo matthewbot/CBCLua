@@ -3,6 +3,7 @@ import wx
 import gui
 import net
 import netstub
+import download
 from functools import wraps
 
 def verify_connected(msg=None):
@@ -74,9 +75,26 @@ class InteractApp(wx.App):
 		return True
 		
 	def on_shell_download(self, path):
-		self.cbcconn.send_download(path)
-		self.shellframe.write_line("Download complete!", "system")
 		self.lastdownload = path
+	
+		try:
+			dp = download.DownloadProcessor()
+			dp.add_codefolder(path)
+			dp.dump()
+		except download.DownloadProcessorError as e:
+			self.shellframe.write_line("Error while processing download", "systemerror")
+			self.shellframe.write_line(e.get_msg(), "systemerror")
+			return
+			
+		self.cbcconn.send_stop()
+		self.cbcconn.send_clear_code()
+		for dirname in sorted(dp.get_dirs()):
+			self.cbcconn.send_make_code_dir(dirname)
+		for cbcfilepath, localfilepath in dp.get_files():
+			self.cbcconn.send_put_file(cbcfilepath, localfilepath)	
+		self.cbcconn.send_reset()
+	
+		self.shellframe.write_line("Download complete!", "system")
 		
 	@verify_connected("Must be connected to reload")
 	def on_shell_reload(self):

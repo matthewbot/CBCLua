@@ -29,12 +29,9 @@ class StubConnection():
 		
 	def send_reset_env(self):
 		pass
-		
-	def send_download(self, rootpath):
-		pass
 	
-	def make_code_dir(self, codedir):		
+	def send_make_code_dir(self, codedir):		
 		pass
 		
-	def put_file(self, cbcfilepath, localfilepath):
+	def send_put_file(self, cbcfilepath, localfilepath):
 		pass

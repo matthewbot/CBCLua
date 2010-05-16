@@ -1,6 +1,5 @@
 import socket
 import threading
-import download
 
 INTERACT_PORT = 6754
 MULTICAST_ADDR = ("239.2.1.1", 13590)
@@ -52,27 +51,12 @@ class CBCConnection(threading.Thread):
 		
 	def send_reset(self):
 		self.write_line("RESET")
-		
-	def send_download(self, rootpath):
-		self.send_stop()
-		self.send_clear_code()
 	
-		dp = download.DownloadProcessor()
-		dp.add_codefolder(rootpath)
-		
-		for dirname in sorted(dp.get_dirs()):
-			self.make_code_dir(dirname)
-			
-		for cbcfilepath, localfilepath in dp.get_files():
-			self.put_file(cbcfilepath, localfilepath)
-				
-		self.send_reset()
-	
-	def make_code_dir(self, codedir):		
+	def send_make_code_dir(self, codedir):		
 		self.write_line("MKCODEDIR")
 		self.write_line(codedir)
 		
-	def put_file(self, cbcfilepath, localfilepath):
+	def send_put_file(self, cbcfilepath, localfilepath):
 		self.write_line("PUTCODE")
 		self.write_line(cbcfilepath)
 		

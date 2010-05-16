@@ -8,17 +8,17 @@ class ShellFrame(wx.Frame):
 		self.history = [ ]
 		self.history_pos = 0
 		
-		splitter = wx.SplitterWindow(self)
-		bottom_panel = wx.Panel(splitter, style=wx.SP_3D)
+		self.splitter = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE)
+		bottom_panel = wx.Panel(self.splitter, style=wx.SP_3D)
 		
 		self.sendbutton = wx.Button(bottom_panel, label="Send")
 		self.stopbutton = wx.Button(bottom_panel, label="Stop")
-		self.output = wx.TextCtrl(splitter, style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
+		self.output = wx.TextCtrl(self.splitter, style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
 		self.input = wx.TextCtrl(bottom_panel, style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_PROCESS_TAB)
 		self.input.SetFont(wx.Font(12, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL))
 		
-		splitter.SplitHorizontally(self.output, bottom_panel, -35)
-		splitter.SetSashGravity(1.0)
+		self.splitter.SplitHorizontally(self.output, bottom_panel, -35)
+		self.splitter.SetSashGravity(1.0)
 		
 		bottom_panel_box = wx.BoxSizer(wx.HORIZONTAL)
 		bottom_panel.SetSizer(bottom_panel_box)
@@ -140,6 +140,19 @@ class ShellFrame(wx.Frame):
 		
 	def evt_stopbutton(self, buttonevent):
 		self.callbacks.on_shell_stop()
+		
+	def evt_splitter_sash_pos_changing(self, sashevent):
+		(width, height) = self.splitter.GetSizeTuple()
+		pos = sashevent.GetSashPosition()
+		if pos > height-35:
+			pos = height-35
+			sashevent.SetSashPosition(pos)
+		print pos
+		
+	def evt_splitter_dclick(self, sashevent):
+		(width, height) = self.splitter.GetSizeTuple()
+		self.splitter.SetSashPosition(height-35)
+		sashevent.Veto()
 		
 	def evt_menu_connect(self, menuevent):
 		self.callbacks.on_shell_connect()

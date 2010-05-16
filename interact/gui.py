@@ -29,18 +29,20 @@ class ShellFrame(wx.Frame):
 		self.input.Bind(wx.EVT_KEY_DOWN, self.evt_key_down)
 		self.sendbutton.Bind(wx.EVT_BUTTON, self.evt_sendbutton)
 		self.stopbutton.Bind(wx.EVT_BUTTON, self.evt_stopbutton)
+		self.splitter.Bind(wx.EVT_SPLITTER_DCLICK, self.evt_splitter_dclick)
+		self.splitter.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self.evt_splitter_sash_pos_changing)
 		
 		cbc_menu = wx.Menu()
 		cbc_menu_connect = cbc_menu.Append(wx.ID_ANY, "&Connect")
 		cbc_menu_disconnect = cbc_menu.Append(wx.ID_ANY, "&Disconnect")
 		cbc_menu.AppendSeparator()
-		cbc_menu_reset = cbc_menu.Append(wx.ID_ANY, "&Reset")
 		cbc_menu_clearhistory = cbc_menu.Append(wx.ID_ANY, "Clear &History")
 		cbc_menu_cleardisplay = cbc_menu.Append(wx.ID_ANY, "Clear &Display")
 		
 		program_menu = wx.Menu()
 		program_menu_download = program_menu.Append(wx.ID_ANY, "&Download")
 		program_menu_reload = program_menu.Append(wx.ID_ANY, "&Reload")
+		program_menu_reset = program_menu.Append(wx.ID_ANY, "&Reset")
 		
 		window_menu = wx.Menu()
 		window_menu_console = window_menu.Append(wx.ID_ANY, "&Console")
@@ -54,11 +56,11 @@ class ShellFrame(wx.Frame):
 		
 		self.Bind(wx.EVT_MENU, self.evt_menu_connect, cbc_menu_connect)
 		self.Bind(wx.EVT_MENU, self.evt_menu_disconnect, cbc_menu_disconnect)
-		self.Bind(wx.EVT_MENU, self.evt_menu_reset, cbc_menu_reset)
 		self.Bind(wx.EVT_MENU, self.evt_menu_clearhistory, cbc_menu_clearhistory)
 		self.Bind(wx.EVT_MENU, self.evt_menu_cleardisplay, cbc_menu_cleardisplay)
 		self.Bind(wx.EVT_MENU, self.evt_menu_download, program_menu_download)
 		self.Bind(wx.EVT_MENU, self.evt_menu_reload, program_menu_reload)
+		self.Bind(wx.EVT_MENU, self.evt_menu_reset, program_menu_reset)
 		self.Bind(wx.EVT_MENU, self.evt_menu_console, window_menu_console)
 		self.Bind(wx.EVT_MENU, self.evt_menu_tasklist, window_menu_tasklist)
 		

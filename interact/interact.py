@@ -6,6 +6,8 @@ import netstub
 import download
 from functools import wraps
 
+INTERACT_VERSION = "CBCLua 2 v1.10"
+
 def verify_connected(msg=None):
 	def decorator(f):
 		@wraps(f)
@@ -163,7 +165,12 @@ class InteractApp(wx.App):
 		wx.CallAfter(self.connectdialog.add_cbc, name, ip, conns)
 		
 	def on_net_version(self, name, version):
-		wx.CallAfter(self.shellframe.write_line, "Connected to " + name + " (" + version + ")", "system")
+		def body():
+			self.shellframe.write_line("Connected to " + name + " (" + version + ")", "system")
+			if version != INTERACT_VERSION:
+				self.shellframe.write_line("Warning, this Interact was designed for " + INTERACT_VERSION, "systemerror")
+				self.shellframe.write_line("Errors may occur due to the version mis-match", "systemerror")
+		wx.CallAfter(body)
 		
 	def on_net_result(self, result):
 		wx.CallAfter(self.shellframe.write_line, result, "result")

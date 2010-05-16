@@ -3,7 +3,7 @@ from wx.lib.mixins.listctrl import ListCtrlAutoWidthMixin
 
 class ShellFrame(wx.Frame):
 	def __init__(self, parent, callbacks):
-		wx.Frame.__init__(self, parent, title='Interact', size=wx.Size(500, 400))
+		wx.Frame.__init__(self, parent, title='Interact', size=wx.Size(600, 400))
 		self.callbacks = callbacks
 		self.history = [ ]
 		self.history_pos = 0

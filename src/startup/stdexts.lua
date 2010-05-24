@@ -1,4 +1,5 @@
 local table = require "table"
+local math = require "math"
 
 function table.map(f, tab)
 	local newtab = { }
@@ -42,18 +43,6 @@ function table.makeset(vals)
 	return set
 end
 
-function _G.assert (v, f, ...)
-	if not v then
-		if f == nil then
-			f = "Assertion failed!"
-		end
-		error (string.format (f, ...), 2)
-	end
-	return v
-end
-
-local math = require "math"
-
 function math.sgn(val)
 	if val == 0 then
 		return 0
@@ -80,5 +69,13 @@ function math.round(val)
 	return math.floor(val + 0.5)
 end
 
-	
+function _G.assert (v, f, ...)
+	if not v then
+		if f == nil then
+			f = "Assertion failed!"
+		end
+		error (string.format (f, ...), 2)
+	end
+	return v
+end
 

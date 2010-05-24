@@ -151,7 +151,6 @@ class ShellFrame(wx.Frame):
 		if pos > height-35:
 			pos = height-35
 			sashevent.SetSashPosition(pos)
-		print pos
 		
 	def evt_splitter_dclick(self, sashevent):
 		(width, height) = self.splitter.GetSizeTuple()

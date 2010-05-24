@@ -82,7 +82,6 @@ class InteractApp(wx.App):
 		try:
 			dp = download.DownloadProcessor()
 			dp.add_codefolder(path)
-			dp.dump()
 		except download.DownloadProcessorError as e:
 			self.shellframe.write_line("Error while processing download", "systemerror")
 			self.shellframe.write_line(e.get_msg(), "systemerror")

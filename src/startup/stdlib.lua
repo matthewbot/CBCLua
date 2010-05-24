@@ -34,3 +34,29 @@ function _G.assert (v, f, ...)
   return v
 end
 
+local math = require "math"
+
+function math.sgn(val)
+	if val == 0 then
+		return 0
+	elseif val > 0 then
+		return 1
+	else
+		return -1
+	end
+end
+
+function math.keepsgn(val, sgn)
+	if sgn == 0 then
+		error("Sign argument can't be zero!", 2)
+	end
+	
+	val = math.abs(val)
+	if sgn < 0 then
+		val = -val
+	end
+	return val
+end
+
+	
+

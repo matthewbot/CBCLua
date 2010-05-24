@@ -3,7 +3,6 @@ module("cbclua.task.signal")
 local sched = require "cbclua.sched"
 local timer = require "cbclua.timer"
 local table = require "table"
-local list = require "list"
 import "cbclua.task.control"
 
 Signal = create_class "Signal"
@@ -27,7 +26,7 @@ function Signal:notify_all()
 		return false
 	end
 
-	for task in list.elems(self.wakelist) do
+	for task in table.values(self.wakelist) do
 		sched.add_task(task)
 	end
 	self.wakelist = { }

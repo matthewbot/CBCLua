@@ -2,7 +2,6 @@ module("cbclua.sched.iolist")
 local timer = require "cbclua.timer"
 local table = require "table"
 local math = require "math"
-local list = require "list"
 
 --[[ IOEntry ]]--
 
@@ -23,7 +22,7 @@ end
 
 --[[ iolist ]]--
 
-local iolist = list.new{}
+local iolist = { }
 
 function register_ioentry(ioentry)
 	table.insert(iolist, ioentry)
@@ -48,7 +47,7 @@ function block(sleepamt)
 		sleepamt = -1
 	end
 
-	local files = list.map(function (ioentry) return ioentry:get_file() end, iolist)
+	local files = table.map(function (ioentry) return ioentry:get_file() end, iolist)
 	local flags = { timer.sleep_select(sleepamt, unpack(files)) }
 	
 	local runentries = { }
@@ -58,7 +57,7 @@ function block(sleepamt)
 		end
 	end
 	
-	for entry in list.elems(runentries) do
+	for entry in table.values(runentries) do
 		unregister_ioentry(entry)
 		entry:run()
 	end

@@ -3,7 +3,6 @@ module("cbclua.sched.taskentry")
 local coroutine = require "coroutine"
 local debug = require "debug"
 local table = require "table"
-local set = require "set"
 
 local all_task_set = setmetatable({}, { __mode = "k" })
 local user_task_set = setmetatable({}, { __mode = "k" })
@@ -126,7 +125,7 @@ function TaskEntry:resume()
 	return true
 end
 
-function all_tasks() return set.elements(all_task_set) end
-function user_tasks() return set.elements(user_task_set) end
+function all_tasks() return table.keys(all_task_set) end
+function user_tasks() return table.keys(user_task_set) end
 
 

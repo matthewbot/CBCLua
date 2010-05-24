@@ -1,7 +1,3 @@
--- CBCLua Module system
-
-local set = require "set"
-
 -- Public API for CBCLua Modules --
 
 local mod_mt = { }
@@ -52,7 +48,12 @@ function export_partial(name, mod, ...)
 	assert(getmetatable(mod) == mod_mt, "export_partial may only be called from within a module!")	
 	
 	local partial_exports = get_system_table(mod, "_PARTIAL_EXPORTS")
-	table.insert(partial_exports, {mod = require(name), names = set.new(names)})
+	
+	local names_set = { }
+	for _, val in ipairs(names) do
+		names_set[val] = true
+	end
+	table.insert(partial_exports, {mod = require(name), names = names_set})
 end
 
 function cbclua_make_module(table)

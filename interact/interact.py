@@ -6,7 +6,7 @@ import netstub
 import download
 from functools import wraps
 
-INTERACT_VERSION = "CBCLua 2 v1.10"
+INTERACT_VERSION = "CBCLua 2 v1.12"
 
 def verify_connected(msg=None):
 	def decorator(f):

@@ -87,6 +87,8 @@ class ShellFrame(wx.Frame):
 			)
 		)
 		
+		setupIcon(self)
+		
 	def do_send(self):
 		text = self.input.GetValue()
 		if text == "":
@@ -475,3 +477,8 @@ class TaskList(wx.ListCtrl, ListCtrlAutoWidthMixin):
 		
 		self.setResizeColumn(0)
 		
+def setupIcon(frame):
+	try:
+		frame.SetIcon(wx.Icon("interact.exe", wx.BITMAP_TYPE_ICO))
+	except:
+		pass

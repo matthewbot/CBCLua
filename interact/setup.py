@@ -21,6 +21,7 @@ setup(
 	zipfile = None,
 	windows = [{
 		'script': "interact.py",
-		'other_resources' : [(24, 1, open("manifest").read())]
+		'other_resources' : [(24, 1, open("manifest").read())],
+		'icon_resources': [(1, "lua.ico")]
 	}],
 )

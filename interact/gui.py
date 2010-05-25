@@ -475,9 +475,15 @@ class TaskList(wx.ListCtrl, ListCtrlAutoWidthMixin):
 		self.InsertColumn(2, "Type", width=100)
 		
 		self.setResizeColumn(0)
-		
-def setupIcon(frame):
-	try:
-		frame.SetIcon(wx.Icon("interact.exe", wx.BITMAP_TYPE_ICO))
-	except:
+
+import platform
+
+if platform.system() == "Windows":
+	def setupIcon(frame):
+		try:
+			frame.SetIcon(wx.Icon("interact.exe", wx.BITMAP_TYPE_ICO))
+		except:
+			pass
+else:
+	def setupIcon(frame):
 		pass

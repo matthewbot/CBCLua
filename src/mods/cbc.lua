@@ -30,10 +30,19 @@ DigitalSensor = create_class("DigitalSensor", SensorBase)
 
 function DigitalSensor:construct(args)
 	self.num = assert(args.num or args[1], "Missing sensor num argument to DigialSensor")
+	self.flip = args.flip
 end
 
 function DigitalSensor:read_raw()
 	return raw.digital(self.num)
+end
+
+function DigitalSensor:read()
+	local val = self:read_raw()
+	if self.flip then
+		val = not val
+	end
+	return val
 end
 
 AnalogSensor = create_class("AnalogSensor", SensorBase)

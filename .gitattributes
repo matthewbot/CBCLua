@@ -1,0 +1,3 @@
+*.sln -crlf
+*.vcproj -crlf
+interact/manifest -crlf

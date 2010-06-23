@@ -23,11 +23,11 @@ if [ "$HOST" == "chumby" ]; then # if we're on a chumby
 	
 	LUA_BIN="./lua"
 	export LUA_PATH="stdmods/?.lua"
-	export LUA_CPATH="cmods/?.so"
+	export LUA_CPATH="cmods/?.so;code/?.so"
 else
 	LUA_BIN="lua"
 	export LUA_PATH="stdmods/?.lua;;"
-	export LUA_CPATH="cmods/?.so;;"
+	export LUA_CPATH="cmods/?.so;code/?.so;;"
 fi
 
 if [ "$1" == "gdb" ]; then

@@ -8,7 +8,10 @@ else
 archdir := local
 endif
 
+ifeq '$(rootdir)' ''
 rootdir := ../../..
+projdir := $(rootdir)
+endif
 
 include $(rootdir)/config.mk
 
@@ -17,8 +20,8 @@ sharedbuilddir := $(rootdir)/build/$(arch)/shared
 sharedobjs := $(patsubst %.cpp,%.o,$(addprefix $(sharedbuilddir)/,$(notdir $(wildcard $(shareddir)/*.cpp))))
 sharedheaders := $(wildcard $(shareddir)/*.h)
 
-modbuilddir := $(rootdir)/build/$(arch)/$(modname)
-moddir := $(rootdir)/$(archdir)/cmods/$(modpath)
+modbuilddir := $(projdir)/build/$(arch)/$(modname)
+moddir := $(projdir)/$(archdir)/cmods/$(modpath)
 modbin := $(moddir)/$(modname).so
 includedir := $(rootdir)/src/include
 objects := $(patsubst %.cpp,%.o,$(addprefix $(modbuilddir)/,$(wildcard *.cpp))) $(sharedobjs)

@@ -28,6 +28,7 @@ function InteractConnection:init()
 	self.sock:setoption('tcp-nodelay', true)
 	self:write_line(cbclua_get_name())
 	self:write_line(cbclua_get_version())
+	self:write_line(cbclua_get_host())
 end	
 
 function InteractConnection:run()

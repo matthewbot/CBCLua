@@ -79,8 +79,13 @@ class InteractApp(wx.App):
 	def on_shell_download(self, path):
 		self.lastdownload = path
 	
+		if self.cbcconn.get_host() == "chumby":
+			arch = "cbclua"
+		else:
+			arch = "local"
+	
 		try:
-			dp = download.DownloadProcessor()
+			dp = download.DownloadProcessor(arch)
 			dp.add_codefolder(path)
 		except download.DownloadProcessorError as e:
 			self.shellframe.write_line("Error while processing download", "systemerror")

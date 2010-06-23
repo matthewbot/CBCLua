@@ -15,11 +15,15 @@ class CBCConnection(threading.Thread):
 		self.callbacks = callbacks
 		self.ip = ip
 		self.closed = False
+		self.host = None
 		self.start()
 	
 	def close(self):
 		self.closed = True
 		self.sock.shutdown(socket.SHUT_RDWR)
+		
+	def get_host(self):
+		return self.host
 		
 	def send_expr(self, expr):
 		self.write_line("EXPR")
@@ -69,6 +73,7 @@ class CBCConnection(threading.Thread):
 			self.sock.connect((self.ip, INTERACT_PORT))
 			name = self.recv_line()
 			version = self.recv_line()
+			self.host = self.recv_line()
 			self.callbacks.on_net_version(name, version)
 		
 			while True:

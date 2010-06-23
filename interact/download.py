@@ -11,10 +11,11 @@ class DownloadProcessorError(Exception):
 		return self.msg
 
 class DownloadProcessor:
-	def __init__(self):
+	def __init__(self, arch):
 		self.dirs = set()
 		self.files = {}
 		self.codepaths = set()
+		self.arch = arch
 			
 	def get_dirs(self):
 		return self.dirs
@@ -49,13 +50,13 @@ class DownloadProcessor:
 			command = parts[0].lower()
 			
 			if command == "codefolder":
-				newcodepath = parts[1]
+				newcodepath = parts[1].replace("%arch", self.arch)
 				if not os.path.isabs(newcodepath):
 					newcodepath = codepath + os.sep + newcodepath
 					
 				self.add_codefolder(newcodepath)
 			elif command == "file" or command == "dir":
-				localpath = parts[1]
+				localpath = parts[1].replace("%arch", self.arch)
 				if not os.path.isabs(localpath):
 					localpath = codepath + os.sep + localpath
 				

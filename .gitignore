@@ -4,6 +4,7 @@ cbclua/cmods/
 cbclua/lua
 local/cmods/
 local/code/
+local/cbclua_name
 usbinstall/cbclua.tgz
 interact/*.pyc
 src/lua-5.1.4-arm/*.o

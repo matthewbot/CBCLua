@@ -44,17 +44,20 @@ end
 
 function sleep_io(file, timeout)
 	local curtask = sched.get_current()
-	sched.remove_task(curtask, "sleep_io")
+	
+	if timeout == nil or timeout > 0 then
+		sched.remove_task(curtask, "sleep_io")
+	end
 	
 	local timerentry
-	if timeout then
+	if timeout and timeout > 0 then
 		timerentry = sched.new_timer(timer.seconds() + timeout, function ()
 			sched.add_task(curtask, "timeout")
 		end)
 	end		
 
 	local ioentry = sched.new_ioentry(file, function ()
-		sched.add_task(curtask)
+		sched.add_task(curtask, "ioentry")
 	end)
 	
 	local yieldarg = yield_with_cleanup(function ()
@@ -64,7 +67,7 @@ function sleep_io(file, timeout)
 		end
 	end)
 	
-	return yieldarg ~= "timeout"
+	return yieldarg == "ioentry"
 end
 
 function join(othertask, timeout)

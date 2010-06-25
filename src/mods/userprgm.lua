@@ -246,12 +246,16 @@ function usb_load_verbose()
 		else
 			print("<<< Program loaded! >>>")
 		end
+		
+		return true
 	else
 		print("!!! Program failed to load !!!")
 		
 		if msg then
 			print("!!! " .. msg .. " !!!")
 		end
+		
+		return false
 	end
 end
 -- 

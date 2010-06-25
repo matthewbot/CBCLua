@@ -35,14 +35,17 @@ function SerialPort:close()
 end
 
 function SerialPort:get_avail()
+	self:fill_buf(0)
 	return #self.readbuf
 end
 
 function SerialPort:check(amt)
-	return #self.readbuf >= amt
+	if #self.readbuf >= amt then return true end
+	return self:get_avail() >= amt
 end
 
 function SerialPort:clear()
+	self:fill_buf(0)
 	self.readbuf = ""
 end
 

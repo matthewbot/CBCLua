@@ -29,7 +29,6 @@ function SerialPort:construct()
 end
 
 function SerialPort:close()
-	self.readtask:stop()
 	self.tx:close()
 	self.rx:close()
 	weaktab.serial_instance = nil -- clear the singleton holder so we can be recreated

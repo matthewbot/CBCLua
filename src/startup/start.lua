@@ -21,12 +21,9 @@ if cbclua_get_host() == "chumby" then
 	console.start_task()
 end
 
-if arg[2] ~= "nointeract" then
-	-- Start interaction tasks
-	local interact = require "cbclua.interact"
-	interact.start_tasks()
-else
-	print("Interaction disabled")
+local interact = require "cbclua.interact"
+if not interact.start_tasks() then
+	print("Failed to start Interaction")
 end
 
 -- Print welcome message

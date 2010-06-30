@@ -17,10 +17,6 @@ else
 fi
 
 if [ "$HOST" == "chumby" ]; then # if we're on a chumby
-	if [ `iwconfig 2>&1 | grep WLAN | wc -l` == "0" ]; then # if theres no wifi plugged in
-		OPTS="nointeract"
-	fi
-	
 	LUA_BIN="./lua"
 	export LUA_PATH="stdmods/?.lua"
 	export LUA_CPATH="cmods/?.so;code/?.so"
@@ -34,5 +30,5 @@ if [ "$1" == "gdb" ]; then
 	LUA_BIN="gdb --args $LUA_BIN"
 fi
 
-exec $LUA_BIN startup/start.lua $HOST $OPTS # start cbclua
+exec $LUA_BIN startup/start.lua $HOST # start cbclua
 

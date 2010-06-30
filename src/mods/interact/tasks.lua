@@ -5,29 +5,35 @@ local task = require "cbclua.task"
 local connlist = require "cbclua.interact.connlist"
 import "cbclua.interact.config"
 
+local listen_socket
+local broadcast_socket
+
+function init()
+	return pcall(function ()
+		listen_socket = assert(socket.bind("*", INTERACT_PORT))
+		broadcast_socket = assert(socket.udp())
+		assert(broadcast_socket:setsockname("*", MULTICAST_PORT))
+		assert(broadcast_socket:setoption("ip-add-membership", { multiaddr = MULTICAST_GROUP, interface = "*"}))
+	end)
+end
+
 function listen()
-	local ss = assert(socket.bind("*", INTERACT_PORT))
-	
 	while true do
-		task.sleep_io(ss)
+		task.sleep_io(listen_socket)
 		
-		connlist.new(ss:accept())
+		connlist.new(listen_socket:accept())
 	end
 end
 
 function respond()
-	local udp = socket.udp()
-	assert(udp:setsockname("*", MULTICAST_PORT))
-	assert(udp:setoption("ip-add-membership", { multiaddr = MULTICAST_GROUP, interface = "*"}))
-	
 	while true do
-		task.sleep_io(udp)
+		task.sleep_io(broadcast_socket)
 		
-		local msg, ip, port = udp:receivefrom()
+		local msg, ip, port = broadcast_socket:receivefrom()
 
 		if msg == "interact" then
 			local response = cbclua_get_name() .. "," .. connlist.count()
-			udp:sendto(response, ip, port)
+			broadcast_socket:sendto(response, ip, port)
 		end
 	end
 end

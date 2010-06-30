@@ -69,30 +69,11 @@ function wait_any(preds)
 end
 
 -- Run func for a maximum amount of time
-
-function timeout(timeout, func)
-	local sig = signal.Signal()
-	
+function timeout(timeout, func, ...)
 	local func_results
-	local func_task = task.async(function ()
-		func_results = { func() }
-		sig.notify()
-	end)
-	
-	if sig:wait(timeout) then
-		return true, unpack(func_results)
-	else
-		func_task:stop()
-		sched.remove_task(func_task)
-		return false
-	end
-end
-
-function timeout(timeout, func)
-	local func_results
-	local task = async(function ()
-		func_results = { func() }
-	end)
+	local task = async(function (...)
+		func_results = { func(...) }
+	end, ...)
 	
 	local ended = join(task, timeout)
 	

@@ -45,7 +45,7 @@ function run()
 		local mainmod = require "main"
 		
 		local function mainwrapper()
-			mainmod.main()
+			pcall(mainmod.main)
 			os.exit()
 		end
 		

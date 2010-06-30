@@ -17,6 +17,7 @@ InteractConnection = create_class "InteractConnection"
 
 function InteractConnection:construct(sock, callback)
 	self.sock = sock
+	self.ip = self.sock:getpeername()
 	self.callback = callback
 	self:init()
 	self.task = task.start(util.bind(self, "run"), "interact conn", "system")
@@ -29,6 +30,9 @@ function InteractConnection:init()
 	self:write_line(cbclua_get_name())
 	self:write_line(cbclua_get_version())
 	self:write_line(cbclua_get_host())
+	
+	cbc.beep()
+	print("<<< Got connection from " .. self.ip .. " >>>")
 end	
 
 function InteractConnection:run()
@@ -55,6 +59,7 @@ function InteractConnection:run()
 		
 	self.sock:close()
 	self.callback.on_conn_close(self)
+	print("<<< Connection from " .. self.ip .. " closed >>>")
 end
 
 function InteractConnection:cmd_expr()

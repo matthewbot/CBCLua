@@ -64,7 +64,7 @@ class CBCConnection(threading.Thread):
 		self.write_line("PUTCODE")
 		self.write_line(cbcfilepath)
 		
-		f = open(localfilepath, "r")
+		f = open(localfilepath, "rb")
 		self.write_data(f.read())
 		f.close()
 		

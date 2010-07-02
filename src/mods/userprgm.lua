@@ -44,21 +44,19 @@ function run()
 	return pcall(function ()
 		local mainmod = require "main"
 		
-		local function mainwrapper()
-			pcall(mainmod.main)
-			os.exit()
-		end
-		
-		main_task = task.start(mainwrapper, "main")
+		main_task = task.start(mainmod.main, "main")
+		main_task:register_cleanup(os.exit)
 		print("<<< Program running >>>")
 	end)
 end
 
 function stop(who)
-	if who == "exit" then
-		print("<<< Program exited >>>")
-	elseif is_running() then
-		print("<<< Program stopped by " .. (who or "unknown") .. " >>>")
+	if is_running() then
+		if who == "exit" then
+			print("<<< Program exited >>>")
+		else
+			print("<<< Program stopped by " .. (who or "unknown") .. " >>>")
+		end
 	end
 
 	for _, hook in ipairs(stop_hooks) do

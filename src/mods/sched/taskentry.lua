@@ -93,11 +93,11 @@ end
 function TaskEntry:stop()
 	if not self.co then return end
 	
+	self.co = nil	
+	
 	for _, func in ipairs(self.cleanup_funcs) do
 		func()
 	end
-	
-	self.co = nil
 end
 
 function TaskEntry:set_resume_arg(arg)

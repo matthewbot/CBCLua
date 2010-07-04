@@ -6,7 +6,7 @@ local userprgm = require "cbclua.userprgm"
 
 local function console_task()
 	while true do
-		task.wait(cbc.black_button)
+		task.wait(cbc.black_button, nil, .2)
 		local released = task.wait_while(cbc.black_button, 1.0)
 		
 		if released then

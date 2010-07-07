@@ -57,7 +57,7 @@ end
 -- @param light_sensor a sensor object to use as the starting light
 -- @param time the amount of time before the match terminates. Defaults to 110.
 function start(light_sensor, time)
-	match_length = time or 110
+	match_length = time or 135
 
 	print("Starting options")
 	local option = util.menu{

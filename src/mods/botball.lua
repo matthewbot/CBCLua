@@ -37,6 +37,21 @@ function get_game_time_remaining()
 	return match_length - game_game_time()
 end
 
+--- Sleeps until the specified time in game time
+function game_time_sleep(gametime)
+	assert_match_start()
+	
+	local amt = gametime - get_game_time()
+	if amt > 0 then
+		task.sleep(amt)
+	end
+end
+
+--- Starts the game clock
+function start_game_time()
+	start_time = timer.seconds()
+end
+
 --- Botball game starting function
 -- Handles the starting light as well as the shutdown timing
 -- @param light_sensor a sensor object to use as the starting light
@@ -60,7 +75,7 @@ function start(light_sensor, time)
 	end
 	
 	print("Match started")
-	start_time = timer.seconds()
+	start_game_time()
 	task.start(shutdown_task, "shutdown task")
 end
 

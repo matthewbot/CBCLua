@@ -122,7 +122,7 @@ function wait_for_light(light)
 end
 
 function shutdown_task()
-	task.sleep(match_length - 0.5) -- safety
+	task.sleep(match_length - 1) -- safety
 	
 	print("Game Over")
 	os.exit()
